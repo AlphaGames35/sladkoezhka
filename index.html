@@ -1,0 +1,2084 @@
+﻿<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF" id="theme-color-meta">
+  <title>СЛАДКОЕЖКА — Учет и продажи</title>
+  
+  <!-- Font: Plus Jakarta Sans for crisp business minimalist typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            cacao: {
+              950: '#15100D',
+              900: '#1F1712',
+              800: '#2C221B',
+              700: '#423328',
+              600: '#5C4739',
+            },
+            caramel: {
+              50: '#FDF9F4',
+              100: '#F9EFE3',
+              200: '#F2DCBF',
+              400: '#D59654',
+              500: '#C47D3B',
+              600: '#A76226',
+              700: '#834718',
+            },
+            cream: {
+              50: '#FAF7F2',
+              100: '#F5F0E6',
+              200: '#ECE3D4',
+              300: '#DFD2BE',
+            }
+          },
+          borderRadius: {
+            'lg': '8px',
+            'xl': '12px',
+            '2xl': '16px',
+            '3xl': '24px'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    }
+    input, textarea, select {
+      user-select: auto;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#FAF7F2] dark:bg-cacao-950 text-cacao-900 dark:text-cream-50 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
+
+  <!-- ==================== ПЛАВАЮЩИЙ БАННЕР ПРЕВЬЮ ДЛЯ УПРАВЛЯЮЩЕГО ==================== -->
+  <div id="preview-mode-banner" class="hidden shrink-0 bg-[#2D1E17] text-white px-4 py-2 text-xs font-semibold flex items-center justify-between z-40 border-b border-cacao-800">
+    <div class="flex items-center space-x-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-caramel-400"></span>
+      <span class="text-[11px] text-cream-200">Режим витрины (просмотр управляющего)</span>
+    </div>
+    <button onclick="exitShowcasePreviewMode()" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-white font-bold text-[11px] transition">
+      Вернуться в управление →
+    </button>
+  </div>
+
+  <!-- ==================== СТРОГИЙ ДЕЛОВОЙ HEADER (BUSINESS MINIMAL) ==================== -->
+  <header class="bg-white dark:bg-[#19130F] border-b border-[#ECE6DE] dark:border-cacao-800 px-4 py-2.5 z-30 shrink-0 flex items-center justify-between transition-colors">
+    
+    <!-- Левая часть: Монохромный логотип и название -->
+    <div class="flex items-center space-x-2.5 min-w-0">
+      <!-- Минималистичная монограмма в скругленном квадрате 32x32px (фон #2D1E17) -->
+      <div class="w-8 h-8 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-2xs">
+        С
+      </div>
+      <div class="min-w-0">
+        <div class="font-bold text-sm sm:text-base tracking-[0.5px] uppercase text-[#1F2937] dark:text-[#F9FAFB] leading-tight truncate">
+          СЛАДКОЕЖКА
+        </div>
+        <div id="header-role-status" class="text-xs text-[#6B7280] dark:text-[#9CA3AF] font-medium leading-none mt-0.5 truncate">
+          Управляющий
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая часть: Только две плоские кнопки-иконки Lucide (Переключение темы + Выход) -->
+    <div class="flex items-center space-x-1 shrink-0">
+      
+      <!-- Кнопка смены темы оформления (Sun/Moon, Lucide strokeWidth=1.75 size=18) -->
+      <button onclick="toggleTheme()" title="Сменить тему оформления" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-neutral-300 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center">
+        <!-- Lucide Sun -->
+        <svg id="theme-icon-sun" class="w-[18px] h-[18px] hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+          <circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <!-- Lucide Moon -->
+        <svg id="theme-icon-moon" class="w-[18px] h-[18px] block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      </button>
+
+      <!-- Кнопка Выхода (Lucide LogOut, strokeWidth=1.75 size=18) -->
+      <button id="btn-logout" onclick="logout()" title="Выйти из системы" class="hidden w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-neutral-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition flex items-center justify-center">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
+  <main id="main-content" class="flex-1 overflow-y-auto overflow-x-hidden relative">
+
+    <!-- 1. ЭКРАН ВХОДА В СИСТЕМУ -->
+    <div id="screen-login" class="min-h-full flex flex-col justify-center items-center px-4 py-8">
+      <div class="w-full max-w-sm bg-white dark:bg-cacao-900 rounded-2xl p-6 sm:p-8 shadow-xs border border-[#ECE6DE] dark:border-cacao-800">
+        
+        <div class="text-center mb-6">
+          <div class="w-12 h-12 rounded-xl bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] mx-auto flex items-center justify-center text-lg font-black tracking-tight mb-3">
+            С
+          </div>
+          <h1 class="text-xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50 uppercase">СЛАДКОЕЖКА</h1>
+          <p class="text-xs text-[#6B7280] dark:text-neutral-400 font-medium tracking-wide mt-0.5">Внутренний учет и продажи</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-[#4B5563] dark:text-cream-200 uppercase tracking-wider mb-1.5">Логин сотрудника</label>
+            <input type="text" id="login-input" required autocomplete="username" placeholder="admin или cashier1" 
+                   class="w-full px-3.5 py-2.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17] text-sm">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-[#4B5563] dark:text-cream-200 uppercase tracking-wider mb-1.5">Пароль</label>
+            <input type="password" id="password-input" required autocomplete="current-password" placeholder="••••••••" 
+                   class="w-full px-3.5 py-2.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17] text-sm">
+          </div>
+
+          <div id="login-error" class="hidden text-xs text-red-600 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/30 p-2.5 rounded-lg border border-red-200 dark:border-red-900"></div>
+
+          <button type="submit" id="login-btn" class="w-full py-3 px-4 rounded-lg font-bold text-white bg-[#2D1E17] hover:bg-black dark:bg-white dark:text-[#2D1E17] dark:hover:bg-cream-100 transition active:scale-[0.99] text-sm shadow-xs">
+            Войти в систему
+          </button>
+        </form>
+
+        <!-- Быстрый выбор роли -->
+        <div class="mt-8 pt-5 border-t border-[#ECE6DE] dark:border-cacao-800">
+          <div class="text-[11px] text-[#9CA3AF] uppercase font-semibold tracking-wider mb-2.5 text-center">Тестовые аккаунты:</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="quickLogin('admin', 'admin123')" class="p-2.5 text-left rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] transition bg-[#FAF7F2] dark:bg-cacao-950">
+              <div class="font-bold text-xs text-[#1F2937] dark:text-cream-50">Управляющий</div>
+              <div class="text-[10px] text-[#6B7280] font-mono mt-0.5">admin</div>
+            </button>
+            <button onclick="quickLogin('cashier1', '1234')" class="p-2.5 text-left rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] transition bg-[#FAF7F2] dark:bg-cacao-950">
+              <div class="font-bold text-xs text-caramel-600 dark:text-caramel-400">Сотрудник</div>
+              <div class="text-[10px] text-[#6B7280] font-mono mt-0.5">cashier1</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. ИНТЕРФЕЙС СОТРУДНИКА (ВИТРИНА И ПРОДАЖИ) -->
+    <div id="screen-employee" class="hidden min-h-full pb-24">
+      
+      <!-- Вкладка 1: ВИТРИНА ПРОДАЖ -->
+      <div id="employee-tab-sale" class="p-4 sm:p-6 max-w-6xl mx-auto space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Витрина десертов и напитков</h2>
+            <p class="text-xs text-[#6B7280]">Нажмите на карточку, чтобы добавить позицию в заказ</p>
+          </div>
+          
+          <!-- Поиск позиций -->
+          <div class="relative w-full sm:w-72">
+            <input type="text" id="employee-search-input" oninput="renderEmployeeProducts()" placeholder="Поиск по названию..."
+                   class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17]">
+            <svg class="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Горизонтальные категории -->
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1" id="employee-categories-bar">
+          <!-- Заполняется JS -->
+        </div>
+
+        <!-- Сетка товаров -->
+        <div id="employee-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
+          <!-- Карточки товаров -->
+        </div>
+
+      </div>
+
+      <!-- Вкладка 2: МОЯ СМЕНА (ЗАКАЗЫ ЗА СЕГОДНЯ) -->
+      <div id="employee-tab-shift" class="hidden p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Заказы за смену</h2>
+            <p class="text-xs text-[#6B7280]">Сводка оформленных заказов за сегодня</p>
+          </div>
+          <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-[#ECE6DE] dark:bg-cacao-800 text-[#1F2937] dark:text-cream-200" id="shift-date-label">Сегодня</span>
+        </div>
+
+        <!-- Сводные KPI карточки смены -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">Выручка за смену</div>
+            <div id="shift-total-amount" class="text-xl sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0 ₽</div>
+          </div>
+          <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">Продаж за смену</div>
+            <div id="shift-total-count" class="text-xl sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0</div>
+          </div>
+        </div>
+
+        <!-- Таблица заказов -->
+        <div class="rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 overflow-hidden shadow-xs">
+          
+          <div class="grid grid-cols-12 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#ECE6DE] dark:border-cacao-800 bg-[#FAF7F2] dark:bg-cacao-950/40">
+            <div class="col-span-2">№</div>
+            <div class="col-span-3">Сумма</div>
+            <div class="col-span-5">Состав заказа</div>
+            <div class="col-span-2 text-right">Время</div>
+          </div>
+
+          <div id="shift-sales-list" class="divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800">
+            <!-- Строки заказов -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 3. ИНТЕРФЕЙС УПРАВЛЯЮЩЕГО -->
+    <div id="screen-manager" class="hidden min-h-full pb-24">
+
+      <!-- Вкладка: СТАТИСТИКА И ОТЧЕТЫ -->
+      <div id="manager-tab-stats" class="p-4 sm:p-6 max-w-5xl mx-auto space-y-5">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Отчеты и продажи</h2>
+            <p class="text-xs text-[#6B7280]">Аналитика выручки, заказов и рейтинг позиций</p>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <!-- Кнопка перехода в витрину для проверки -->
+            <button onclick="enterShowcasePreviewMode()" class="px-3 py-1.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-xs font-semibold text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900 flex items-center space-x-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Витрина сотрудника</span>
+            </button>
+
+            <!-- Селектор периода -->
+            <div class="flex items-center space-x-1 overflow-x-auto no-scrollbar">
+              <button onclick="setStatsPeriod('today')" class="stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] transition" data-period="today">Сегодня</button>
+              <button onclick="setStatsPeriod('yesterday')" class="stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900" data-period="yesterday">Вчера</button>
+              <button onclick="setStatsPeriod('week')" class="stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900" data-period="week">Неделя</button>
+              <button onclick="setStatsPeriod('month')" class="stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900" data-period="month">Месяц</button>
+              <button onclick="openCustomRangeModal()" class="stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900 flex items-center space-x-1" data-period="custom" id="custom-range-btn">
+                <span>Календарь</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 KPI карточки -->
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4">
+          <div class="p-3.5 sm:p-4 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[10px] sm:text-xs text-[#6B7280] font-semibold uppercase tracking-wider truncate">Выручка</div>
+            <div id="stat-revenue" class="text-base sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0 ₽</div>
+          </div>
+          <div class="p-3.5 sm:p-4 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[10px] sm:text-xs text-[#6B7280] font-semibold uppercase tracking-wider truncate">Заказов</div>
+            <div id="stat-sales-count" class="text-base sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0</div>
+          </div>
+          <div class="p-3.5 sm:p-4 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[10px] sm:text-xs text-[#6B7280] font-semibold uppercase tracking-wider truncate">Продано</div>
+            <div id="stat-items-qty" class="text-base sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0 шт</div>
+          </div>
+        </div>
+
+        <!-- График выручки -->
+        <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Динамика выручки</h3>
+            <span class="text-xs text-[#6B7280] font-mono" id="chart-subtitle">По часам</span>
+          </div>
+          <div id="sales-chart-container" class="h-40 sm:h-44 w-full flex items-end">
+            <!-- График -->
+          </div>
+        </div>
+
+        <!-- Топ продаж -->
+        <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Топ позиций меню</h3>
+            <div class="flex items-center bg-[#FAF7F2] dark:bg-cacao-950 rounded-lg p-0.5 text-xs">
+              <button onclick="setTopSort('revenue')" id="top-sort-rev" class="px-2.5 py-1 rounded-md font-semibold bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs">По сумме</button>
+              <button onclick="setTopSort('quantity')" id="top-sort-qty" class="px-2.5 py-1 rounded-md font-medium text-[#6B7280]">По штукам</button>
+            </div>
+          </div>
+          <div id="top-products-list" class="space-y-3">
+            <!-- Топ -->
+          </div>
+        </div>
+
+        <!-- Лента всех заказов -->
+        <div class="rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 overflow-hidden shadow-xs">
+          <div class="px-4 py-3 border-b border-[#ECE6DE] dark:border-cacao-800 flex items-center justify-between">
+            <h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Все заказы за период</h3>
+          </div>
+          <div class="grid grid-cols-12 px-4 py-2.5 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#ECE6DE] dark:border-cacao-800 bg-[#FAF7F2] dark:bg-cacao-950/40">
+            <div class="col-span-2">№</div>
+            <div class="col-span-3">Сумма</div>
+            <div class="col-span-3">Сотрудник</div>
+            <div class="col-span-4 text-right">Дата и время</div>
+          </div>
+          <div id="manager-sales-feed" class="divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800">
+            <!-- Заказы -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Вкладка: СКЛАД И ВИТРИНА -->
+      <div id="manager-tab-inventory" class="hidden p-4 sm:p-6 max-w-5xl mx-auto space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Склад и остатки</h2>
+            <p class="text-xs text-[#6B7280]">Актуальные остатки позиций меню на складе</p>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <button onclick="openCategoryManageModal()" class="px-3 py-2 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 hover:border-[#2D1E17] text-xs font-semibold transition flex items-center space-x-1.5 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100">
+              <span>Категории</span>
+            </button>
+            <button onclick="openProductModal()" class="px-3.5 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] text-xs font-bold transition hover:bg-black dark:hover:bg-cream-100 flex items-center space-x-1.5 shadow-2xs">
+              <span>+ Добавить позицию</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Горизонтальные категории -->
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1" id="manager-categories-bar">
+          <!-- Категории -->
+        </div>
+
+        <!-- Поиск товаров -->
+        <div class="relative">
+          <input type="text" id="inventory-search-input" oninput="renderManagerInventory()" placeholder="Поиск десерта или напитка по названию..."
+                 class="w-full pl-9 pr-4 py-2.5 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17]">
+          <svg class="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+
+        <!-- Таблица позиций склада (с переносом названия на 2 строки и строгими кнопками 8px) -->
+        <div class="rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 overflow-hidden shadow-xs">
+          <div class="grid grid-cols-12 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#ECE6DE] dark:border-cacao-800 bg-[#FAF7F2] dark:bg-cacao-950/40">
+            <div class="col-span-5 sm:col-span-6">Позиция меню</div>
+            <div class="col-span-3 sm:col-span-2">Цена</div>
+            <div class="col-span-4 text-right">Остаток на складе</div>
+          </div>
+          <div id="inventory-products-list" class="divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800">
+            <!-- Позиции склада -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Вкладка: ПЕРСОНАЛ И НАСТРОЙКИ -->
+      <div id="manager-tab-staff" class="hidden p-4 sm:p-6 max-w-3xl mx-auto space-y-5">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Персонал</h2>
+            <p class="text-xs text-[#6B7280]">Сотрудники с доступом к системе учета</p>
+          </div>
+          <button onclick="openStaffModal()" class="px-3.5 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] text-xs font-bold transition hover:bg-black dark:hover:bg-cream-100 shadow-2xs">
+            + Сотрудник
+          </button>
+        </div>
+
+        <!-- Список персонала -->
+        <div class="rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800 overflow-hidden shadow-xs" id="staff-list">
+          <!-- Персонал -->
+        </div>
+
+        <!-- Настройки темы оформления -->
+        <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 space-y-3 shadow-xs">
+          <h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Тема оформления</h3>
+          <div class="flex items-center bg-[#FAF7F2] dark:bg-cacao-950 rounded-lg p-1 text-xs">
+            <button onclick="setThemePreference('light')" class="theme-btn flex-1 py-1.5 rounded-md font-semibold transition" data-theme="light">Светлая</button>
+            <button onclick="setThemePreference('dark')" class="theme-btn flex-1 py-1.5 rounded-md font-semibold transition" data-theme="dark">Темная</button>
+            <button onclick="setThemePreference('system')" class="theme-btn flex-1 py-1.5 rounded-md font-semibold transition" data-theme="system">Авто</button>
+          </div>
+        </div>
+
+        <!-- Профиль текущей сессии -->
+        <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold text-[#1F2937] dark:text-cream-50 uppercase tracking-wide">Текущая сессия</div>
+              <div class="text-[11px] text-[#6B7280] mt-0.5">Вход выполнен: <span id="settings-user-name" class="font-bold text-[#2D1E17] dark:text-caramel-400"></span></div>
+            </div>
+            <button onclick="logout()" class="px-3.5 py-2 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40 text-xs font-semibold transition flex items-center space-x-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              <span>Выйти из аккаунта</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== ПЛАВАЮЩАЯ ПАНЕЛЬ ОФОРМЛЕНИЯ ЗАКАЗА ==================== -->
+  <div id="floating-checkout-bar" class="hidden fixed bottom-16 sm:bottom-0 left-0 right-0 p-3 sm:p-4 bg-[#2D1E17]/95 text-white backdrop-blur-md border-t border-cacao-800 z-40 animate-slide-up shadow-2xl">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <button onclick="clearCart()" class="p-2 text-neutral-300 hover:text-red-400 transition" title="Очистить заказ">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
+        <div>
+          <span class="text-[11px] text-neutral-400 font-mono uppercase font-bold" id="checkout-items-label">1 позиция</span>
+          <div class="text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight" id="checkout-total-price">0 ₽</div>
+        </div>
+      </div>
+
+      <button id="btn-process-sale" onclick="submitSale()" class="py-2.5 px-5 sm:px-6 rounded-lg bg-white hover:bg-cream-100 text-[#2D1E17] font-bold text-xs sm:text-sm transition flex items-center space-x-2 shadow-sm active:scale-95">
+        <span>Оформить заказ</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== СТРОГИЙ ДЕЛОВОЙ BOTTOM NAVIGATION BAR ==================== -->
+  
+  <!-- Меню Сотрудника (2 вкладки) -->
+  <nav id="nav-employee" class="hidden fixed bottom-0 left-0 right-0 h-[62px] bg-white dark:bg-[#19130F] border-t border-[#ECE6DE] dark:border-cacao-800 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] z-30 grid grid-cols-2">
+    <!-- Вкладка «Витрина» (Lucide ShoppingBag) -->
+    <button onclick="switchEmployeeTab('sale')" id="btn-emp-tab-sale" class="flex flex-col items-center justify-center space-y-1 font-semibold text-[11px] text-[#2B1A12] dark:text-[#EAE2D8] transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      <span>Витрина</span>
+    </button>
+    <!-- Вкладка «Заказы смены» (Lucide Receipt) -->
+    <button onclick="switchEmployeeTab('shift')" id="btn-emp-tab-shift" class="flex flex-col items-center justify-center space-y-1 font-medium text-[11px] text-[#8E8A85] hover:text-[#2B1A12] dark:hover:text-[#EAE2D8] transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14 8H8M16 12H8M13 16H8"/>
+      </svg>
+      <span>Заказы смены</span>
+    </button>
+  </nav>
+
+  <!-- Меню Управляющего (3 вкладки, строгие Lucide иконки) -->
+  <nav id="nav-manager" class="hidden fixed bottom-0 left-0 right-0 h-[62px] bg-white dark:bg-[#19130F] border-t border-[#ECE6DE] dark:border-cacao-800 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] z-30 grid grid-cols-3">
+    <!-- Вкладка «Отчеты» (Lucide BarChart3) -->
+    <button onclick="switchManagerTab('stats')" id="btn-mgr-tab-stats" class="flex flex-col items-center justify-center space-y-1 font-semibold text-[11px] text-[#2B1A12] dark:text-[#EAE2D8] transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" d="M18 17V9"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 17V5"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 17v-3"/>
+      </svg>
+      <span>Отчеты</span>
+    </button>
+    <!-- Вкладка «Склад / Витрина» (Lucide Package) -->
+    <button onclick="switchManagerTab('inventory')" id="btn-mgr-tab-inventory" class="flex flex-col items-center justify-center space-y-1 font-medium text-[11px] text-[#8E8A85] hover:text-[#2B1A12] dark:hover:text-[#EAE2D8] transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+      </svg>
+      <span>Склад / Витрина</span>
+    </button>
+    <!-- Вкладка «Персонал» (Lucide Users) -->
+    <button onclick="switchManagerTab('staff')" id="btn-mgr-tab-staff" class="flex flex-col items-center justify-center space-y-1 font-medium text-[11px] text-[#8E8A85] hover:text-[#2B1A12] dark:hover:text-[#EAE2D8] transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Персонал</span>
+    </button>
+  </nav>
+
+  <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
+
+  <!-- 1. МОДАЛКА БЫСТРОГО ПОПОЛНЕНИЯ ОСТАТКА (ВМЕСТО PROMPT) -->
+  <div id="modal-stock-edit" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Изменение остатка</h3>
+          <p id="modal-stock-prod-name" class="text-xs text-[#6B7280] font-semibold truncate mt-0.5"></p>
+        </div>
+        <button onclick="closeStockModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
+      </div>
+
+      <input type="hidden" id="modal-stock-prod-id">
+
+      <div>
+        <label class="block text-xs font-semibold text-[#6B7280] mb-1">Точное количество (шт):</label>
+        <input type="number" min="0" id="modal-stock-input" class="w-full px-3.5 py-2.5 text-base font-bold rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white focus:ring-1 focus:ring-[#2D1E17] tabular-nums">
+      </div>
+
+      <!-- Кнопки быстрого добавления остатка -->
+      <div>
+        <div class="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mb-2">Быстрое пополнение:</div>
+        <div class="grid grid-cols-4 gap-1.5">
+          <button type="button" onclick="adjustModalStock(5)" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-[#EAE2D8] text-xs font-semibold text-[#2D1E17] dark:text-cream-50 transition">+5</button>
+          <button type="button" onclick="adjustModalStock(10)" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-[#EAE2D8] text-xs font-semibold text-[#2D1E17] dark:text-cream-50 transition">+10</button>
+          <button type="button" onclick="adjustModalStock(20)" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-[#EAE2D8] text-xs font-semibold text-[#2D1E17] dark:text-cream-50 transition">+20</button>
+          <button type="button" onclick="adjustModalStock(50)" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-[#EAE2D8] text-xs font-semibold text-[#2D1E17] dark:text-cream-50 transition">+50</button>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5 mt-1.5">
+          <button type="button" onclick="adjustModalStock(-5)" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-red-50 dark:hover:bg-red-950/20 text-xs font-medium text-[#6B7280] transition">-5 шт</button>
+          <button type="button" onclick="setModalStockZero()" class="py-1.5 rounded-lg bg-[#F3EDE6] dark:bg-cacao-800 hover:bg-red-50 dark:hover:bg-red-950/20 text-xs font-medium text-red-600 transition">Обнулить (0)</button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-[#ECE6DE] dark:border-cacao-800">
+        <button onclick="closeStockModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">Отмена</button>
+        <button onclick="saveModalStock()" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs shadow-2xs hover:opacity-95">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. КАЛЕНДАРЬ (ВЫБОР ПЕРИОДА ДАТ) -->
+  <div id="modal-custom-range" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm uppercase tracking-wider text-[#1F2937] dark:text-cream-50">Период отчета</h3>
+        <button onclick="closeCustomRangeModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Дата и время ОТ:</label>
+          <input type="datetime-local" id="range-start-date" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Дата и время ДО:</label>
+          <input type="datetime-local" id="range-end-date" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button onclick="closeCustomRangeModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">Отмена</button>
+        <button onclick="applyCustomRange()" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs">Применить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. МОДАЛКА УПРАВЛЕНИЯ КАТЕГОРИЯМИ ВИТРИНЫ -->
+  <div id="modal-category-manage" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-[#1F2937] dark:text-cream-50">Категории витрины</h3>
+        <button onclick="closeCategoryManageModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- Добавить категорию -->
+      <div class="flex items-center space-x-2">
+        <input type="text" id="new-cat-input" placeholder="Например: Свежая выпечка..." class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        <button onclick="createNewCategory()" class="px-3.5 py-2 bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] text-xs font-bold rounded-lg whitespace-nowrap">+ Добавить</button>
+      </div>
+
+      <!-- Список категорий -->
+      <div class="max-h-60 overflow-y-auto divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800" id="categories-manage-list">
+        <!-- Заполняется JS -->
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="closeCategoryManageModal()" class="px-4 py-2 text-xs font-bold text-[#6B7280]">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. МОДАЛКА ПЕРЕИМЕНОВАНИЯ КАТЕГОРИИ -->
+  <div id="modal-category-edit" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-xl max-w-xs w-full p-5 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm">Переименовать категорию</h3>
+        <button onclick="closeCategoryEditModal()" class="text-[#8E8A85]">✕</button>
+      </div>
+      <input type="hidden" id="edit-cat-id">
+      <div>
+        <label class="block text-xs text-[#6B7280] mb-1">Новое название:</label>
+        <input type="text" id="edit-cat-name" required class="w-full px-3 py-2 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-xs">
+      </div>
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeCategoryEditModal()" class="px-3 py-1.5 text-xs text-[#6B7280]">Отмена</button>
+        <button onclick="saveCategoryRename()" class="px-3.5 py-1.5 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. МОДАЛКА ТОВАРА -->
+  <div id="modal-product" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="modal-product-title" class="font-bold text-sm uppercase tracking-wide text-[#1F2937] dark:text-cream-50">Добавить позицию</h3>
+        <button onclick="closeProductModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
+      </div>
+      <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3">
+        <input type="hidden" id="prod-id">
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Название позиции меню</label>
+          <input type="text" id="prod-name" required placeholder="Капучино (280 мл)" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Категория</label>
+          <select id="prod-category" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            <!-- Категории -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Цена (₽)</label>
+            <input type="number" step="0.01" min="0" id="prod-price" required placeholder="150.00" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Остаток (шт)</label>
+            <input type="number" min="0" id="prod-stock" required placeholder="30" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-3">
+          <button type="button" id="btn-delete-prod" onclick="deleteCurrentProduct()" class="text-xs font-semibold text-red-600 hover:underline">Удалить позицию</button>
+          <div class="flex items-center space-x-2 ml-auto">
+            <button type="button" onclick="closeProductModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">Отмена</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs shadow-2xs">Сохранить</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. МОДАЛКА СОТРУДНИКА -->
+  <div id="modal-staff" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-xs w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-sm">Новый сотрудник</h3>
+        <button onclick="closeStaffModal()" class="text-[#8E8A85]">✕</button>
+      </div>
+      <form onsubmit="saveStaff(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs text-[#6B7280] mb-1">ФИО сотрудника</label>
+          <input type="text" id="staff-name" required placeholder="Анна (Бариста)" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+        </div>
+        <div>
+          <label class="block text-xs text-[#6B7280] mb-1">Логин для входа</label>
+          <input type="text" id="staff-login" required placeholder="anna1" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+        </div>
+        <div>
+          <label class="block text-xs text-[#6B7280] mb-1">Пароль</label>
+          <input type="password" id="staff-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+        </div>
+        <div>
+          <label class="block text-xs text-[#6B7280] mb-1">Роль</label>
+          <select id="staff-role" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+            <option value="employee">Сотрудник (Бариста / Продавец)</option>
+            <option value="manager">Управляющий</option>
+          </select>
+        </div>
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeStaffModal()" class="px-3 py-1.5 text-xs text-[#6B7280]">Отмена</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs">Создать</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Всплывающий тост -->
+  <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg shadow-xl text-xs font-semibold text-white bg-[#1F2937]/95 dark:bg-white dark:text-[#1F2937] backdrop-blur-md transition-all duration-200">
+  </div>
+
+  <!-- ==================== СКРИПТ ПРИЛОЖЕНИЯ ==================== -->
+  <script>
+    // ==========================================
+    // 1. КОНСТАНТЫ И ПОДКЛЮЧЕНИЕ К SUPABASE
+    // ==========================================
+    // Безопасное получение параметров через защищенный нативный мост Android
+    const SUPABASE_URL = (window.AndroidBridge && typeof window.AndroidBridge.getUrl === 'function' ? window.AndroidBridge.getUrl() : '') || localStorage.getItem('sladkoezhka_db_url') || '';
+    const SUPABASE_KEY = (window.AndroidBridge && typeof window.AndroidBridge.getKey === 'function' ? window.AndroidBridge.getKey() : '') || localStorage.getItem('sladkoezhka_db_key') || '';
+
+    let supabaseClient = null;
+    let realtimeChannel = null;
+    let currentUser = null;
+    let isManagerInPreview = false;
+
+    // Корзина продавца: { [productId]: quantity }
+    let cart = {};
+
+    // Состояние фильтров
+    let currentEmployeeCategory = 'all';
+    let currentManagerCategory = 'all';
+    let statsPeriod = 'today';
+    let customStartDate = null;
+    let customEndDate = null;
+    let topSortMode = 'revenue';
+
+    // Кэш данных
+    let cachedCategories = [];
+    let cachedProducts = [];
+    let cachedSales = [];
+    let cachedUsers = [];
+
+    // ==========================================
+    // 2. ЗВУКОВОЙ СИГНАЛ (WEBAUDIO) И ВИБРАЦИЯ
+    // ==========================================
+    let audioCtx = null;
+    function playBeep(type = 'click') {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08);
+          osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16);
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.4);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        }
+      } catch(e) {}
+    }
+
+    function triggerHaptic() {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(20); } catch(e) {}
+      }
+    }
+
+    // ==========================================
+    // 3. ПОДКЛЮЧЕНИЕ К SUPABASE
+    // ==========================================
+    function initSupabase() {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        setupRealtimeSubscriptions();
+      } catch(err) {
+        console.error('Ошибка Supabase:', err);
+      }
+    }
+
+    function setupRealtimeSubscriptions() {
+      if (!supabaseClient) return;
+      if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+
+      realtimeChannel = supabaseClient
+        .channel('public:sladkoezhka_pos')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+          refreshAppData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+          refreshAppData();
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sales' }, (payload) => {
+          showToast(`Новый заказ: +${Number(payload.new.total_amount).toLocaleString('ru-RU')} ₽`);
+          refreshAppData();
+        })
+        .subscribe();
+    }
+
+    // ==========================================
+    // 4. ТЕМА ОФОРМЛЕНИЯ
+    // ==========================================
+    function initTheme() {
+      const saved = localStorage.getItem('sladkoezhka_theme') || 'light';
+      applyTheme(saved);
+    }
+
+    function applyTheme(pref) {
+      const html = document.documentElement;
+      let isDark = false;
+      if (pref === 'dark') isDark = true;
+      else if (pref === 'light') isDark = false;
+      else isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (isDark) html.classList.add('dark');
+      else html.classList.remove('dark');
+
+      document.querySelectorAll('.theme-btn').forEach(b => {
+        if (b.dataset.theme === pref) {
+          b.className = 'theme-btn flex-1 py-1.5 rounded-md font-semibold bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs';
+        } else {
+          b.className = 'theme-btn flex-1 py-1.5 rounded-md font-medium text-[#6B7280]';
+        }
+      });
+    }
+
+    function setThemePreference(pref) {
+      localStorage.setItem('sladkoezhka_theme', pref);
+      applyTheme(pref);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      setThemePreference(isDark ? 'light' : 'dark');
+    }
+
+    // ==========================================
+    // 5. АВТОРИЗАЦИЯ И СЕССИИ
+    // ==========================================
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const login = document.getElementById('login-input').value.trim();
+      const password = document.getElementById('password-input').value.trim();
+      await performLogin(login, password);
+    }
+
+    function quickLogin(u, p) {
+      document.getElementById('login-input').value = u;
+      document.getElementById('password-input').value = p;
+      performLogin(u, p);
+    }
+
+    async function performLogin(login, password) {
+      const errorEl = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+      errorEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerText = 'Проверка...';
+
+      try {
+        const { data, error } = await supabaseClient.rpc('verify_user', {
+          p_login: login,
+          p_password: password
+        });
+
+        if (error || !data || !data.success) {
+          throw new Error((data && data.message) || 'Неверный логин или пароль');
+        }
+
+        currentUser = data.user;
+        isManagerInPreview = false;
+        localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+        applyUserSession();
+      } catch (err) {
+        errorEl.innerText = err.message || 'Ошибка входа';
+        errorEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Войти в систему';
+      }
+    }
+
+    function checkSavedSession() {
+      const saved = localStorage.getItem('sladkoezhka_auth_user');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          applyUserSession();
+          return;
+        } catch(e) {}
+      }
+      showScreen('login');
+    }
+
+    function logout() {
+      currentUser = null;
+      isManagerInPreview = false;
+      cart = {};
+      localStorage.removeItem('sladkoezhka_auth_user');
+      showScreen('login');
+      updateCartUI();
+    }
+
+    function applyUserSession() {
+      if (!currentUser) return showScreen('login');
+
+      const roleStatus = document.getElementById('header-role-status');
+      const logoutBtn = document.getElementById('btn-logout');
+
+      if (roleStatus) {
+        roleStatus.innerText = currentUser.role === 'manager' ? 'Управляющий' : 'Сотрудник';
+      }
+      logoutBtn.classList.remove('hidden');
+
+      const settingsUserName = document.getElementById('settings-user-name');
+      if (settingsUserName) settingsUserName.innerText = `${currentUser.name} (${currentUser.login})`;
+
+      if (currentUser.role === 'manager') {
+        showScreen('manager');
+        switchManagerTab('stats');
+      } else {
+        showScreen('employee');
+        switchEmployeeTab('sale');
+      }
+
+      refreshAppData();
+    }
+
+    function showScreen(name) {
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-employee').classList.add('hidden');
+      document.getElementById('screen-manager').classList.add('hidden');
+      document.getElementById('nav-employee').classList.add('hidden');
+      document.getElementById('nav-manager').classList.add('hidden');
+      document.getElementById('floating-checkout-bar').classList.add('hidden');
+      document.getElementById('preview-mode-banner').classList.add('hidden');
+
+      if (name === 'login') {
+        document.getElementById('screen-login').classList.remove('hidden');
+        document.getElementById('btn-logout').classList.add('hidden');
+        const roleStatus = document.getElementById('header-role-status');
+        if (roleStatus) roleStatus.innerText = 'Вход в систему';
+      } else if (name === 'employee') {
+        document.getElementById('screen-employee').classList.remove('hidden');
+        document.getElementById('nav-employee').classList.remove('hidden');
+        if (isManagerInPreview) {
+          document.getElementById('preview-mode-banner').classList.remove('hidden');
+        }
+        if (Object.keys(cart).length > 0) document.getElementById('floating-checkout-bar').classList.remove('hidden');
+      } else if (name === 'manager') {
+        document.getElementById('screen-manager').classList.remove('hidden');
+        document.getElementById('nav-manager').classList.remove('hidden');
+      }
+    }
+
+    function enterShowcasePreviewMode() {
+      isManagerInPreview = true;
+      showScreen('employee');
+      switchEmployeeTab('sale');
+      renderEmployeeCategories();
+      renderEmployeeProducts();
+      showToast('Режим просмотра витрины');
+    }
+
+    function exitShowcasePreviewMode() {
+      isManagerInPreview = false;
+      showScreen('manager');
+      switchManagerTab('stats');
+    }
+
+    // ==========================================
+    // 6. НАВИГАЦИЯ ПО ВКЛАДКАМ (СТРОГИЕ СОСТОЯНИЯ)
+    // ==========================================
+    const TAB_ACTIVE_CLASS = 'flex flex-col items-center justify-center space-y-1 font-semibold text-[11px] text-[#2B1A12] dark:text-[#EAE2D8] transition-colors';
+    const TAB_INACTIVE_CLASS = 'flex flex-col items-center justify-center space-y-1 font-medium text-[11px] text-[#8E8A85] hover:text-[#2B1A12] dark:hover:text-[#EAE2D8] transition-colors';
+
+    function switchEmployeeTab(tab) {
+      const tabSale = document.getElementById('employee-tab-sale');
+      const tabShift = document.getElementById('employee-tab-shift');
+      const btnSale = document.getElementById('btn-emp-tab-sale');
+      const btnShift = document.getElementById('btn-emp-tab-shift');
+      const checkoutBar = document.getElementById('floating-checkout-bar');
+
+      if (tab === 'sale') {
+        tabSale.classList.remove('hidden');
+        tabShift.classList.add('hidden');
+        btnSale.className = TAB_ACTIVE_CLASS;
+        btnShift.className = TAB_INACTIVE_CLASS;
+        if (Object.keys(cart).length > 0) checkoutBar.classList.remove('hidden');
+      } else {
+        tabSale.classList.add('hidden');
+        tabShift.classList.remove('hidden');
+        btnSale.className = TAB_INACTIVE_CLASS;
+        btnShift.className = TAB_ACTIVE_CLASS;
+        checkoutBar.classList.add('hidden');
+        renderShiftData();
+      }
+    }
+
+    function switchManagerTab(tab) {
+      const tabs = {
+        stats: document.getElementById('manager-tab-stats'),
+        inventory: document.getElementById('manager-tab-inventory'),
+        staff: document.getElementById('manager-tab-staff')
+      };
+      const btns = {
+        stats: document.getElementById('btn-mgr-tab-stats'),
+        inventory: document.getElementById('btn-mgr-tab-inventory'),
+        staff: document.getElementById('btn-mgr-tab-staff')
+      };
+
+      Object.keys(tabs).forEach(k => {
+        if (k === tab) {
+          tabs[k].classList.remove('hidden');
+          btns[k].className = TAB_ACTIVE_CLASS;
+        } else {
+          tabs[k].classList.add('hidden');
+          btns[k].className = TAB_INACTIVE_CLASS;
+        }
+      });
+
+      if (tab === 'stats') renderManagerStats();
+      if (tab === 'inventory') renderManagerInventory();
+      if (tab === 'staff') renderManagerStaff();
+    }
+
+    // ==========================================
+    // 7. СИНХРОНИЗАЦИЯ ДАННЫХ
+    // ==========================================
+    async function refreshAppData() {
+      try {
+        if (!supabaseClient) return;
+
+        const [cRes, pRes, sRes, uRes] = await Promise.all([
+          supabaseClient.from('categories').select('*').eq('is_deleted', false).order('sort_order'),
+          supabaseClient.from('products').select('*').eq('is_deleted', false).order('name'),
+          supabaseClient.from('sales').select('*, sale_items(*), users(name)').order('created_at', { ascending: false }),
+          supabaseClient.from('users').select('*').order('created_at')
+        ]);
+
+        if (cRes.data) cachedCategories = cRes.data;
+        if (pRes.data) cachedProducts = pRes.data;
+        if (sRes.data) {
+          cachedSales = sRes.data.map(s => ({
+            ...s,
+            employee_name: s.users ? s.users.name : 'Сотрудник',
+            items: s.sale_items || []
+          }));
+        }
+        if (uRes.data) cachedUsers = uRes.data;
+
+        if (currentUser) {
+          if (currentUser.role === 'employee' || isManagerInPreview) {
+            renderEmployeeCategories();
+            renderEmployeeProducts();
+            renderShiftData();
+          }
+          if (currentUser.role === 'manager') {
+            renderManagerStats();
+            renderManagerInventory();
+            renderManagerStaff();
+          }
+        }
+      } catch (err) {
+        console.error('Ошибка загрузки данных:', err);
+      }
+    }
+
+    // ==========================================
+    // 8. ИНТЕРФЕЙС СОТРУДНИКА (ВИТРИНА)
+    // ==========================================
+    function renderEmployeeCategories() {
+      const container = document.getElementById('employee-categories-bar');
+      if (!container) return;
+
+      let html = `
+        <button onclick="setEmployeeCategory('all')" 
+                class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${currentEmployeeCategory === 'all' ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
+          Все категории
+        </button>
+      `;
+
+      cachedCategories.forEach(cat => {
+        const isSel = currentEmployeeCategory === cat.id;
+        html += `
+          <button onclick="setEmployeeCategory('${cat.id}')" 
+                  class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${isSel ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
+            ${escapeHtml(cat.name)}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setEmployeeCategory(catId) {
+      currentEmployeeCategory = catId;
+      renderEmployeeCategories();
+      renderEmployeeProducts();
+    }
+
+    function renderEmployeeProducts() {
+      const grid = document.getElementById('employee-products-grid');
+      const search = (document.getElementById('employee-search-input')?.value || '').toLowerCase().trim();
+      if (!grid) return;
+
+      let list = cachedProducts;
+      if (currentEmployeeCategory !== 'all') {
+        list = list.filter(p => p.category_id === currentEmployeeCategory);
+      }
+      if (search) {
+        list = list.filter(p => p.name.toLowerCase().includes(search));
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-[#8E8A85]">
+            <svg class="w-8 h-8 mx-auto text-[#8E8A85] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+            </svg>
+            <p class="text-xs font-semibold">Позиции не найдены</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(prod => {
+        const inCartQty = cart[prod.id] || 0;
+        const isOutOfStock = prod.stock_qty <= 0;
+        const isMax = inCartQty >= prod.stock_qty;
+
+        return `
+          <div onclick="handleProductCardClick('${prod.id}', ${prod.stock_qty})" 
+               class="relative bg-white dark:bg-cacao-900 rounded-xl p-3 sm:p-3.5 border transition-all cursor-pointer flex flex-col justify-between h-36 ${isOutOfStock ? 'opacity-40 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] ring-1 ring-[#2D1E17] shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
+            
+            <div>
+              <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 min-h-[2.4rem] leading-snug">
+                ${escapeHtml(prod.name)}
+              </div>
+            </div>
+
+            ${inCartQty > 0 ? `
+              <div class="absolute top-2.5 right-2.5 flex items-center space-x-1 z-10" onclick="event.stopPropagation()">
+                <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-[#2D1E17] dark:text-white font-bold flex items-center justify-center hover:bg-[#EAE2D8] text-xs">
+                  -
+                </button>
+                <span class="w-6 h-6 rounded-md bg-[#2D1E17] text-white font-bold flex items-center justify-center text-xs tabular-nums">
+                  ${inCartQty}
+                </span>
+                <button onclick="incrementCart('${prod.id}', ${prod.stock_qty})" ${isMax ? 'disabled class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-neutral-300 opacity-40"' : 'class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-[#2D1E17] dark:text-white font-bold flex items-center justify-center hover:bg-[#EAE2D8] text-xs"'}>
+                  +
+                </button>
+              </div>
+            ` : ''}
+
+            <div class="pt-2 border-t border-dashed border-[#ECE6DE] dark:border-cacao-800 flex items-end justify-between">
+              <div>
+                <div class="text-[10px] sm:text-[11px] ${prod.stock_qty <= 5 ? 'text-amber-700 font-semibold' : 'text-[#8E8A85] font-medium'}">
+                  ${isOutOfStock ? 'Закончилось' : `Остаток: ${prod.stock_qty} шт`}
+                </div>
+                <div class="text-sm sm:text-base font-bold text-[#1F2937] dark:text-cream-50 mt-0.5 tabular-nums">
+                  ${Number(prod.price).toLocaleString('ru-RU')} ₽
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleProductCardClick(prodId, maxStock) {
+      if (maxStock <= 0) return;
+      incrementCart(prodId, maxStock);
+    }
+
+    function incrementCart(prodId, maxStock) {
+      const cur = cart[prodId] || 0;
+      if (cur >= maxStock) {
+        showToast('Достигнут максимальный остаток');
+        return;
+      }
+      cart[prodId] = cur + 1;
+      playBeep('click');
+      triggerHaptic();
+      updateCartUI();
+    }
+
+    function decrementCart(prodId) {
+      const cur = cart[prodId] || 0;
+      if (cur <= 1) delete cart[prodId];
+      else cart[prodId] = cur - 1;
+      playBeep('click');
+      triggerHaptic();
+      updateCartUI();
+    }
+
+    function clearCart() {
+      cart = {};
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      renderEmployeeProducts();
+      const checkoutBar = document.getElementById('floating-checkout-bar');
+      const itemsLabel = document.getElementById('checkout-items-label');
+      const totalPrice = document.getElementById('checkout-total-price');
+      const btnSale = document.getElementById('btn-process-sale');
+
+      const itemIds = Object.keys(cart);
+      if (itemIds.length === 0) {
+        checkoutBar.classList.add('hidden');
+        return;
+      }
+
+      let totalCount = 0;
+      let totalSum = 0;
+
+      itemIds.forEach(id => {
+        const prod = cachedProducts.find(p => p.id === id);
+        if (prod) {
+          const qty = cart[id];
+          totalCount += qty;
+          totalSum += Number(prod.price) * qty;
+        }
+      });
+
+      itemsLabel.innerText = `${totalCount} ${pluralize(totalCount, ['позиция', 'позиции', 'позиций'])}`;
+      totalPrice.innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
+      btnSale.innerHTML = `
+        <span>Оформить заказ (${totalSum.toLocaleString('ru-RU')} ₽)</span>
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      `;
+
+      checkoutBar.classList.remove('hidden');
+    }
+
+    async function submitSale() {
+      if (!currentUser) return;
+      const itemIds = Object.keys(cart);
+      if (itemIds.length === 0) return;
+
+      const btn = document.getElementById('btn-process-sale');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Оформление...</span>`;
+
+      const payloadItems = itemIds.map(id => ({
+        product_id: id,
+        quantity: cart[id]
+      }));
+
+      try {
+        const { data, error } = await supabaseClient.rpc('process_sale', {
+          p_employee_id: currentUser.id,
+          p_items: payloadItems
+        });
+
+        if (error) throw error;
+
+        playBeep('success');
+        triggerHaptic();
+        showToast('✓ Заказ оформлен');
+        cart = {};
+        updateCartUI();
+        refreshAppData();
+      } catch (err) {
+        console.error(err);
+        alert('Ошибка при оформлении: ' + (err.message || 'Сбой'));
+      } finally {
+        btn.disabled = false;
+        updateCartUI();
+      }
+    }
+
+    // ==========================================
+    // 9. МОЯ СМЕНА (СПИСОК ЗАКАЗОВ В СТИЛЕ RESTIK)
+    // ==========================================
+    function renderShiftData() {
+      if (!currentUser) return;
+      const listEl = document.getElementById('shift-sales-list');
+      const shiftSumEl = document.getElementById('shift-total-amount');
+      const shiftCountEl = document.getElementById('shift-total-count');
+      if (!listEl) return;
+
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+      const todaySales = cachedSales.filter(s => {
+        const t = new Date(s.created_at).getTime();
+        return (s.employee_id === currentUser.id || isManagerInPreview) && t >= startOfDay;
+      });
+
+      const totalShiftAmount = todaySales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      shiftSumEl.innerText = `${totalShiftAmount.toLocaleString('ru-RU')} ₽`;
+      shiftCountEl.innerText = todaySales.length.toString();
+
+      if (todaySales.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-10 text-center text-[#8E8A85] text-xs font-semibold">
+            За сегодняшнюю смену заказов пока нет
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = todaySales.map((sale, idx) => {
+        const orderNum = String(todaySales.length - idx).padStart(2, '0');
+        const time = new Date(sale.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        const items = sale.items || [];
+        const itemsSummary = items.map(it => `${escapeHtml(it.product_name_snapshot)} × ${it.quantity}`).join(', ');
+
+        return `
+          <div class="grid grid-cols-12 px-4 py-3.5 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+            <div class="col-span-2 font-mono text-xs font-bold text-[#8E8A85]">#${orderNum}</div>
+            <div class="col-span-3 font-bold text-sm sm:text-base text-[#1F2937] dark:text-cream-50 tabular-nums">
+              ${Number(sale.total_amount).toLocaleString('ru-RU')} ₽
+            </div>
+            <div class="col-span-5 text-xs text-[#4B5563] dark:text-cream-200 truncate pr-2 font-medium">
+              ${itemsSummary}
+            </div>
+            <div class="col-span-2 text-right text-xs font-mono text-[#8E8A85]">
+              ${time}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // 10. УПРАВЛЯЮЩИЙ: СТАТИСТИКА И КАЛЕНДАРЬ
+    // ==========================================
+    function setStatsPeriod(period) {
+      statsPeriod = period;
+      document.querySelectorAll('.stats-period-btn').forEach(btn => {
+        if (btn.dataset.period === period) {
+          btn.className = 'stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] transition';
+        } else {
+          btn.className = 'stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900';
+        }
+      });
+      renderManagerStats();
+    }
+
+    function openCustomRangeModal() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0);
+      document.getElementById('range-start-date').value = formatDateTimeLocal(customStartDate || start);
+      document.getElementById('range-end-date').value = formatDateTimeLocal(customEndDate || now);
+      document.getElementById('modal-custom-range').classList.remove('hidden');
+    }
+
+    function closeCustomRangeModal() {
+      document.getElementById('modal-custom-range').classList.add('hidden');
+    }
+
+    function applyCustomRange() {
+      const startVal = document.getElementById('range-start-date').value;
+      const endVal = document.getElementById('range-end-date').value;
+
+      if (!startVal || !endVal) {
+        alert('Пожалуйста, укажите обе даты');
+        return;
+      }
+
+      customStartDate = new Date(startVal);
+      customEndDate = new Date(endVal);
+
+      if (customStartDate > customEndDate) {
+        alert('Дата начала не может быть позже даты окончания');
+        return;
+      }
+
+      statsPeriod = 'custom';
+      closeCustomRangeModal();
+
+      document.querySelectorAll('.stats-period-btn').forEach(b => {
+        b.className = 'stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900';
+      });
+
+      const customBtn = document.getElementById('custom-range-btn');
+      customBtn.className = 'stats-period-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] transition flex items-center space-x-1';
+
+      renderManagerStats();
+      showToast('Период отчета применен');
+    }
+
+    function setTopSort(mode) {
+      topSortMode = mode;
+      const btnRev = document.getElementById('top-sort-rev');
+      const btnQty = document.getElementById('top-sort-qty');
+      if (mode === 'revenue') {
+        btnRev.className = 'px-2.5 py-1 rounded-md font-semibold bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs';
+        btnQty.className = 'px-2.5 py-1 rounded-md font-medium text-[#6B7280]';
+      } else {
+        btnQty.className = 'px-2.5 py-1 rounded-md font-semibold bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs';
+        btnRev.className = 'px-2.5 py-1 rounded-md font-medium text-[#6B7280]';
+      }
+      renderManagerStats();
+    }
+
+    function renderManagerStats() {
+      const now = new Date();
+      let startTime = 0;
+      let endTime = now.getTime();
+      let isHourly = false;
+
+      if (statsPeriod === 'today') {
+        startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        isHourly = true;
+      } else if (statsPeriod === 'yesterday') {
+        const yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        startTime = yest.getTime();
+        endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        isHourly = true;
+      } else if (statsPeriod === 'week') {
+        startTime = now.getTime() - 7 * 24 * 3600000;
+      } else if (statsPeriod === 'month') {
+        startTime = now.getTime() - 30 * 24 * 3600000;
+      } else if (statsPeriod === 'custom') {
+        startTime = customStartDate ? customStartDate.getTime() : 0;
+        endTime = customEndDate ? customEndDate.getTime() : now.getTime();
+        if ((endTime - startTime) <= 24 * 3600000) isHourly = true;
+      }
+
+      const filteredSales = cachedSales.filter(s => {
+        const t = new Date(s.created_at).getTime();
+        return t >= startTime && t <= endTime;
+      });
+
+      let totalRev = 0;
+      let totalUnits = 0;
+      const productStats = {};
+
+      filteredSales.forEach(s => {
+        totalRev += Number(s.total_amount);
+        s.items?.forEach(it => {
+          totalUnits += Number(it.quantity);
+          const name = it.product_name_snapshot;
+          if (!productStats[name]) productStats[name] = { qty: 0, rev: 0 };
+          productStats[name].qty += Number(it.quantity);
+          productStats[name].rev += Number(it.total_price);
+        });
+      });
+
+      document.getElementById('stat-revenue').innerText = `${totalRev.toLocaleString('ru-RU')} ₽`;
+      document.getElementById('stat-sales-count').innerText = filteredSales.length.toString();
+      document.getElementById('stat-items-qty').innerText = `${totalUnits} шт`;
+
+      renderStatsChart(filteredSales, isHourly);
+
+      // Топ товаров
+      const topList = Object.keys(productStats).map(name => ({
+        name,
+        qty: productStats[name].qty,
+        rev: productStats[name].rev
+      }));
+
+      topList.sort((a, b) => topSortMode === 'revenue' ? b.rev - a.rev : b.qty - a.qty);
+      const maxVal = topList.length > 0 ? (topSortMode === 'revenue' ? topList[0].rev : topList[0].qty) : 1;
+
+      const topContainer = document.getElementById('top-products-list');
+      if (topList.length === 0) {
+        topContainer.innerHTML = `<div class="py-4 text-center text-xs text-[#8E8A85] font-semibold">Нет продаж за период</div>`;
+      } else {
+        topContainer.innerHTML = topList.slice(0, 5).map((item, idx) => {
+          const percent = Math.round(((topSortMode === 'revenue' ? item.rev : item.qty) / maxVal) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-[#1F2937] dark:text-cream-50 truncate pr-2">
+                  <span class="text-[#8E8A85] mr-2 font-mono">#${idx + 1}</span>${escapeHtml(item.name)}
+                </span>
+                <span class="font-bold text-[#1F2937] dark:text-cream-50 tabular-nums shrink-0">
+                  ${item.rev.toLocaleString('ru-RU')} ₽ <span class="text-[#8E8A85] font-medium text-[11px]">(${item.qty} шт)</span>
+                </span>
+              </div>
+              <div class="h-1.5 w-full bg-[#FAF7F2] dark:bg-cacao-800 rounded-full overflow-hidden">
+                <div class="h-full bg-[#2D1E17] dark:bg-white rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Лента всех заказов
+      const feedContainer = document.getElementById('manager-sales-feed');
+      if (filteredSales.length === 0) {
+        feedContainer.innerHTML = `<div class="p-8 text-center text-xs text-[#8E8A85] font-semibold">Заказов за период нет</div>`;
+      } else {
+        feedContainer.innerHTML = filteredSales.map((sale, idx) => {
+          const orderNum = String(filteredSales.length - idx).padStart(2, '0');
+          const dateStr = new Date(sale.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+          return `
+            <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+              <div class="col-span-2 font-mono text-xs font-bold text-[#8E8A85]">#${orderNum}</div>
+              <div class="col-span-3 font-bold text-sm sm:text-base text-[#1F2937] dark:text-cream-50 tabular-nums">
+                ${Number(sale.total_amount).toLocaleString('ru-RU')} ₽
+              </div>
+              <div class="col-span-3 text-xs text-[#4B5563] dark:text-cream-200 font-semibold truncate">
+                ${escapeHtml(sale.employee_name || 'Сотрудник')}
+              </div>
+              <div class="col-span-4 text-right text-xs font-mono text-[#8E8A85]">
+                ${dateStr}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderStatsChart(sales, isHourly) {
+      const chartContainer = document.getElementById('sales-chart-container');
+      const subtitle = document.getElementById('chart-subtitle');
+      if (!chartContainer) return;
+
+      subtitle.innerText = isHourly ? 'По часам' : 'По дням';
+
+      let buckets = {};
+      if (isHourly) {
+        for (let h = 8; h <= 22; h++) {
+          const key = (h < 10 ? '0' : '') + h + ':00';
+          buckets[key] = 0;
+        }
+        sales.forEach(s => {
+          const h = new Date(s.created_at).getHours();
+          const key = (h < 10 ? '0' : '') + h + ':00';
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount);
+        });
+      } else {
+        for (let d = 6; d >= 0; d--) {
+          const dayDate = new Date(Date.now() - d * 24 * 3600000);
+          const key = dayDate.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+          buckets[key] = 0;
+        }
+        sales.forEach(s => {
+          const key = new Date(s.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount);
+        });
+      }
+
+      const keys = Object.keys(buckets);
+      const maxVal = Math.max(...Object.values(buckets), 100);
+
+      chartContainer.innerHTML = `
+        <div class="w-full h-full flex items-end justify-between space-x-1.5 pt-4">
+          ${keys.map(k => {
+            const val = buckets[k];
+            const heightPercent = Math.max(Math.round((val / maxVal) * 100), 4);
+            return `
+              <div class="flex-1 flex flex-col items-center h-full justify-end group relative cursor-pointer">
+                <div class="opacity-0 group-hover:opacity-100 transition absolute -top-7 text-[10px] font-bold bg-[#1F2937] text-white px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-10">
+                  ${val.toLocaleString('ru-RU')} ₽
+                </div>
+                <div class="w-full bg-[#2D1E17] dark:bg-white hover:opacity-80 rounded-t-xs transition-all duration-200" style="height: ${heightPercent}%"></div>
+                <span class="text-[9px] text-[#8E8A85] mt-1.5 truncate font-mono">${k}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 11. УПРАВЛЯЮЩИЙ: СКЛАД И КАТЕГОРИИ
+    // ==========================================
+    function renderManagerInventory() {
+      renderManagerCategoriesBar();
+      const listContainer = document.getElementById('inventory-products-list');
+      const search = (document.getElementById('inventory-search-input')?.value || '').toLowerCase().trim();
+      if (!listContainer) return;
+
+      let list = cachedProducts;
+      if (currentManagerCategory !== 'all') {
+        list = list.filter(p => p.category_id === currentManagerCategory);
+      }
+      if (search) {
+        list = list.filter(p => p.name.toLowerCase().includes(search));
+      }
+
+      if (list.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-12 text-center text-[#8E8A85] text-xs font-semibold">
+            Позиций в данной категории нет
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = list.map(prod => {
+        const cat = cachedCategories.find(c => c.id === prod.category_id);
+        const isLow = prod.stock_qty <= 5;
+
+        return `
+          <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+            <!-- Название переносится на две строки (line-clamp-2) -->
+            <div class="col-span-5 sm:col-span-6 pr-2 cursor-pointer" onclick="openProductModal('${prod.id}')">
+              <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">${escapeHtml(prod.name)}</div>
+              ${cat ? `<div class="text-[10px] text-[#8E8A85] font-medium truncate mt-0.5">${escapeHtml(cat.name)}</div>` : ''}
+            </div>
+
+            <div class="col-span-3 sm:col-span-2 font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 tabular-nums">
+              ${Number(prod.price).toLocaleString('ru-RU')} ₽
+            </div>
+
+            <!-- Плоские строгие кнопки [-] и [+] (фон #F3EDE6, символ #2D1E17, скругление 8px) -->
+            <div class="col-span-4 flex items-center justify-end space-x-1 sm:space-x-1.5">
+              <button onclick="quickStockChange('${prod.id}', -1)" aria-label="Уменьшить остаток" 
+                      class="w-10 h-10 sm:w-11 sm:h-11 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-lg shrink-0 select-none transition">
+                -
+              </button>
+              
+              <!-- Тап по числу открывает быстрое модальное окно остатка -->
+              <div onclick="openStockModal('${prod.id}', ${prod.stock_qty}, '${escapeHtml(prod.name)}')" title="Изменить остаток" 
+                   class="min-w-[44px] text-center cursor-pointer py-1.5 px-1 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                <span class="text-sm sm:text-base font-bold tabular-nums block leading-none ${isLow ? 'text-red-600' : 'text-[#1F2937] dark:text-cream-50'}">
+                  ${prod.stock_qty}
+                </span>
+                <span class="text-[9px] text-[#8E8A85] block mt-0.5">шт</span>
+              </div>
+
+              <button onclick="quickStockChange('${prod.id}', 1)" aria-label="Увеличить остаток" 
+                      class="w-10 h-10 sm:w-11 sm:h-11 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-lg shrink-0 select-none transition">
+                +
+              </button>
+
+              <button onclick="openProductModal('${prod.id}')" title="Редактировать товар" class="w-8 h-8 flex items-center justify-center text-[#8E8A85] hover:text-[#2D1E17] dark:hover:text-white ml-0.5 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderManagerCategoriesBar() {
+      const container = document.getElementById('manager-categories-bar');
+      if (!container) return;
+
+      let html = `
+        <button onclick="setManagerCategory('all')" 
+                class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${currentManagerCategory === 'all' ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
+          Все категории
+        </button>
+      `;
+
+      cachedCategories.forEach(cat => {
+        const isSel = currentManagerCategory === cat.id;
+        html += `
+          <button onclick="setManagerCategory('${cat.id}')" 
+                  class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${isSel ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
+            ${escapeHtml(cat.name)}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setManagerCategory(catId) {
+      currentManagerCategory = catId;
+      renderManagerInventory();
+    }
+
+    async function quickStockChange(prodId, delta) {
+      const prod = cachedProducts.find(p => p.id === prodId);
+      if (!prod) return;
+      const newStock = Math.max(0, prod.stock_qty + delta);
+      await updateProductStock(prodId, newStock);
+    }
+
+    // ==========================================
+    // МОДАЛЬНОЕ ОКНО БЫСТРОГО ИЗМЕНЕНИЯ ОСТАТКА
+    // ==========================================
+    function openStockModal(prodId, currentStock, prodName) {
+      document.getElementById('modal-stock-prod-id').value = prodId;
+      document.getElementById('modal-stock-prod-name').innerText = prodName || '';
+      document.getElementById('modal-stock-input').value = currentStock;
+      document.getElementById('modal-stock-edit').classList.remove('hidden');
+    }
+
+    function closeStockModal() {
+      document.getElementById('modal-stock-edit').classList.add('hidden');
+    }
+
+    function adjustModalStock(delta) {
+      const inp = document.getElementById('modal-stock-input');
+      const cur = parseInt(inp.value, 10) || 0;
+      inp.value = Math.max(0, cur + delta);
+    }
+
+    function setModalStockZero() {
+      document.getElementById('modal-stock-input').value = 0;
+    }
+
+    async function saveModalStock() {
+      const prodId = document.getElementById('modal-stock-prod-id').value;
+      const val = parseInt(document.getElementById('modal-stock-input').value, 10);
+      if (isNaN(val) || val < 0) {
+        alert('Введите корректное число >= 0');
+        return;
+      }
+      closeStockModal();
+      await updateProductStock(prodId, val);
+    }
+
+    async function updateProductStock(prodId, newStock) {
+      try {
+        const { error } = await supabaseClient
+          .from('products')
+          .update({ stock_qty: newStock, updated_at: new Date().toISOString() })
+          .eq('id', prodId);
+        if (error) throw error;
+        showToast('Остаток обновлен');
+        refreshAppData();
+      } catch (err) {
+        alert('Ошибка обновления остатка: ' + err.message);
+      }
+    }
+
+    // ==========================================
+    // 12. УПРАВЛЕНИЕ КАТЕГОРИЯМИ
+    // ==========================================
+    function openCategoryManageModal() {
+      renderCategoryManageList();
+      document.getElementById('new-cat-input').value = '';
+      document.getElementById('modal-category-manage').classList.remove('hidden');
+    }
+
+    function closeCategoryManageModal() {
+      document.getElementById('modal-category-manage').classList.add('hidden');
+    }
+
+    function renderCategoryManageList() {
+      const listEl = document.getElementById('categories-manage-list');
+      if (!listEl) return;
+
+      if (cachedCategories.length === 0) {
+        listEl.innerHTML = `<div class="py-6 text-center text-xs text-[#8E8A85]">Нет категорий</div>`;
+        return;
+      }
+
+      listEl.innerHTML = cachedCategories.map(cat => {
+        const prodCount = cachedProducts.filter(p => p.category_id === cat.id).length;
+        return `
+          <div class="py-2.5 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-sm text-[#1F2937] dark:text-cream-50">${escapeHtml(cat.name)}</span>
+              <span class="text-[11px] text-[#6B7280] ml-2 font-medium">(${prodCount} тов.)</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button onclick="openCategoryEditModal('${cat.id}', '${escapeHtml(cat.name)}')" title="Переименовать" class="p-1.5 text-[#8E8A85] hover:text-[#1F2937] rounded-md hover:bg-[#F3EDE6] dark:hover:bg-cacao-800">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+              </button>
+              <button onclick="deleteCategory('${cat.id}', '${escapeHtml(cat.name)}')" title="Удалить категорию" class="p-1.5 text-[#8E8A85] hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-950/20">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function createNewCategory() {
+      const input = document.getElementById('new-cat-input');
+      const name = input.value.trim();
+      if (!name) return;
+
+      try {
+        const { error } = await supabaseClient.from('categories').insert({
+          name,
+          sort_order: cachedCategories.length + 1
+        });
+        if (error) throw error;
+        input.value = '';
+        showToast('✓ Категория добавлена');
+        await refreshAppData();
+        renderCategoryManageList();
+      } catch (err) {
+        alert('Ошибка создания: ' + err.message);
+      }
+    }
+
+    function openCategoryEditModal(catId, catName) {
+      document.getElementById('edit-cat-id').value = catId;
+      document.getElementById('edit-cat-name').value = catName;
+      document.getElementById('modal-category-edit').classList.remove('hidden');
+    }
+
+    function closeCategoryEditModal() {
+      document.getElementById('modal-category-edit').classList.add('hidden');
+    }
+
+    async function saveCategoryRename() {
+      const id = document.getElementById('edit-cat-id').value;
+      const name = document.getElementById('edit-cat-name').value.trim();
+      if (!name) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('categories')
+          .update({ name })
+          .eq('id', id);
+        if (error) throw error;
+
+        closeCategoryEditModal();
+        showToast('✓ Категория переименована');
+        await refreshAppData();
+        renderCategoryManageList();
+      } catch (err) {
+        alert('Ошибка: ' + err.message);
+      }
+    }
+
+    async function deleteCategory(catId, catName) {
+      if (!confirm(`Удалить категорию "${catName}"? Привязанные товары сохранятся в каталоге.`)) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('categories')
+          .update({ is_deleted: true })
+          .eq('id', catId);
+        if (error) throw error;
+
+        showToast('✓ Категория удалена');
+        if (currentManagerCategory === catId) currentManagerCategory = 'all';
+        if (currentEmployeeCategory === catId) currentEmployeeCategory = 'all';
+        await refreshAppData();
+        renderCategoryManageList();
+      } catch (err) {
+        alert('Ошибка удаления: ' + err.message);
+      }
+    }
+
+    // ==========================================
+    // 13. ДЕЙСТВИЯ С ТОВАРАМИ И СОТРУДНИКАМИ
+    // ==========================================
+    function openProductModal(prodId = null) {
+      const modal = document.getElementById('modal-product');
+      const title = document.getElementById('modal-product-title');
+      const btnDel = document.getElementById('btn-delete-prod');
+      const catSelect = document.getElementById('prod-category');
+
+      catSelect.innerHTML = cachedCategories.map(c => `
+        <option value="${c.id}">${escapeHtml(c.name)}</option>
+      `).join('');
+
+      if (prodId) {
+        const prod = cachedProducts.find(p => p.id === prodId);
+        if (!prod) return;
+        title.innerText = 'Редактировать позицию';
+        document.getElementById('prod-id').value = prod.id;
+        document.getElementById('prod-name').value = prod.name;
+        document.getElementById('prod-category').value = prod.category_id || '';
+        document.getElementById('prod-price').value = prod.price;
+        document.getElementById('prod-stock').value = prod.stock_qty;
+        btnDel.classList.remove('hidden');
+      } else {
+        title.innerText = 'Добавить позицию';
+        document.getElementById('prod-id').value = '';
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-stock').value = '30';
+        btnDel.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('modal-product').classList.add('hidden');
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value.trim();
+      const category_id = document.getElementById('prod-category').value;
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const stock_qty = parseInt(document.getElementById('prod-stock').value, 10);
+
+      try {
+        if (id) {
+          const { error } = await supabaseClient
+            .from('products')
+            .update({ name, category_id, price, stock_qty, updated_at: new Date().toISOString() })
+            .eq('id', id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabaseClient
+            .from('products')
+            .insert({ name, category_id, price, stock_qty });
+          if (error) throw error;
+        }
+
+        closeProductModal();
+        showToast('✓ Позиция сохранена');
+        refreshAppData();
+      } catch (err) {
+        alert('Ошибка при сохранении: ' + err.message);
+      }
+    }
+
+    async function deleteCurrentProduct() {
+      const id = document.getElementById('prod-id').value;
+      if (!id || !confirm('Удалить позицию с витрины? Прошлые заказы сохранятся.')) return;
+
+      try {
+        const { error } = await supabaseClient
+          .from('products')
+          .update({ is_deleted: true })
+          .eq('id', id);
+        if (error) throw error;
+
+        closeProductModal();
+        showToast('✓ Позиция удалена');
+        refreshAppData();
+      } catch (err) {
+        alert('Ошибка удаления: ' + err.message);
+      }
+    }
+
+    function openStaffModal() {
+      document.getElementById('staff-name').value = '';
+      document.getElementById('staff-login').value = '';
+      document.getElementById('staff-password').value = '';
+      document.getElementById('modal-staff').classList.remove('hidden');
+    }
+
+    function closeStaffModal() {
+      document.getElementById('modal-staff').classList.add('hidden');
+    }
+
+    async function saveStaff(e) {
+      e.preventDefault();
+      const name = document.getElementById('staff-name').value.trim();
+      const login = document.getElementById('staff-login').value.trim();
+      const password = document.getElementById('staff-password').value.trim();
+      const role = document.getElementById('staff-role').value;
+
+      try {
+        const { error } = await supabaseClient.from('users').insert({
+          name,
+          login,
+          password_hash: password,
+          role,
+          is_deleted: false
+        });
+        if (error) throw error;
+
+        closeStaffModal();
+        showToast('✓ Сотрудник добавлен');
+        refreshAppData();
+      } catch (err) {
+        alert('Ошибка: ' + err.message);
+      }
+    }
+
+    function renderManagerStaff() {
+      const staffList = document.getElementById('staff-list');
+      if (!staffList) return;
+
+      const activeUsers = cachedUsers.filter(u => !u.is_deleted);
+
+      staffList.innerHTML = activeUsers.map(user => {
+        const isManager = user.role === 'manager';
+        const isSelf = currentUser && currentUser.id === user.id;
+
+        return `
+          <div class="px-4 sm:px-5 py-3.5 flex items-center justify-between hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-sm text-[#1F2937] dark:text-cream-50">${escapeHtml(user.name)}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isManager ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17]' : 'bg-[#ECE6DE] text-[#4B5563] dark:bg-cacao-800 dark:text-cream-200'}">
+                  ${isManager ? 'Управляющий' : 'Сотрудник'}
+                </span>
+              </div>
+              <div class="text-xs text-[#8E8A85] mt-0.5 font-mono">логин: ${escapeHtml(user.login)}</div>
+            </div>
+
+            ${!isSelf ? `
+              <button onclick="deleteStaff('${user.id}')" title="Деактивировать" class="text-xs text-red-600 hover:underline font-semibold">
+                Удалить доступ
+              </button>
+            ` : '<span class="text-xs text-[#8E8A85] font-mono font-bold">вы</span>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function deleteStaff(userId) {
+      if (!confirm('Заблокировать доступ сотруднику? История его продаж сохранится.')) return;
+      try {
+        const { error } = await supabaseClient
+          .from('users')
+          .update({ is_deleted: true })
+          .eq('id', userId);
+        if (error) throw error;
+        showToast('✓ Доступ сотрудника заблокирован');
+        refreshAppData();
+      } catch (err) {
+        alert('Ошибка: ' + err.message);
+      }
+    }
+
+    // ==========================================
+    // 14. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ==========================================
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      toast.innerText = text;
+      toast.classList.remove('hidden');
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2400);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function pluralize(n, forms) {
+      const pr = new Intl.PluralRules('ru-RU');
+      const rule = pr.select(n);
+      if (rule === 'one') return forms[0];
+      if (rule === 'few') return forms[1];
+      return forms[2];
+    }
+
+    function formatDateTimeLocal(date) {
+      const pad = (n) => String(n).padStart(2, '0');
+      const y = date.getFullYear();
+      const m = pad(date.getMonth() + 1);
+      const d = pad(date.getDate());
+      const h = pad(date.getHours());
+      const min = pad(date.getMinutes());
+      return `${y}-${m}-${d}T${h}:${min}`;
+    }
+
+    // ==========================================
+    // СТАРТ ПРИЛОЖЕНИЯ
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      initSupabase();
+      checkSavedSession();
+    });
+  </script>
+</body>
+</html>
