@@ -216,27 +216,54 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Витрина десертов и напитков</h2>
-            <p class="text-xs text-[#6B7280]">Нажмите на карточку, чтобы добавить позицию в заказ</p>
+            <p class="text-xs text-[#6B7280]">Нажмите на категорию или воспользуйтесь поиском</p>
           </div>
           
-          <!-- Поиск позиций -->
+          <!-- Поиск позиций с кнопкой сброса -->
           <div class="relative w-full sm:w-72">
-            <input type="text" id="employee-search-input" oninput="renderEmployeeProducts()" placeholder="Поиск по названию..."
-                   class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17]">
+            <input type="text" id="employee-search-input" oninput="handleEmployeeSearchInput()" placeholder="Быстрый поиск по меню..."
+                   class="w-full pl-9 pr-8 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17]">
             <svg class="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
+            <button id="employee-search-clear" onclick="clearEmployeeSearch()" class="hidden absolute right-2.5 top-2 text-[#9CA3AF] hover:text-[#1F2937] dark:hover:text-white text-xs p-0.5">✕</button>
           </div>
         </div>
 
-        <!-- Горизонтальные категории -->
-        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1" id="employee-categories-bar">
-          <!-- Заполняется JS -->
+        <!-- 1. УРОВЕНЬ 1: БОЛЬШИЕ КНОПКИ КАТЕГОРИЙ -->
+        <div id="employee-categories-view" class="space-y-3">
+          <div class="flex items-center justify-between text-xs text-[#6B7280]">
+            <span class="font-bold uppercase tracking-wider">Категории меню</span>
+            <span id="employee-cat-total-count" class="font-semibold text-[#8E8A85]">12 категорий</span>
+          </div>
+          <div id="employee-categories-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <!-- Большие плитки категорий -->
+          </div>
         </div>
 
-        <!-- Сетка товаров -->
-        <div id="employee-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
-          <!-- Карточки товаров -->
+        <!-- 2. УРОВЕНЬ 2: ТОВАРЫ ВЫБРАННОЙ КАТЕГОРИИ -->
+        <div id="employee-products-view" class="hidden space-y-3">
+          <!-- Верхняя панель навигации категории с кнопкой НАЗАД -->
+          <div class="flex items-center justify-between bg-white dark:bg-cacao-900 p-2.5 sm:p-3 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 shadow-2xs">
+            <button onclick="backToCategories()" class="px-3.5 py-2 rounded-lg bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 text-[#1F2937] dark:text-cream-50 text-xs font-bold flex items-center space-x-1.5 transition active:scale-95 shadow-2xs">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+              <span>Назад к категориям</span>
+            </button>
+            <div class="text-right">
+              <h3 id="employee-selected-cat-title" class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50"></h3>
+              <p id="employee-selected-cat-count" class="text-[11px] text-[#6B7280]"></p>
+            </div>
+          </div>
+
+          <!-- Горизонтальная полоска быстрого переключения между категориями -->
+          <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1" id="employee-categories-mini-bar">
+            <!-- Мини-кнопки категорий -->
+          </div>
+
+          <!-- Сетка товаров -->
+          <div id="employee-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
+            <!-- Карточки товаров -->
+          </div>
         </div>
 
       </div>
@@ -818,11 +845,11 @@
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Логин для входа</label>
-          <input type="text" id="staff-login" required placeholder="anna1" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+          <input type="text" id="staff-login" required autocomplete="username" placeholder="anna1" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Пароль</label>
-          <input type="password" id="staff-password" required placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+          <input type="password" id="staff-password" required autocomplete="new-password" placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Роль</label>
@@ -861,7 +888,7 @@
     let cart = {};
 
     // Состояние фильтров
-    let currentEmployeeCategory = 'all';
+    let currentEmployeeCategory = null; // null = выбор из плиток категорий
     let currentManagerCategory = 'all';
     let statsPeriod = 'today';
     let customStartDate = null;
@@ -877,11 +904,19 @@
     // ==========================================
     // 2. ЗВУКОВОЙ СИГНАЛ (WEBAUDIO) И ВИБРАЦИЯ
     // ==========================================
+    let userHasInteracted = false;
+    ['pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+      window.addEventListener(evt, () => { userHasInteracted = true; }, { once: true, passive: true });
+    });
+
     let audioCtx = null;
     function playBeep(type = 'click') {
+      if (!userHasInteracted) return; // Защита от предупреждений браузера до первого жеста пользователя
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -908,6 +943,7 @@
     }
 
     function triggerHaptic() {
+      if (!userHasInteracted) return; // Защита от блокировки вибровызова
       if (navigator.vibrate) {
         try { navigator.vibrate(20); } catch(e) {}
       }
@@ -967,10 +1003,15 @@
             playBeep('success');
             triggerHaptic();
 
-            if (window.AndroidBridge && typeof window.AndroidBridge.notifySale === 'function') {
-              const title = `💰 Новая покупка: +${amt} ₽`;
-              const msg = `Способ оплаты: ${method} • Время: ${time}`;
-              window.AndroidBridge.notifySale(title, msg, amt, method, time);
+            if (window.AndroidBridge) {
+              if (sale.id && typeof window.AndroidBridge.registerSeenSale === 'function') {
+                window.AndroidBridge.registerSeenSale(sale.id);
+              }
+              if (typeof window.AndroidBridge.notifySale === 'function') {
+                const title = `💰 Новая покупка: +${amt} ₽`;
+                const msg = `Способ оплаты: ${method} • Время: ${time}`;
+                window.AndroidBridge.notifySale(title, msg, amt, method, time);
+              }
             }
           } else if (payload.eventType === 'DELETE') {
             showToast('🗑️ Продажи обновлены');
@@ -1116,6 +1157,7 @@
         showScreen('manager');
         switchManagerTab('stats');
       } else {
+        currentEmployeeCategory = null;
         showScreen('employee');
         switchEmployeeTab('sale');
       }
@@ -1152,15 +1194,16 @@
 
     function enterShowcasePreviewMode() {
       isManagerInPreview = true;
+      currentEmployeeCategory = null;
       showScreen('employee');
       switchEmployeeTab('sale');
       renderEmployeeCategories();
-      renderEmployeeProducts();
       showToast('Режим просмотра витрины');
     }
 
     function exitShowcasePreviewMode() {
       isManagerInPreview = false;
+      currentEmployeeCategory = null;
       showScreen('manager');
       switchManagerTab('stats');
     }
@@ -1264,49 +1307,213 @@
     }
 
     // ==========================================
-    // 8. ИНТЕРФЕЙС СОТРУДНИКА (ВИТРИНА)
+    // 8. ИНТЕРФЕЙС СОТРУДНИКА (ДВУХУРОВНЕВАЯ ВИТРИНА)
     // ==========================================
+    function getCategoryIcon(code, name) {
+      const c = (code || '').toLowerCase();
+      const n = (name || '').toLowerCase();
+
+      if (c.includes('hot') || n.includes('горяч') || c.includes('coffee') || n.includes('кофе')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 2v2m4-2v2m4-2v2"/></svg>`;
+      }
+      if (c.includes('tea') || n.includes('чай')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
+      }
+      if (c.includes('cold') || n.includes('холод') || c.includes('nitro') || n.includes('нитро')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20m-8-8 16-8m-16 0 16 8m-4-15-4 4-4-4m12 16-4-4-4 4m-7-5 4-4-4-4m16 12-4-4 4-4"/></svg>`;
+      }
+      if (c.includes('fast') || n.includes('фаст') || n.includes('фуд') || n.includes('бургер') || n.includes('сэндвич')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M4 11h16a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-1a1 1 0 0 1 1-1Zm0 0c0-3.5 3.5-7 8-7s8 3.5 8 7M4 17h16m-14 3h12"/></svg>`;
+      }
+      if (c.includes('ice') || n.includes('морожен')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m7 11 5 11 5-11M6 11a6 6 0 0 1 12 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6a3 3 0 0 1 3 3M6 11c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>`;
+      }
+      if (c.includes('cocktail') || n.includes('коктейл') || c.includes('smuzi') || n.includes('смузи') || c.includes('bubble') || n.includes('бабл')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8 22h8m-4-9v9M4 3h16l-8 10Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m14 7 3-3"/></svg>`;
+      }
+      if (c.includes('chocolate') || n.includes('шоколад') || n.includes('десерт')) {
+        return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><rect width="18" height="14" x="3" y="5" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M9 5v14M15 5v14"/></svg>`;
+      }
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.75 7.5h16.5a1.5 1.5 0 0 0 1.5-1.5v-1.5a1.5 1.5 0 0 0-1.5-1.5H3.75a1.5 1.5 0 0 0-1.5 1.5v1.5a1.5 1.5 0 0 0 1.5 1.5Z"/></svg>`;
+    }
+
     function renderEmployeeCategories() {
-      const container = document.getElementById('employee-categories-bar');
+      renderEmployeeCategoriesGrid();
+      const search = (document.getElementById('employee-search-input')?.value || '').trim();
+      if (search) {
+        document.getElementById('employee-categories-view')?.classList.add('hidden');
+        document.getElementById('employee-products-view')?.classList.remove('hidden');
+        return;
+      }
+      if (currentEmployeeCategory !== null) {
+        document.getElementById('employee-categories-view')?.classList.add('hidden');
+        document.getElementById('employee-products-view')?.classList.remove('hidden');
+        renderEmployeeSelectedCategoryHeader();
+        renderEmployeeCategoriesMiniBar();
+        renderEmployeeProducts();
+      } else {
+        document.getElementById('employee-products-view')?.classList.add('hidden');
+        document.getElementById('employee-categories-view')?.classList.remove('hidden');
+      }
+    }
+
+    function renderEmployeeCategoriesGrid() {
+      const grid = document.getElementById('employee-categories-grid');
+      const totalCountEl = document.getElementById('employee-cat-total-count');
+      if (!grid) return;
+
+      if (totalCountEl) {
+        totalCountEl.innerText = `${cachedCategories.length} ${pluralize(cachedCategories.length, ['категория', 'категории', 'категорий'])}`;
+      }
+
+      grid.innerHTML = cachedCategories.map(cat => {
+        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted).length;
+        const iconSvg = getCategoryIcon(cat.code, cat.name);
+
+        return `
+          <button type="button" onclick="selectEmployeeCategory('${cat.id}')"
+                  class="group relative bg-white dark:bg-cacao-900 rounded-2xl p-4 sm:p-5 border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] dark:hover:border-cream-100 shadow-xs hover:shadow-md transition-all active:scale-[0.98] text-left flex flex-col justify-between h-28 sm:h-32">
+            <div class="flex items-center justify-between w-full">
+              <div class="w-10 h-10 rounded-xl bg-[#FAF7F2] dark:bg-cacao-950 text-[#2D1E17] dark:text-cream-100 flex items-center justify-center font-bold text-base shadow-2xs group-hover:bg-[#2D1E17] group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-[#2D1E17] transition-colors">
+                ${iconSvg}
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FAF7F2] dark:bg-cacao-950 text-[#6B7280] dark:text-cream-200 border border-[#ECE6DE] dark:border-cacao-800 tabular-nums">
+                ${count} ${pluralize(count, ['товар', 'товара', 'товаров'])}
+              </span>
+            </div>
+            <div class="font-bold text-sm sm:text-base text-[#1F2937] dark:text-cream-50 leading-tight truncate mt-2">
+              ${escapeHtml(cat.name)}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectEmployeeCategory(catId) {
+      currentEmployeeCategory = catId;
+      playBeep('click');
+      triggerHaptic();
+
+      const searchInput = document.getElementById('employee-search-input');
+      if (searchInput) searchInput.value = '';
+      document.getElementById('employee-search-clear')?.classList.add('hidden');
+
+      document.getElementById('employee-categories-view')?.classList.add('hidden');
+      document.getElementById('employee-products-view')?.classList.remove('hidden');
+
+      renderEmployeeSelectedCategoryHeader();
+      renderEmployeeCategoriesMiniBar();
+      renderEmployeeProducts();
+    }
+
+    function backToCategories() {
+      currentEmployeeCategory = null;
+      playBeep('click');
+      triggerHaptic();
+
+      const searchInput = document.getElementById('employee-search-input');
+      if (searchInput) searchInput.value = '';
+      document.getElementById('employee-search-clear')?.classList.add('hidden');
+
+      document.getElementById('employee-products-view')?.classList.add('hidden');
+      document.getElementById('employee-categories-view')?.classList.remove('hidden');
+
+      renderEmployeeCategoriesGrid();
+    }
+
+    function renderEmployeeSelectedCategoryHeader() {
+      const titleEl = document.getElementById('employee-selected-cat-title');
+      const countEl = document.getElementById('employee-selected-cat-count');
+      if (!titleEl) return;
+
+      const cat = cachedCategories.find(c => c.id === currentEmployeeCategory);
+      if (cat) {
+        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted).length;
+        titleEl.innerText = cat.name;
+        if (countEl) countEl.innerText = `${count} ${pluralize(count, ['товар', 'товара', 'товаров'])}`;
+      } else {
+        titleEl.innerText = 'Все товары';
+        if (countEl) countEl.innerText = `${cachedProducts.length} товаров`;
+      }
+    }
+
+    function renderEmployeeCategoriesMiniBar() {
+      const container = document.getElementById('employee-categories-mini-bar');
       if (!container) return;
 
-      let html = `
-        <button onclick="setEmployeeCategory('all')" 
-                class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${currentEmployeeCategory === 'all' ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
-          Все категории
-        </button>
-      `;
-
-      cachedCategories.forEach(cat => {
+      container.innerHTML = cachedCategories.map(cat => {
         const isSel = currentEmployeeCategory === cat.id;
-        html += `
-          <button onclick="setEmployeeCategory('${cat.id}')" 
-                  class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${isSel ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
+        return `
+          <button type="button" onclick="selectEmployeeCategory('${cat.id}')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${isSel ? 'bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs' : 'bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#4B5563] dark:text-cream-200 hover:border-[#2D1E17]'}">
             ${escapeHtml(cat.name)}
           </button>
         `;
-      });
-
-      container.innerHTML = html;
+      }).join('');
     }
 
-    function setEmployeeCategory(catId) {
-      currentEmployeeCategory = catId;
-      renderEmployeeCategories();
-      renderEmployeeProducts();
+    function handleEmployeeSearchInput() {
+      const input = document.getElementById('employee-search-input');
+      const val = input ? input.value.trim() : '';
+      const clearBtn = document.getElementById('employee-search-clear');
+
+      if (clearBtn) {
+        if (val) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      if (val) {
+        document.getElementById('employee-categories-view')?.classList.add('hidden');
+        document.getElementById('employee-products-view')?.classList.remove('hidden');
+        
+        const titleEl = document.getElementById('employee-selected-cat-title');
+        const countEl = document.getElementById('employee-selected-cat-count');
+        if (titleEl) titleEl.innerText = `Поиск: "${val}"`;
+        if (countEl) countEl.innerText = 'Все категории';
+        renderEmployeeProducts();
+      } else {
+        if (currentEmployeeCategory === null) {
+          backToCategories();
+        } else {
+          renderEmployeeSelectedCategoryHeader();
+          renderEmployeeProducts();
+        }
+      }
     }
+
+    function clearEmployeeSearch() {
+      const input = document.getElementById('employee-search-input');
+      if (input) input.value = '';
+      handleEmployeeSearchInput();
+    }
+
+    function handleBackPressed() {
+      const isEmployeeScreen = !document.getElementById('screen-employee')?.classList.contains('hidden');
+      if (isEmployeeScreen) {
+        const searchInput = document.getElementById('employee-search-input');
+        if (searchInput && searchInput.value.trim() !== '') {
+          clearEmployeeSearch();
+          return true;
+        }
+        if (currentEmployeeCategory !== null) {
+          backToCategories();
+          return true;
+        }
+      }
+      return false;
+    }
+    window.handleBackPressed = handleBackPressed;
 
     function renderEmployeeProducts() {
       const grid = document.getElementById('employee-products-grid');
       const search = (document.getElementById('employee-search-input')?.value || '').toLowerCase().trim();
       if (!grid) return;
 
-      let list = cachedProducts;
-      if (currentEmployeeCategory !== 'all') {
-        list = list.filter(p => p.category_id === currentEmployeeCategory);
-      }
+      let list = cachedProducts.filter(p => !p.is_deleted);
       if (search) {
         list = list.filter(p => p.name.toLowerCase().includes(search));
+      } else if (currentEmployeeCategory !== null) {
+        list = list.filter(p => p.category_id === currentEmployeeCategory);
       }
 
       if (list.length === 0) {
@@ -1453,6 +1660,10 @@
         });
 
         if (error) throw error;
+
+        if (data && window.AndroidBridge && typeof window.AndroidBridge.registerSeenSale === 'function') {
+          window.AndroidBridge.registerSeenSale(typeof data === 'string' ? data : (data.id || ''));
+        }
 
         playBeep('success');
         triggerHaptic();
@@ -2290,7 +2501,7 @@
 
         showToast('✓ Категория удалена');
         if (currentManagerCategory === catId) currentManagerCategory = 'all';
-        if (currentEmployeeCategory === catId) currentEmployeeCategory = 'all';
+        if (currentEmployeeCategory === catId) currentEmployeeCategory = null;
         await refreshAppData();
         renderCategoryManageList();
       } catch (err) {
