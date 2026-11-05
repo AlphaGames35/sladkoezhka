@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru" class="h-full">
 <head>
   <meta charset="UTF-8">
@@ -99,6 +99,15 @@
     <button onclick="exitShowcasePreviewMode()" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-white font-bold text-[11px] transition">
       Вернуться в управление →
     </button>
+  </div>
+
+  <!-- ==================== GITHUB WARNING BANNER ==================== -->
+  <div id="github-warning-banner" class="hidden shrink-0 bg-amber-600 text-white px-4 py-2.5 text-xs font-semibold flex items-center justify-between z-50 shadow-sm border-b border-amber-700">
+    <div class="flex items-center space-x-2 min-w-0">
+      <span class="px-2 py-0.5 rounded bg-black/25 text-white text-[11px] font-black uppercase tracking-wider shrink-0">GitHub Warning</span>
+      <span class="text-white/95 text-[12px] truncate">Связь с GitHub не установлена (нет VPN или интернета). Загружена стабильная локальная версия.</span>
+    </div>
+    <button type="button" onclick="document.getElementById('github-warning-banner').remove()" class="ml-3 px-2 py-0.5 bg-black/20 hover:bg-black/30 rounded text-white text-xs font-bold shrink-0 transition">✕ Закрыть</button>
   </div>
 
   <!-- ==================== СТРОГИЙ ДЕЛОВОЙ HEADER (BUSINESS MINIMAL) ==================== -->
@@ -818,8 +827,22 @@
           refreshAppData();
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sales' }, (payload) => {
-          showToast(`Новый заказ: +${Number(payload.new.total_amount).toLocaleString('ru-RU')} ₽`);
+          const sale = payload.new || {};
+          const amt = Number(sale.total_amount || 0).toLocaleString('ru-RU');
+          const method = sale.payment_method === 'cash' ? 'Наличные' : 'Банковская карта';
+          const time = new Date(sale.created_at || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+          showToast(`💰 Новая покупка: +${amt} ₽ (${method})`);
+          playBeep('success');
+          triggerHaptic();
           refreshAppData();
+
+          // Красивое нативное уведомление Android (работает в том числе в фоне!)
+          if (window.AndroidBridge && typeof window.AndroidBridge.notifySale === 'function') {
+            const title = `💰 Новая покупка: +${amt} ₽`;
+            const msg = `Способ оплаты: ${method} • Время: ${time}`;
+            window.AndroidBridge.notifySale(title, msg, amt, method, time);
+          }
         })
         .subscribe();
     }
@@ -2078,6 +2101,10 @@
       initTheme();
       initSupabase();
       checkSavedSession();
+      if (window.location.search.includes('warn=github') || window.location.hash.includes('warn=github')) {
+        const gwb = document.getElementById('github-warning-banner');
+        if (gwb) gwb.classList.remove('hidden');
+      }
     });
   </script>
 </body>
