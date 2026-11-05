@@ -925,37 +925,73 @@
       }
     }
 
+    function broadcastChange(type, data) {
+      try {
+        if (realtimeChannel) {
+          realtimeChannel.send({
+            type: 'broadcast',
+            event: 'pos_sync',
+            payload: { type, data, timestamp: Date.now() }
+          });
+        }
+      } catch(e) {
+        console.warn('Broadcast error:', e);
+      }
+    }
+
     function setupRealtimeSubscriptions() {
       if (!supabaseClient) return;
-      if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+      if (realtimeChannel) {
+        try { supabaseClient.removeChannel(realtimeChannel); } catch(e) {}
+      }
 
       realtimeChannel = supabaseClient
-        .channel('public:sladkoezhka_pos')
+        .channel('public:sladkoezhka_pos', {
+          config: {
+            broadcast: { self: false }
+          }
+        })
+        .on('broadcast', { event: 'pos_sync' }, (msg) => {
+          console.log('⚡ Мгновенная синхронизация через Broadcast:', msg);
+          refreshAppData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, (payload) => {
+          console.log('⚡ Изменение в таблице sales:', payload.eventType);
+          if (payload.eventType === 'INSERT') {
+            const sale = payload.new || {};
+            const amt = Number(sale.total_amount || 0).toLocaleString('ru-RU');
+            const method = sale.payment_method === 'cash' ? 'Наличные' : 'Банковская карта';
+            const time = new Date(sale.created_at || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+            showToast(`💰 Новая покупка: +${amt} ₽ (${method})`);
+            playBeep('success');
+            triggerHaptic();
+
+            if (window.AndroidBridge && typeof window.AndroidBridge.notifySale === 'function') {
+              const title = `💰 Новая покупка: +${amt} ₽`;
+              const msg = `Способ оплаты: ${method} • Время: ${time}`;
+              window.AndroidBridge.notifySale(title, msg, amt, method, time);
+            }
+          } else if (payload.eventType === 'DELETE') {
+            showToast('🗑️ Продажи обновлены');
+          }
+          refreshAppData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sale_items' }, () => {
+          refreshAppData();
+        })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
           refreshAppData();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
           refreshAppData();
         })
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sales' }, (payload) => {
-          const sale = payload.new || {};
-          const amt = Number(sale.total_amount || 0).toLocaleString('ru-RU');
-          const method = sale.payment_method === 'cash' ? 'Наличные' : 'Банковская карта';
-          const time = new Date(sale.created_at || Date.now()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
-          showToast(`💰 Новая покупка: +${amt} ₽ (${method})`);
-          playBeep('success');
-          triggerHaptic();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
           refreshAppData();
-
-          // Красивое нативное уведомление Android (работает в том числе в фоне!)
-          if (window.AndroidBridge && typeof window.AndroidBridge.notifySale === 'function') {
-            const title = `💰 Новая покупка: +${amt} ₽`;
-            const msg = `Способ оплаты: ${method} • Время: ${time}`;
-            window.AndroidBridge.notifySale(title, msg, amt, method, time);
-          }
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Realtime status:', status);
+        });
     }
 
     // ==========================================
@@ -1421,6 +1457,7 @@
         playBeep('success');
         triggerHaptic();
         showToast('✓ Заказ оформлен');
+        broadcastChange('sale_created', { employeeId: currentUser.id });
         cart = {};
         updateCartUI();
         refreshAppData();
@@ -1757,6 +1794,7 @@
 
         showToast(`✓ Удалено чеков: ${pendingDeleteSaleIds.length}`);
         closeDeleteSalesModal();
+        broadcastChange('sales_deleted', { count: pendingDeleteSaleIds.length });
         await refreshAppData();
       } catch (err) {
         console.error('Ошибка при удалении чеков:', err);
@@ -1798,6 +1836,7 @@
         if (error) throw error;
 
         showToast('✓ Заказ удален, товары возвращены');
+        broadcastChange('single_sale_deleted', { saleId });
         await refreshAppData();
       } catch (err) {
         console.error('Ошибка удаления заказа:', err);
@@ -2138,6 +2177,7 @@
           .eq('id', prodId);
         if (error) throw error;
         showToast('Остаток обновлен');
+        broadcastChange('stock_updated', { prodId, newStock });
         refreshAppData();
       } catch (err) {
         alert('Ошибка обновления остатка: ' + err.message);
@@ -2481,6 +2521,23 @@
         const gwb = document.getElementById('github-warning-banner');
         if (gwb) gwb.classList.remove('hidden');
       }
+
+      // Мгновенная синхронизация при переключении между приложениями/вкладками
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && currentUser) {
+          refreshAppData();
+        }
+      });
+      window.addEventListener('focus', () => {
+        if (currentUser) refreshAppData();
+      });
+
+      // Автоматический пульс сверки каждые 3 секунды (гарантия 100% синхронности всех устройств)
+      setInterval(() => {
+        if (currentUser && document.visibilityState === 'visible') {
+          refreshAppData();
+        }
+      }, 3000);
     });
   </script>
 </body>
