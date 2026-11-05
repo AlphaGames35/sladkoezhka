@@ -296,7 +296,7 @@
             <p class="text-xs text-[#6B7280]">Аналитика выручки, заказов и рейтинг позиций</p>
           </div>
 
-          <div class="flex items-center space-x-2">
+          <div class="flex flex-wrap items-center gap-2">
             <!-- Кнопка перехода в витрину для проверки -->
             <button onclick="enterShowcasePreviewMode()" class="px-3 py-1.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] text-xs font-semibold text-[#4B5563] dark:text-cream-200 transition bg-white dark:bg-cacao-900 flex items-center space-x-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -313,6 +313,12 @@
                 <span>Календарь</span>
               </button>
             </div>
+
+            <!-- Кнопка очистки / удаления продаж -->
+            <button onclick="openDeleteSalesModal()" title="Удалить продажи за дату, период или по сотруднику" class="px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-semibold text-red-600 dark:text-red-400 transition bg-white dark:bg-cacao-900 flex items-center space-x-1.5 shadow-2xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              <span>Удалить продажи</span>
+            </button>
           </div>
         </div>
 
@@ -366,7 +372,8 @@
             <div class="col-span-2">№</div>
             <div class="col-span-3">Сумма</div>
             <div class="col-span-3">Сотрудник</div>
-            <div class="col-span-4 text-right">Дата и время</div>
+            <div class="col-span-3 text-right">Дата и время</div>
+            <div class="col-span-1 text-right">Удал.</div>
           </div>
           <div id="manager-sales-feed" class="divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800">
             <!-- Заказы -->
@@ -606,6 +613,110 @@
         <button onclick="closeCustomRangeModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">Отмена</button>
         <button onclick="applyCustomRange()" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs">Применить</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА УДАЛЕНИЯ И ОЧИСТКИ ПРОДАЖ ==================== -->
+  <div id="modal-delete-sales" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4 my-auto">
+      
+      <!-- Заголовок -->
+      <div class="flex items-center justify-between pb-2 border-b border-[#ECE6DE] dark:border-cacao-800">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm uppercase tracking-wide text-[#1F2937] dark:text-cream-50">Удаление продаж</h3>
+            <p class="text-[11px] text-[#6B7280]">Очистка чеков из базы и аналитики</p>
+          </div>
+        </div>
+        <button onclick="closeDeleteSalesModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1 text-base">✕</button>
+      </div>
+
+      <!-- Переключатель режима удаления -->
+      <div class="grid grid-cols-4 gap-1 p-1 bg-[#FAF7F2] dark:bg-cacao-950 rounded-xl text-center text-[11px] font-semibold">
+        <button type="button" onclick="setDeleteMode('date')" id="del-tab-date" class="py-1.5 rounded-lg bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs transition">По дате</button>
+        <button type="button" onclick="setDeleteMode('range')" id="del-tab-range" class="py-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] dark:hover:text-cream-50 transition">Период</button>
+        <button type="button" onclick="setDeleteMode('employee')" id="del-tab-employee" class="py-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] dark:hover:text-cream-50 transition">Сотрудник</button>
+        <button type="button" onclick="setDeleteMode('current')" id="del-tab-current" class="py-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] dark:hover:text-cream-50 transition">Фильтр</button>
+      </div>
+
+      <!-- 1. По конкретной дате -->
+      <div id="del-section-date" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Выберите календарный день:</label>
+          <input type="date" id="del-single-date" onchange="updateDeletePreview()" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        </div>
+      </div>
+
+      <!-- 2. По промежутку дат -->
+      <div id="del-section-range" class="hidden space-y-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Дата С:</label>
+            <input type="date" id="del-range-start" onchange="updateDeletePreview()" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Дата ПО:</label>
+            <input type="date" id="del-range-end" onchange="updateDeletePreview()" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. По сотруднику -->
+      <div id="del-section-employee" class="hidden space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Сотрудник:</label>
+          <select id="del-employee-select" onchange="updateDeletePreview()" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            <!-- Список сотрудников -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Период для удаления:</label>
+          <select id="del-employee-period" onchange="updateDeletePreview()" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            <option value="all">За всё время</option>
+            <option value="today">Только за сегодня</option>
+            <option value="yesterday">За вчера</option>
+            <option value="month">За текущий месяц</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. Текущий фильтр -->
+      <div id="del-section-current" class="hidden space-y-2">
+        <p class="text-xs text-[#6B7280]" id="del-current-filter-desc">
+          Будут удалены все чеки, которые сейчас отображаются на экране отчётов.
+        </p>
+      </div>
+
+      <!-- Информационная плашка предварительного подсчета -->
+      <div id="del-preview-box" class="p-3.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 text-xs space-y-1">
+        <div class="flex items-center justify-between font-bold text-red-900 dark:text-red-300">
+          <span>Найдено для удаления:</span>
+          <span id="del-preview-count" class="tabular-nums">0 заказов</span>
+        </div>
+        <div class="flex items-center justify-between text-[#6B7280] dark:text-cream-200 text-[11px]">
+          <span>Общая сумма чеков:</span>
+          <span id="del-preview-sum" class="font-bold tabular-nums">0 ₽</span>
+        </div>
+      </div>
+
+      <!-- Опция возврата товара -->
+      <label class="flex items-start space-x-2.5 text-xs text-[#4B5563] dark:text-cream-200 cursor-pointer pt-1">
+        <input type="checkbox" id="del-restore-stock" checked class="mt-0.5 rounded border-[#ECE6DE] text-[#2D1E17] focus:ring-0">
+        <span>Вернуть списанные в этих чеках товары обратно в остатки на склад</span>
+      </label>
+
+      <!-- Действия -->
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-[#ECE6DE] dark:border-cacao-800">
+        <button type="button" onclick="closeDeleteSalesModal()" class="px-3 py-2 text-xs text-[#6B7280] font-semibold hover:text-[#1F2937] transition">Отмена</button>
+        <button type="button" onclick="executeDeleteSales()" id="btn-confirm-delete-sales" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-2xs transition flex items-center space-x-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          <span>Удалить выбранное</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1434,6 +1545,266 @@
       showToast('Период отчета применен');
     }
 
+    // ==========================================
+    // 10.1 УДАЛЕНИЕ И ОЧИСТКА ПРОДАЖ
+    // ==========================================
+    let currentDeleteMode = 'date';
+    let pendingDeleteSaleIds = [];
+
+    function openDeleteSalesModal() {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      const singleDateEl = document.getElementById('del-single-date');
+      if (singleDateEl) singleDateEl.value = todayStr;
+
+      const rangeStartEl = document.getElementById('del-range-start');
+      const rangeEndEl = document.getElementById('del-range-end');
+      if (rangeStartEl) rangeStartEl.value = todayStr;
+      if (rangeEndEl) rangeEndEl.value = todayStr;
+
+      // Заполнить список сотрудников
+      const empSelect = document.getElementById('del-employee-select');
+      if (empSelect) {
+        empSelect.innerHTML = (cachedUsers || []).map(u => `
+          <option value="${u.id}">${escapeHtml(u.name)} (${u.role === 'admin' ? 'Управляющий' : 'Кассир'})</option>
+        `).join('');
+      }
+
+      setDeleteMode('date');
+      document.getElementById('modal-delete-sales').classList.remove('hidden');
+      updateDeletePreview();
+    }
+
+    function closeDeleteSalesModal() {
+      document.getElementById('modal-delete-sales').classList.add('hidden');
+    }
+
+    function setDeleteMode(mode) {
+      currentDeleteMode = mode;
+      
+      const tabs = ['date', 'range', 'employee', 'current'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`del-tab-${t}`);
+        const sec = document.getElementById(`del-section-${t}`);
+        if (btn) {
+          if (t === mode) {
+            btn.className = 'py-1.5 rounded-lg bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs transition';
+          } else {
+            btn.className = 'py-1.5 rounded-lg text-[#6B7280] hover:text-[#1F2937] dark:hover:text-cream-50 transition';
+          }
+        }
+        if (sec) {
+          if (t === mode) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        }
+      });
+
+      updateDeletePreview();
+    }
+
+    function updateDeletePreview() {
+      pendingDeleteSaleIds = [];
+      let totalSum = 0;
+
+      if (currentDeleteMode === 'date') {
+        const dateVal = document.getElementById('del-single-date').value;
+        if (dateVal) {
+          const [y, m, d] = dateVal.split('-').map(Number);
+          const start = new Date(y, m - 1, d, 0, 0, 0, 0).getTime();
+          const end = new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
+
+          cachedSales.forEach(s => {
+            const t = new Date(s.created_at).getTime();
+            if (t >= start && t <= end) {
+              pendingDeleteSaleIds.push(s.id);
+              totalSum += Number(s.total_amount || 0);
+            }
+          });
+        }
+      } else if (currentDeleteMode === 'range') {
+        const startVal = document.getElementById('del-range-start').value;
+        const endVal = document.getElementById('del-range-end').value;
+        if (startVal && endVal) {
+          const [y1, m1, d1] = startVal.split('-').map(Number);
+          const [y2, m2, d2] = endVal.split('-').map(Number);
+          const start = new Date(y1, m1 - 1, d1, 0, 0, 0, 0).getTime();
+          const end = new Date(y2, m2 - 1, d2, 23, 59, 59, 999).getTime();
+
+          cachedSales.forEach(s => {
+            const t = new Date(s.created_at).getTime();
+            if (t >= start && t <= end) {
+              pendingDeleteSaleIds.push(s.id);
+              totalSum += Number(s.total_amount || 0);
+            }
+          });
+        }
+      } else if (currentDeleteMode === 'employee') {
+        const empId = document.getElementById('del-employee-select').value;
+        const period = document.getElementById('del-employee-period').value;
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+        const startOfYesterday = startOfDay - 86400000;
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
+
+        cachedSales.forEach(s => {
+          if (s.employee_id === empId || (s.users && s.users.id === empId)) {
+            const t = new Date(s.created_at).getTime();
+            let matches = false;
+            if (period === 'all') matches = true;
+            else if (period === 'today') matches = t >= startOfDay;
+            else if (period === 'yesterday') matches = t >= startOfYesterday && t < startOfDay;
+            else if (period === 'month') matches = t >= startOfMonth;
+
+            if (matches) {
+              pendingDeleteSaleIds.push(s.id);
+              totalSum += Number(s.total_amount || 0);
+            }
+          }
+        });
+      } else if (currentDeleteMode === 'current') {
+        const filtered = getFilteredSalesForCurrentStats();
+        pendingDeleteSaleIds = filtered.map(s => s.id);
+        totalSum = filtered.reduce((acc, s) => acc + Number(s.total_amount || 0), 0);
+        const descEl = document.getElementById('del-current-filter-desc');
+        if (descEl) {
+          descEl.innerText = `Будут удалены все ${filtered.length} заказов, попадающих под текущий фильтр (${statsPeriod === 'today' ? 'Сегодня' : statsPeriod === 'yesterday' ? 'Вчера' : statsPeriod === 'week' ? 'Неделя' : statsPeriod === 'month' ? 'Месяц' : 'Календарь'}).`;
+        }
+      }
+
+      const countEl = document.getElementById('del-preview-count');
+      const sumEl = document.getElementById('del-preview-sum');
+      const btn = document.getElementById('btn-confirm-delete-sales');
+
+      if (countEl) countEl.innerText = `${pendingDeleteSaleIds.length} ${pluralize(pendingDeleteSaleIds.length, ['заказ', 'заказа', 'заказов'])}`;
+      if (sumEl) sumEl.innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
+      if (btn) btn.disabled = pendingDeleteSaleIds.length === 0;
+    }
+
+    function getFilteredSalesForCurrentStats() {
+      const now = new Date();
+      let startTime = 0;
+      let endTime = now.getTime();
+
+      if (statsPeriod === 'today') {
+        startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      } else if (statsPeriod === 'yesterday') {
+        const y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        startTime = y.getTime();
+        endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      } else if (statsPeriod === 'week') {
+        startTime = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+      } else if (statsPeriod === 'month') {
+        startTime = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      } else if (statsPeriod === 'custom' && customStartDate && customEndDate) {
+        startTime = customStartDate.getTime();
+        endTime = customEndDate.getTime();
+      }
+
+      return cachedSales.filter(s => {
+        const t = new Date(s.created_at).getTime();
+        return t >= startTime && t <= endTime;
+      });
+    }
+
+    async function executeDeleteSales() {
+      if (!pendingDeleteSaleIds || pendingDeleteSaleIds.length === 0) {
+        alert('Нет заказов для удаления по выбранным критериям');
+        return;
+      }
+
+      const shouldRestoreStock = document.getElementById('del-restore-stock').checked;
+      const confirmMsg = `Внимание! Вы собираетесь удалить ${pendingDeleteSaleIds.length} ${pluralize(pendingDeleteSaleIds.length, ['заказ', 'заказа', 'заказов'])}.\n\n` +
+        (shouldRestoreStock ? '✓ Списанные товары будут возвращены на склад.\n' : '⚠️ Товары не будут возвращены на склад.\n') +
+        `Вы уверены, что хотите продолжить?`;
+
+      if (!confirm(confirmMsg)) return;
+
+      const btn = document.getElementById('btn-confirm-delete-sales');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Удаление...</span>`;
+
+      try {
+        showToast('Удаление чеков...');
+
+        if (shouldRestoreStock) {
+          const { data: items } = await supabaseClient
+            .from('sale_items')
+            .select('product_id, quantity')
+            .in('sale_id', pendingDeleteSaleIds);
+
+          if (items && items.length > 0) {
+            const stockDeltas = {};
+            items.forEach(it => {
+              if (it.product_id) {
+                stockDeltas[it.product_id] = (stockDeltas[it.product_id] || 0) + Number(it.quantity || 0);
+              }
+            });
+
+            for (const prodId of Object.keys(stockDeltas)) {
+              const prod = cachedProducts.find(p => p.id === prodId);
+              const curStock = prod ? Number(prod.stock_qty || 0) : 0;
+              const newStock = curStock + stockDeltas[prodId];
+              await supabaseClient.from('products').update({ stock_qty: newStock }).eq('id', prodId);
+            }
+          }
+        }
+
+        await supabaseClient.from('sale_items').delete().in('sale_id', pendingDeleteSaleIds);
+
+        const { error } = await supabaseClient.from('sales').delete().in('id', pendingDeleteSaleIds);
+        if (error) throw error;
+
+        showToast(`✓ Удалено чеков: ${pendingDeleteSaleIds.length}`);
+        closeDeleteSalesModal();
+        await refreshAppData();
+      } catch (err) {
+        console.error('Ошибка при удалении чеков:', err);
+        alert('Не удалось удалить: ' + (err.message || 'Ошибка сети'));
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+          <span>Удалить выбранное</span>
+        `;
+      }
+    }
+
+    async function deleteSingleOrder(saleId, totalAmount) {
+      if (!saleId) return;
+      const shouldRestoreStock = confirm(`Удалить заказ на сумму ${Number(totalAmount).toLocaleString('ru-RU')} ₽?\n\nНажмите ОК для удаления (с возвратом товаров на склад).`);
+      if (!shouldRestoreStock) return;
+
+      try {
+        showToast('Удаление заказа...');
+
+        const { data: items } = await supabaseClient
+          .from('sale_items')
+          .select('product_id, quantity')
+          .eq('sale_id', saleId);
+
+        if (items && items.length > 0) {
+          for (const it of items) {
+            if (it.product_id) {
+              const prod = cachedProducts.find(p => p.id === it.product_id);
+              const curStock = prod ? Number(prod.stock_qty || 0) : 0;
+              await supabaseClient.from('products').update({ stock_qty: curStock + Number(it.quantity || 0) }).eq('id', it.product_id);
+            }
+          }
+        }
+
+        await supabaseClient.from('sale_items').delete().eq('sale_id', saleId);
+        const { error } = await supabaseClient.from('sales').delete().eq('id', saleId);
+        if (error) throw error;
+
+        showToast('✓ Заказ удален, товары возвращены');
+        await refreshAppData();
+      } catch (err) {
+        console.error('Ошибка удаления заказа:', err);
+        alert('Не удалось удалить заказ: ' + (err.message || 'Ошибка сети'));
+      }
+    }
+
     function setTopSort(mode) {
       topSortMode = mode;
       const btnRev = document.getElementById('top-sort-rev');
@@ -1550,8 +1921,13 @@
               <div class="col-span-3 text-xs text-[#4B5563] dark:text-cream-200 font-semibold truncate">
                 ${escapeHtml(sale.employee_name || 'Сотрудник')}
               </div>
-              <div class="col-span-4 text-right text-xs font-mono text-[#8E8A85]">
+              <div class="col-span-3 text-right text-xs font-mono text-[#8E8A85]">
                 ${dateStr}
+              </div>
+              <div class="col-span-1 text-right">
+                <button onclick="deleteSingleOrder('${sale.id}', ${sale.total_amount})" title="Удалить заказ #${orderNum}" class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/40 text-red-500 transition inline-flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                </button>
               </div>
             </div>
           `;
