@@ -2476,13 +2476,13 @@
         }
         if (Object.keys(cart).length > 0) document.getElementById('floating-checkout-bar').classList.remove('hidden');
         requestAnimationFrame(() => {
-          updateLiquidIndicator('bottom-nav-employee', document.getElementById(currentEmpTab === 'sale' ? 'btn-emp-tab-sale' : 'btn-emp-tab-shift'));
+          updateLiquidIndicator('nav-employee', document.getElementById(currentEmpTab === 'sale' ? 'btn-emp-tab-sale' : 'btn-emp-tab-shift'));
         });
       } else if (name === 'manager') {
         document.getElementById('screen-manager').classList.remove('hidden');
         document.getElementById('nav-manager').classList.remove('hidden');
         requestAnimationFrame(() => {
-          updateLiquidIndicator('bottom-nav-manager', document.getElementById(`btn-mgr-tab-${currentMgrTab}`));
+          updateLiquidIndicator('nav-manager', document.getElementById(`btn-mgr-tab-${currentMgrTab}`));
         });
       }
 
@@ -2531,7 +2531,7 @@
       const currentEl = oldTab === 'sale' ? tabSale : tabShift;
       const nextEl = tab === 'sale' ? tabSale : tabShift;
 
-      updateLiquidIndicator('bottom-nav-employee', activeBtn);
+      updateLiquidIndicator('nav-employee', activeBtn);
       const svgEmp = activeBtn ? activeBtn.querySelector('svg') : null;
       if (svgEmp) {
         svgEmp.classList.remove('tab-icon-pop');
@@ -2596,7 +2596,7 @@
       const currentEl = tabs[oldTab];
       const nextEl = tabs[tab];
 
-      updateLiquidIndicator('bottom-nav-manager', activeBtn);
+      updateLiquidIndicator('nav-manager', activeBtn);
       const svgMgr = activeBtn ? activeBtn.querySelector('svg') : null;
       if (svgMgr) {
         svgMgr.classList.remove('tab-icon-pop');
@@ -4893,22 +4893,34 @@
       initBottomSheetGestures();
 
       // Скрытие бара при скролле вниз, возврат при скролле вверх
+      // Плавное скрытие бара при скролле вниз, немедленный возврат при скролле вверх
       ['screen-employee', 'screen-manager'].forEach(screenId => {
         const el = document.getElementById(screenId);
         if (!el) return;
         let lastScroll = 0;
+        let ticking = false;
         el.addEventListener('scroll', () => {
-          const st = el.scrollTop;
-          const navEmp = document.getElementById('bottom-nav-employee');
-          const navMgr = document.getElementById('bottom-nav-manager');
-          if (st > lastScroll + 12 && st > 80) {
-            if (navEmp) navEmp.classList.add('nav-hidden-scroll');
-            if (navMgr) navMgr.classList.add('nav-hidden-scroll');
-          } else if (st < lastScroll - 12) {
-            if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
-            if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              const st = el.scrollTop;
+              const navEmp = document.getElementById('nav-employee');
+              const navMgr = document.getElementById('nav-manager');
+              const diff = st - lastScroll;
+              if (st <= 40) {
+                if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
+                if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
+              } else if (diff > 35 && st > 120) {
+                if (navEmp) navEmp.classList.add('nav-hidden-scroll');
+                if (navMgr) navMgr.classList.add('nav-hidden-scroll');
+              } else if (diff < -20) {
+                if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
+                if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
+              }
+              lastScroll = Math.max(0, st);
+              ticking = false;
+            });
+            ticking = true;
           }
-          lastScroll = st;
         }, { passive: true });
       });
 
@@ -4918,8 +4930,8 @@
         window.visualViewport.addEventListener('resize', () => {
           const currentHeight = window.visualViewport.height;
           const isKeyboardOpen = initialHeight - currentHeight > 140;
-          const navEmp = document.getElementById('bottom-nav-employee');
-          const navMgr = document.getElementById('bottom-nav-manager');
+          const navEmp = document.getElementById('nav-employee');
+          const navMgr = document.getElementById('nav-manager');
           if (isKeyboardOpen) {
             if (navEmp) navEmp.classList.add('nav-hidden-scroll');
             if (navMgr) navMgr.classList.add('nav-hidden-scroll');
@@ -4968,8 +4980,8 @@
       }, { passive: true });
 
       setTimeout(() => {
-        updateLiquidIndicator('bottom-nav-employee', document.getElementById('btn-emp-tab-sale'));
-        updateLiquidIndicator('bottom-nav-manager', document.getElementById('btn-mgr-tab-stats'));
+        updateLiquidIndicator('nav-employee', document.getElementById('btn-emp-tab-sale'));
+        updateLiquidIndicator('nav-manager', document.getElementById('btn-mgr-tab-stats'));
       }, 100);
     }
 
@@ -5023,13 +5035,6 @@
       window.addEventListener('focus', () => {
         if (currentUser) refreshAppData();
       });
-
-      // Автоматический пульс сверки каждые 3 секунды (гарантия 100% синхронности всех устройств)
-      setInterval(() => {
-        if (currentUser && document.visibilityState === 'visible') {
-          refreshAppData();
-        }
-      }, 3000);
     });
   </script>
 </body>
