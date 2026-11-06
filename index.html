@@ -97,6 +97,64 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* 1.1 Тактильная iOS-анимация нажатия всех кнопок (визуально без изменений в исходном состоянии) */
+    button, [role="button"], input[type="button"], input[type="submit"] {
+      position: relative;
+      transition: transform var(--dur-fast) var(--ease-spring),
+                  opacity var(--dur-fast) var(--ease-out),
+                  filter var(--dur-fast) var(--ease-out),
+                  background-color var(--dur-fast) var(--ease-out),
+                  box-shadow var(--dur-fast) var(--ease-out);
+      will-change: transform;
+      cursor: pointer;
+      -webkit-touch-callout: none;
+    }
+
+    /* Нажатие кнопки: физическое пружинное сжатие */
+    button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]),
+    input[type="button"]:active:not(:disabled), input[type="submit"]:active:not(:disabled) {
+      transform: scale(0.95);
+      opacity: 0.92;
+    }
+
+    /* Компактные кнопки-иконки, плюс/минус и крестики закрытия */
+    button.p-1:active:not(:disabled), 
+    button.p-1\.5:active:not(:disabled),
+    button.p-2:active:not(:disabled),
+    button.w-6:active:not(:disabled),
+    button.w-7:active:not(:disabled),
+    button.w-8:active:not(:disabled) {
+      transform: scale(0.90) !important;
+    }
+
+    /* Кнопки табов нижнего бара */
+    .liquid-tab-btn:active {
+      transform: scale(0.88) !important;
+    }
+
+    /* Кнопки карточек категорий и товаров */
+    .group.cursor-pointer:active,
+    .stagger-in.cursor-pointer:active {
+      transform: scale(0.97) !important;
+    }
+
+    /* Исключаем disabled кнопки */
+    button:disabled, button[disabled] {
+      transform: none !important;
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    /* Деликатная подсветка при наведении курсора на десктопе без искажения цветов */
+    @media (hover: hover) and (pointer: fine) {
+      button:hover:not(:disabled) {
+        filter: brightness(1.02);
+      }
+      button:active:not(:disabled) {
+        filter: brightness(0.97);
+      }
+    }
+
     /* 2. Плавающий Liquid-бар (Floating Liquid Pill Bar) */
     .floating-liquid-nav {
       position: fixed;
@@ -4773,6 +4831,14 @@
           }
         });
       }
+
+      // Глобальный тактильный микро-отклик на нажатие любой кнопки приложения
+      document.addEventListener('pointerdown', (e) => {
+        const btn = e.target.closest('button, [role="button"], input[type="button"], input[type="submit"]');
+        if (btn && !btn.disabled && !btn.getAttribute('disabled')) {
+          triggerHaptic(6);
+        }
+      }, { passive: true });
 
       setTimeout(() => {
         updateLiquidIndicator('bottom-nav-employee', document.getElementById('btn-emp-tab-sale'));
