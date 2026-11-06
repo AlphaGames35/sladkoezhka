@@ -1054,9 +1054,14 @@
     // ==========================================
     // 1. КОНСТАНТЫ И ПОДКЛЮЧЕНИЕ К SUPABASE
     // ==========================================
-    // Безопасное получение параметров через защищенный нативный мост Android
-    const SUPABASE_URL = (window.AndroidBridge && typeof window.AndroidBridge.getUrl === 'function' ? window.AndroidBridge.getUrl() : '') || localStorage.getItem('sladkoezhka_db_url') || '';
-    const SUPABASE_KEY = (window.AndroidBridge && typeof window.AndroidBridge.getKey === 'function' ? window.AndroidBridge.getKey() : '') || localStorage.getItem('sladkoezhka_db_key') || '';
+    // Безопасное получение параметров через защищенный нативный мост Android или облачные константы платформы
+    const SUPABASE_URL = (window.AndroidBridge && typeof window.AndroidBridge.getUrl === 'function' ? window.AndroidBridge.getUrl() : '') 
+      || localStorage.getItem('sladkoezhka_db_url') 
+      || 'https://ruammkzbmzwhaknqmazc.supabase.co';
+
+    const SUPABASE_KEY = (window.AndroidBridge && typeof window.AndroidBridge.getKey === 'function' ? window.AndroidBridge.getKey() : '') 
+      || localStorage.getItem('sladkoezhka_db_key') 
+      || 'sb_publishable_dPYEwrLjoUPvOn6nBuhlvw_k6Dcvk_B';
 
     let supabaseClient = null;
     let realtimeChannel = null;
@@ -1548,6 +1553,13 @@
       btn.innerText = 'Проверка...';
 
       try {
+        if (!supabaseClient) {
+          initSupabase();
+        }
+        if (!supabaseClient) {
+          throw new Error('Подключение к базе данных не установлено. Проверьте интернет-соединение.');
+        }
+
         const { data, error } = await supabaseClient.rpc('verify_user', {
           p_login: login,
           p_password: password
@@ -1721,6 +1733,9 @@
     // ==========================================
     async function refreshAppData() {
       try {
+        if (!supabaseClient) {
+          initSupabase();
+        }
         if (!supabaseClient) return;
 
         const [cRes, pRes, sRes, uRes, ingRes] = await Promise.all([
