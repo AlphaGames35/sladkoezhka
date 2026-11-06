@@ -97,64 +97,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* 1.1 Тактильная iOS-анимация нажатия всех кнопок (визуально без изменений в исходном состоянии) */
-    button, [role="button"], input[type="button"], input[type="submit"] {
-      position: relative;
-      transition: transform var(--dur-fast) var(--ease-spring),
-                  opacity var(--dur-fast) var(--ease-out),
-                  filter var(--dur-fast) var(--ease-out),
-                  background-color var(--dur-fast) var(--ease-out),
-                  box-shadow var(--dur-fast) var(--ease-out);
-      will-change: transform;
-      cursor: pointer;
-      -webkit-touch-callout: none;
-    }
-
-    /* Нажатие кнопки: физическое пружинное сжатие */
-    button:active:not(:disabled), [role="button"]:active:not([aria-disabled="true"]),
-    input[type="button"]:active:not(:disabled), input[type="submit"]:active:not(:disabled) {
-      transform: scale(0.95);
-      opacity: 0.92;
-    }
-
-    /* Компактные кнопки-иконки, плюс/минус и крестики закрытия */
-    button.p-1:active:not(:disabled), 
-    button.p-1\.5:active:not(:disabled),
-    button.p-2:active:not(:disabled),
-    button.w-6:active:not(:disabled),
-    button.w-7:active:not(:disabled),
-    button.w-8:active:not(:disabled) {
-      transform: scale(0.90) !important;
-    }
-
-    /* Кнопки табов нижнего бара */
-    .liquid-tab-btn:active {
-      transform: scale(0.88) !important;
-    }
-
-    /* Кнопки карточек категорий и товаров */
-    .group.cursor-pointer:active,
-    .stagger-in.cursor-pointer:active {
-      transform: scale(0.97) !important;
-    }
-
-    /* Исключаем disabled кнопки */
-    button:disabled, button[disabled] {
-      transform: none !important;
-      cursor: not-allowed;
-      opacity: 0.45;
-    }
-
-    /* Деликатная подсветка при наведении курсора на десктопе без искажения цветов */
-    @media (hover: hover) and (pointer: fine) {
-      button:hover:not(:disabled) {
-        filter: brightness(1.02);
-      }
-      button:active:not(:disabled) {
-        filter: brightness(0.97);
-      }
-    }
-
     /* 2. Плавающий Liquid-бар (Floating Liquid Pill Bar) */
     .floating-liquid-nav {
       position: fixed;
@@ -493,6 +435,108 @@
     }
     .animate-splash-badge {
       animation: splashBadgeIn 0.6s ease-out 0.6s both;
+    }
+
+    /* 7.1. Разнообразные видимые анимации кнопок (Micro-interactions) */
+    button, [role="button"] {
+      position: relative;
+      transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+      will-change: transform;
+      overflow: hidden;
+    }
+    button:active, [role="button"]:active {
+      transform: scale(0.94);
+    }
+
+    /* Главные темные / акцентные кнопки (логин, оформление, сохранение) */
+    #login-btn, #btn-process-sale, button[type="submit"], button.bg-\[\#2D1E17\] {
+      box-shadow: 0 4px 14px -2px rgba(45, 26, 17, 0.25);
+    }
+    #login-btn:hover, #btn-process-sale:hover, button[type="submit"]:hover, button.bg-\[\#2D1E17\]:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px -2px rgba(45, 26, 17, 0.35);
+    }
+    #login-btn:active, #btn-process-sale:active, button[type="submit"]:active, button.bg-\[\#2D1E17\]:active {
+      transform: scale(0.95) translateY(1px);
+      box-shadow: 0 2px 6px rgba(45, 26, 17, 0.2);
+    }
+    /* Световой блик при наведении на главные кнопки */
+    #login-btn::after, #btn-process-sale::after, button[type="submit"]::after, button.bg-\[\#2D1E17\]::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+      transform: skewX(-22deg);
+      transition: left 0.55s ease;
+      pointer-events: none;
+    }
+    #login-btn:hover::after, #btn-process-sale:hover::after, button[type="submit"]:hover::after, button.bg-\[\#2D1E17\]:hover::after {
+      left: 150%;
+    }
+
+    /* Иконки и круглые кнопки действий (закрытие, удаление, меню) */
+    button:has(svg):active, button[onclick*="close"]:active {
+      transform: scale(0.85) rotate(-4deg);
+    }
+
+    /* Кнопки счетчика в корзине (+ / -) */
+    button[onclick*="incrementCart"]:active {
+      transform: scale(1.22);
+    }
+    button[onclick*="decrementCart"]:active {
+      transform: scale(0.8);
+    }
+
+    /* Табы периодов, фильтры и мини-категории */
+    .stats-period-btn, #employee-categories-mini-bar button, .theme-btn {
+      transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 150ms ease, box-shadow 150ms ease;
+    }
+    .stats-period-btn:hover:not(:active), #employee-categories-mini-bar button:hover:not(:active) {
+      transform: translateY(-1px);
+    }
+    .stats-period-btn:active, #employee-categories-mini-bar button:active, .theme-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Плитки категорий витрины */
+    #employee-categories-grid > button {
+      transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease, border-color 180ms ease !important;
+    }
+    #employee-categories-grid > button:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 8px 20px -4px rgba(45, 26, 17, 0.12);
+    }
+    #employee-categories-grid > button:active {
+      transform: scale(0.97) translateY(0);
+    }
+
+    /* Быстрый вход (тестовые аккаунты) */
+    [onclick*="quickLogin"] {
+      transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease, border-color 150ms ease !important;
+      cursor: pointer;
+    }
+    [onclick*="quickLogin"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(45, 26, 17, 0.08);
+    }
+    [onclick*="quickLogin"]:active {
+      transform: scale(0.95);
+    }
+
+    /* Интерактивная круговая волна нажатия (Ripple) */
+    .btn-click-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.32);
+      transform: scale(0);
+      animation: btnRippleAnim 0.45s ease-out forwards;
+      pointer-events: none;
+    }
+    .dark .btn-click-ripple {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    @keyframes btnRippleAnim {
+      to { transform: scale(2.4); opacity: 0; }
     }
 
     /* 8. Доступность: prefers-reduced-motion */
@@ -4832,12 +4876,23 @@
         });
       }
 
-      // Глобальный тактильный микро-отклик на нажатие любой кнопки приложения
+      // Глобальный эффект круговой волны (Ripple) и тактильный клик для всех кнопок
       document.addEventListener('pointerdown', (e) => {
-        const btn = e.target.closest('button, [role="button"], input[type="button"], input[type="submit"]');
-        if (btn && !btn.disabled && !btn.getAttribute('disabled')) {
-          triggerHaptic(6);
-        }
+        if (currentMotionMode === 'off') return;
+        const btn = e.target.closest('button, [role="button"], [onclick*="quickLogin"]');
+        if (!btn || btn.disabled) return;
+        
+        triggerHaptic(6);
+        const rect = btn.getBoundingClientRect();
+        const d = Math.max(rect.width, rect.height, 40);
+        const circle = document.createElement('span');
+        circle.className = 'btn-click-ripple';
+        circle.style.width = `${d}px`;
+        circle.style.height = `${d}px`;
+        circle.style.left = `${e.clientX - rect.left - d / 2}px`;
+        circle.style.top = `${e.clientY - rect.top - d / 2}px`;
+        btn.appendChild(circle);
+        setTimeout(() => circle.remove(), 460);
       }, { passive: true });
 
       setTimeout(() => {
