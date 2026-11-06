@@ -1959,13 +1959,22 @@
         }
         if (!supabaseClient) return;
 
-        const [cRes, pRes, sRes, uRes, ingRes] = await Promise.all([
+        const [cRes, pRes, sRes, uRes] = await Promise.all([
           supabaseClient.from('categories').select('*').eq('is_deleted', false).order('sort_order'),
           supabaseClient.from('products').select('*').eq('is_deleted', false).order('name'),
           supabaseClient.from('sales').select('*, sale_items(*), users(name)').order('created_at', { ascending: false }),
-          supabaseClient.from('users').select('*').order('created_at'),
-          supabaseClient.from('product_ingredients').select('*').catch(() => ({ data: [] }))
+          supabaseClient.from('users').select('*').order('created_at')
         ]);
+
+        let ingRes = { data: [] };
+        try {
+          const ingQuery = await supabaseClient.from('product_ingredients').select('*');
+          if (ingQuery && ingQuery.data) {
+            ingRes = ingQuery;
+          }
+        } catch (ingErr) {
+          console.warn('Техкарты (product_ingredients) пока не загружены:', ingErr);
+        }
 
         if (cRes.data) {
           cachedCategories = cRes.data;
