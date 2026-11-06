@@ -416,7 +416,8 @@
       100% { transform: translateX(100%); }
     }
     @keyframes chartBarGrow {
-      0% { transform: scaleY(0); opacity: 0.3; }
+      0% { transform: scaleY(0); opacity: 0; }
+      70% { transform: scaleY(1.06); opacity: 1; }
       100% { transform: scaleY(1); opacity: 1; }
     }
 
@@ -537,6 +538,67 @@
     }
     @keyframes btnRippleAnim {
       to { transform: scale(2.4); opacity: 0; }
+    }
+
+    /* 7.2. Анимация заполнения графиков (Chart Fill Transitions) */
+    @keyframes barFillHoriz {
+      0% { width: 0%; opacity: 0.3; }
+      100% { width: var(--target-w); opacity: 1; }
+    }
+    .chart-horiz-bar {
+      animation: barFillHoriz 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Анимации нижнего бара и иконок */
+    .liquid-tab-btn {
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    .liquid-tab-btn svg {
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease, filter 0.2s ease;
+    }
+    .liquid-tab-btn:hover svg {
+      transform: translateY(-2px) scale(1.12);
+    }
+    .liquid-tab-btn:active svg {
+      transform: scale(0.85);
+    }
+    .liquid-tab-btn.tab-active svg {
+      transform: translateY(-1px) scale(1.15);
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+    }
+    .tab-icon-pop {
+      animation: tabIconPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes tabIconPop {
+      0% { transform: scale(1); }
+      35% { transform: translateY(-6px) scale(1.35) rotate(-8deg); }
+      70% { transform: translateY(1.5px) scale(0.92) rotate(3deg); }
+      100% { transform: translateY(-1px) scale(1.15) rotate(0deg); }
+    }
+
+    /* Анимация надписей, бейджей и уведомлений */
+    .dynamic-island-toast.toast-show {
+      animation: toastSpringIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes toastSpringIn {
+      0% { transform: translate(-50%, -100%) scale(0.75); opacity: 0; }
+      60% { transform: translate(-50%, 8px) scale(1.05); opacity: 1; }
+      100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+    }
+    .dynamic-island-toast.toast-hide {
+      animation: toastFlyUp 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+    @keyframes toastFlyUp {
+      0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -130%) scale(0.7); opacity: 0; pointer-events: none; }
+    }
+
+    h2, h3, .stat-card-title {
+      animation: titleFadeIn 0.35s ease-out;
+    }
+    @keyframes titleFadeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* 8. Доступность: prefers-reduced-motion */
@@ -2470,6 +2532,12 @@
       const nextEl = tab === 'sale' ? tabSale : tabShift;
 
       updateLiquidIndicator('bottom-nav-employee', activeBtn);
+      const svgEmp = activeBtn ? activeBtn.querySelector('svg') : null;
+      if (svgEmp) {
+        svgEmp.classList.remove('tab-icon-pop');
+        void svgEmp.offsetWidth;
+        svgEmp.classList.add('tab-icon-pop');
+      }
       playBeep('click');
       triggerHaptic(6);
 
@@ -2529,6 +2597,12 @@
       const nextEl = tabs[tab];
 
       updateLiquidIndicator('bottom-nav-manager', activeBtn);
+      const svgMgr = activeBtn ? activeBtn.querySelector('svg') : null;
+      if (svgMgr) {
+        svgMgr.classList.remove('tab-icon-pop');
+        void svgMgr.offsetWidth;
+        svgMgr.classList.add('tab-icon-pop');
+      }
       playBeep('click');
       triggerHaptic(6);
 
@@ -2567,8 +2641,6 @@
 
       if (tab === 'stats') renderManagerStats();
       if (tab === 'inventory') renderManagerInventory();
-      if (tab === 'staff') renderManagerStaff();
-    }
       if (tab === 'staff') renderManagerStaff();
     }
 
@@ -3554,7 +3626,7 @@
                 </span>
               </div>
               <div class="h-1.5 w-full bg-[#FAF7F2] dark:bg-cacao-800 rounded-full overflow-hidden">
-                <div class="h-full bg-[#2D1E17] dark:bg-white rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+                <div class="h-full bg-[#2D1E17] dark:bg-white rounded-full chart-horiz-bar" style="--target-w: ${percent}%; animation-delay: ${idx * 90}ms; width: 0%;"></div>
               </div>
             </div>
           `;
