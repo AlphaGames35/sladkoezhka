@@ -2879,13 +2879,11 @@
         const isOutOfStock = availQty <= 0;
         const isMax = inCartQty >= availQty;
         const isComposite = prod.item_type === 'composite';
-        const delayMs = Math.min(idx, 12) * 35;
         const isValidImg = prod.image_url && (prod.image_url.startsWith('http') || prod.image_url.startsWith('data:') || prod.image_url.startsWith('/'));
 
         return `
           <div onclick="handleProductCardClick('${prod.id}', ${availQty}, event)" 
-               class="stagger-in group relative bg-white dark:bg-cacao-900 rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between ${isOutOfStock ? 'opacity-45 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] dark:border-cream-100 ring-1 ring-[#2D1E17] dark:ring-cream-100 shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}"
-               style="animation-delay: ${delayMs}ms;">
+               class="group relative bg-white dark:bg-cacao-900 rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between ${isOutOfStock ? 'opacity-45 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] dark:border-cream-100 ring-1 ring-[#2D1E17] dark:ring-cream-100 shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
             
             <!-- Верхняя часть: Фотография 4:3 или нейтральная векторная заглушка -->
             <div class="relative w-full aspect-[4/3] bg-[#FAF7F2] dark:bg-cacao-950 overflow-hidden flex items-center justify-center">
@@ -2957,11 +2955,7 @@
       cart[prodId] = cur + 1;
       playBeep('click');
       triggerHaptic(8);
-      if (event) {
-        animateFlyToCart(event.currentTarget || event.target);
-      }
       updateCartUI();
-      renderEmployeeProducts();
     }
 
     function decrementCart(prodId) {
@@ -2971,7 +2965,6 @@
       playBeep('click');
       triggerHaptic();
       updateCartUI();
-      renderEmployeeProducts();
     }
 
     function clearCart() {
@@ -3005,11 +2998,13 @@
       });
 
       itemsLabel.innerText = `${totalCount} ${pluralize(totalCount, ['позиция', 'позиции', 'позиций'])}`;
-      updateCheckoutPrice(totalSum);
+      if (totalPrice) {
+        totalPrice.innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
+      }
       btnSale.innerHTML = `
-        <span class="inline-flex items-center space-x-1.5 font-bold">
+        <span class="inline-flex items-center space-x-1.5 font-bold whitespace-nowrap">
           <span>Оформить (${totalSum.toLocaleString('ru-RU')} ₽)</span>
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          <svg class="w-4 h-4 ml-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </span>
       `;
 
@@ -4672,85 +4667,21 @@
     }
 
     // ------------------------------------------
-    // PARABOLIC FLY TO CART & ROLLING DIGITS
+    // PARABOLIC FLY TO CART & ROLLING DIGITS (ОТКЛЮЧЕНЫ)
     // ------------------------------------------
     function animateFlyToCart(sourceEl) {
-      if (currentMotionMode === 'off' || !sourceEl) return;
-      const checkoutPill = document.getElementById('floating-checkout-pill') || document.getElementById('floating-checkout-bar');
-      if (!checkoutPill) return;
-
-      const sourceRect = sourceEl.getBoundingClientRect();
-      const targetRect = checkoutPill.getBoundingClientRect();
-
-      const flyEl = document.createElement('div');
-      flyEl.className = 'flying-cart-thumbnail';
-      flyEl.style.left = `${sourceRect.left + sourceRect.width / 2 - 14}px`;
-      flyEl.style.top = `${sourceRect.top + sourceRect.height / 2 - 14}px`;
-      document.body.appendChild(flyEl);
-
-      const targetX = targetRect.left + targetRect.width / 2 - 14;
-      const targetY = targetRect.top + targetRect.height / 2 - 14;
-
-      const anim = flyEl.animate([
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        { transform: `translate(${(targetX - sourceRect.left) * 0.5}px, ${(targetY - sourceRect.top) * 0.3 - 40}px) scale(1.15)`, opacity: 0.9, offset: 0.4 },
-        { transform: `translate(${targetX - sourceRect.left}px, ${targetY - sourceRect.top}px) scale(0.3)`, opacity: 0 }
-      ], {
-        duration: 460,
-        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-      });
-
-      anim.onfinish = () => {
-        flyEl.remove();
-        checkoutPill.animate([
-          { transform: 'translateX(-50%) scale(1)' },
-          { transform: 'translateX(-50%) scale(1.03)' },
-          { transform: 'translateX(-50%) scale(1)' }
-        ], {
-          duration: 200,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-        });
-      };
+      // Отключено по запросу пользователя для мгновенного отклика без анимаций
     }
 
     function animateCountUp(element, endVal, prefix = '', suffix = '', duration = 400) {
       if (!element) return;
-      if (currentMotionMode === 'off') {
-        element.innerText = `${prefix}${endVal.toLocaleString('ru-RU')}${suffix}`;
-        return;
-      }
-
-      const raw = element.innerText.replace(/[^0-9.-]/g, '');
-      const startVal = parseFloat(raw) || 0;
-      if (startVal === endVal) {
-        element.innerText = `${prefix}${endVal.toLocaleString('ru-RU')}${suffix}`;
-        return;
-      }
-
-      const startTime = performance.now();
-      element.classList.add('digit-pulse');
-      setTimeout(() => element.classList.remove('digit-pulse'), 300);
-
-      function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-        const current = Math.round(startVal + (endVal - startVal) * ease);
-        element.innerText = `${prefix}${current.toLocaleString('ru-RU')}${suffix}`;
-
-        if (progress < 1) {
-          requestAnimationFrame(update);
-        } else {
-          element.innerText = `${prefix}${endVal.toLocaleString('ru-RU')}${suffix}`;
-        }
-      }
-      requestAnimationFrame(update);
+      element.innerText = `${prefix}${endVal.toLocaleString('ru-RU')}${suffix}`;
     }
 
     function updateCheckoutPrice(totalSum) {
       const priceEl = document.getElementById('checkout-total-price');
       if (priceEl) {
-        animateCountUp(priceEl, totalSum, '', ' ₽');
+        priceEl.innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
       }
     }
 
