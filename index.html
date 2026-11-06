@@ -3013,14 +3013,16 @@
 
       let buckets = {};
       if (isHourly) {
-        for (let h = 8; h <= 22; h++) {
+        // Динамика с 08:00 до 20:00 (часы работы кондитерской)
+        for (let h = 8; h <= 20; h++) {
           const key = (h < 10 ? '0' : '') + h + ':00';
           buckets[key] = 0;
         }
         sales.forEach(s => {
           const h = new Date(s.created_at).getHours();
-          const key = (h < 10 ? '0' : '') + h + ':00';
-          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount);
+          const targetH = Math.min(Math.max(h, 8), 20);
+          const key = (targetH < 10 ? '0' : '') + targetH + ':00';
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount || 0);
         });
       } else {
         for (let d = 6; d >= 0; d--) {
@@ -3030,7 +3032,7 @@
         }
         sales.forEach(s => {
           const key = new Date(s.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount);
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount || 0);
         });
       }
 
@@ -3038,17 +3040,18 @@
       const maxVal = Math.max(...Object.values(buckets), 100);
 
       chartContainer.innerHTML = `
-        <div class="w-full h-full flex items-end justify-between space-x-1.5 pt-4">
+        <div class="w-full h-full flex items-end justify-between gap-1 sm:gap-1.5 pt-4">
           ${keys.map(k => {
             const val = buckets[k];
             const heightPercent = Math.max(Math.round((val / maxVal) * 100), 4);
+            const isZero = val === 0;
             return `
-              <div class="flex-1 flex flex-col items-center h-full justify-end group relative cursor-pointer">
+              <div class="flex-1 min-w-0 flex flex-col items-center h-full justify-end group relative cursor-pointer" onclick="showToast('${k}: ${val.toLocaleString('ru-RU')} ₽')">
                 <div class="opacity-0 group-hover:opacity-100 transition absolute -top-7 text-[10px] font-bold bg-[#1F2937] text-white px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-10">
                   ${val.toLocaleString('ru-RU')} ₽
                 </div>
-                <div class="w-full bg-[#2D1E17] dark:bg-white hover:opacity-80 rounded-t-xs transition-all duration-200" style="height: ${heightPercent}%"></div>
-                <span class="text-[9px] text-[#8E8A85] mt-1.5 truncate font-mono">${k}</span>
+                <div class="w-full ${isZero ? 'bg-[#2D1E17]/20 dark:bg-white/20' : 'bg-[#2D1E17] dark:bg-white'} hover:opacity-80 rounded-t-xs transition-all duration-200" style="height: ${heightPercent}%"></div>
+                <span class="text-[8px] sm:text-[9px] text-[#8E8A85] mt-1.5 truncate font-mono w-full text-center tracking-tighter">${k}</span>
               </div>
             `;
           }).join('')}
