@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#FFFFFF" id="theme-color-meta">
   <title>СЛАДКОЕЖКА — POS-система</title>
   
@@ -2562,7 +2565,22 @@
     // ==========================================
     // 7. СИНХРОНИЗАЦИЯ ДАННЫХ
     // ==========================================
-    async function refreshAppData() {
+    let isRefreshingAppData = false;
+    let refreshDebounceTimer = null;
+    let lastRefreshTimestamp = 0;
+
+    async function refreshAppData(forceImmediate = false) {
+      if (!forceImmediate) {
+        clearTimeout(refreshDebounceTimer);
+        refreshDebounceTimer = setTimeout(() => refreshAppData(true), 400);
+        return;
+      }
+
+      const now = Date.now();
+      if (isRefreshingAppData || (now - lastRefreshTimestamp < 1500)) return;
+      isRefreshingAppData = true;
+      lastRefreshTimestamp = now;
+
       try {
         if (!supabaseClient) {
           initSupabase();
@@ -2626,6 +2644,8 @@
         }
       } catch (err) {
         console.error('Ошибка загрузки данных:', err);
+      } finally {
+        isRefreshingAppData = false;
       }
     }
 
@@ -4914,14 +4934,13 @@
         if (gwb) gwb.classList.remove('hidden');
       }
 
-      // Мгновенная синхронизация при переключении между приложениями/вкладками
+      // Фоновая сверка только при возврате на вкладку (не чаще раза в 30 секунд)
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && currentUser) {
-          refreshAppData();
+          if (Date.now() - lastRefreshTimestamp > 30000) {
+            refreshAppData();
+          }
         }
-      });
-      window.addEventListener('focus', () => {
-        if (currentUser) refreshAppData();
       });
     });
   </script>
