@@ -197,6 +197,15 @@
         </svg>
       </button>
 
+      <!-- Кнопка настройки подключения к БД (всегда доступна на любом экране) -->
+      <button onclick="openDbConfigModal()" id="btn-db-config" title="Настройки подключения к базе данных" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-neutral-300 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center relative">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span id="db-status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 absolute top-1 right-1 ring-2 ring-white dark:ring-[#19130F]"></span>
+      </button>
+
       <!-- Кнопка Выхода (Lucide LogOut, strokeWidth=1.75 size=18) -->
       <button id="btn-logout" onclick="logout()" title="Выйти из системы" class="hidden w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-neutral-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition flex items-center justify-center">
         <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
@@ -264,16 +273,16 @@
         </div>
 
         <!-- Баннер настройки подключения для Web-режима (когда открыто в браузере) -->
-        <div id="web-db-setup-banner" class="hidden mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-left">
-          <div class="flex items-start space-x-2">
-            <span class="text-amber-600 text-sm">⚙️</span>
+        <div id="web-db-setup-banner" class="hidden mt-4 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-left">
+          <div class="flex items-start space-x-2.5">
+            <span class="text-amber-600 text-base">⚙️</span>
             <div class="flex-1">
-              <div class="text-[11px] font-bold text-amber-900 dark:text-amber-200">Режим браузера (Web)</div>
-              <p class="text-[10px] text-amber-700 dark:text-amber-300 mt-0.5 leading-snug">
-                В открытом репозитории ключи базы данных скрыты в целях безопасности. Нажмите кнопку, чтобы настроить параметры для этого браузера.
+              <div class="text-xs font-bold text-amber-900 dark:text-amber-100">Подключение к базе данных</div>
+              <p class="text-[11px] text-amber-800 dark:text-amber-200 mt-1 leading-snug">
+                В открытом репозитории ключи скрыты для безопасности. Нажмите кнопку, чтобы настроить параметры подключения.
               </p>
-              <button type="button" onclick="openDbConfigModal()" class="mt-2 px-3 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-md text-[10px] font-bold">
-                Настроить подключение
+              <button type="button" id="btn-open-db-config" onclick="openDbConfigModal()" class="mt-2.5 w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-2xs text-center flex items-center justify-center space-x-1.5">
+                <span>⚙️ Настроить подключение</span>
               </button>
             </div>
           </div>
@@ -291,6 +300,16 @@
       
       <!-- Вкладка 1: ВИТРИНА ПРОДАЖ -->
       <div id="employee-tab-sale" class="p-4 sm:p-6 max-w-6xl mx-auto space-y-4">
+        
+        <!-- Предупреждение о неподключенной БД -->
+        <div class="panel-db-warning hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-3 text-left">
+          <div class="flex items-center space-x-2 text-xs font-semibold text-amber-900 dark:text-amber-200">
+            <span>⚠️ База данных не подключена. Товары не могут загрузиться.</span>
+          </div>
+          <button type="button" onclick="openDbConfigModal()" class="px-3 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-md text-xs font-bold shrink-0">
+            Настроить подключение
+          </button>
+        </div>
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -395,6 +414,16 @@
 
       <!-- Вкладка: СТАТИСТИКА И ОТЧЕТЫ -->
       <div id="manager-tab-stats" class="p-4 sm:p-6 max-w-5xl mx-auto space-y-5">
+        
+        <!-- Предупреждение о неподключенной БД -->
+        <div class="panel-db-warning hidden p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-3 text-left">
+          <div class="flex items-center space-x-2 text-xs font-semibold text-amber-900 dark:text-amber-200">
+            <span>⚠️ База данных не подключена. Данные не могут загрузиться.</span>
+          </div>
+          <button type="button" onclick="openDbConfigModal()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-md text-xs font-bold shrink-0">
+            Настроить подключение
+          </button>
+        </div>
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -1096,28 +1125,105 @@
     // 1) Через защищенный нативный мост Android (APK)
     // 2) Из локального хранилища браузера (LocalStorage)
     // 3) Из параметров адресной строки браузера при первой настройке (?db_url=...&db_key=...)
-    let SUPABASE_URL = (window.AndroidBridge && typeof window.AndroidBridge.getUrl === 'function' ? window.AndroidBridge.getUrl() : '') 
-      || localStorage.getItem('sladkoezhka_db_url') 
-      || '';
+    let SUPABASE_URL = '';
+    let SUPABASE_KEY = '';
 
-    let SUPABASE_KEY = (window.AndroidBridge && typeof window.AndroidBridge.getKey === 'function' ? window.AndroidBridge.getKey() : '') 
-      || localStorage.getItem('sladkoezhka_db_key') 
-      || '';
-
-    // Автоматический перехват параметров настройки из URL (разовая инициализация браузера)
-    try {
-      const searchStr = window.location.search || (window.location.hash.includes('?') ? window.location.hash.substring(window.location.hash.indexOf('?')) : '');
-      const urlParams = new URLSearchParams(searchStr);
-      const paramUrl = urlParams.get('db_url') || urlParams.get('supabase_url');
-      const paramKey = urlParams.get('db_key') || urlParams.get('supabase_key');
-      if (paramUrl && paramKey) {
-        SUPABASE_URL = paramUrl;
-        SUPABASE_KEY = paramKey;
-        localStorage.setItem('sladkoezhka_db_url', paramUrl);
-        localStorage.setItem('sladkoezhka_db_key', paramKey);
-        window.history.replaceState({}, document.title, window.location.pathname);
+    window.setupFromNativeBridge = function(url, key) {
+      if (url && key) {
+        SUPABASE_URL = String(url).trim();
+        SUPABASE_KEY = String(key).trim();
+        localStorage.setItem('sladkoezhka_db_url', SUPABASE_URL);
+        localStorage.setItem('sladkoezhka_db_key', SUPABASE_KEY);
+        initSupabase();
+        refreshAppData();
       }
-    } catch(e) {}
+    };
+
+    function resolveCredentials() {
+      let url = SUPABASE_URL;
+      let key = SUPABASE_KEY;
+
+      // 1. Из нативного AndroidBridge
+      if (!url || !key) {
+        try {
+          if (window.AndroidBridge) {
+            if (typeof window.AndroidBridge.getUrl === 'function') {
+              url = String(window.AndroidBridge.getUrl() || '').trim();
+            } else if (window.AndroidBridge.getUrl) {
+              url = String(window.AndroidBridge.getUrl).trim();
+            }
+            if (typeof window.AndroidBridge.getKey === 'function') {
+              key = String(window.AndroidBridge.getKey() || '').trim();
+            } else if (window.AndroidBridge.getKey) {
+              key = String(window.AndroidBridge.getKey).trim();
+            }
+          }
+        } catch(e) {
+          console.warn('AndroidBridge read error:', e);
+        }
+      }
+
+      // 2. Из LocalStorage браузера
+      if (!url) url = (localStorage.getItem('sladkoezhka_db_url') || '').trim();
+      if (!key) key = (localStorage.getItem('sladkoezhka_db_key') || '').trim();
+
+      // 3. Из URL параметров (?db_url=...&db_key=...)
+      if (!url || !key) {
+        try {
+          const searchStr = window.location.search || (window.location.hash.includes('?') ? window.location.hash.substring(window.location.hash.indexOf('?')) : '');
+          const urlParams = new URLSearchParams(searchStr);
+          const paramUrl = (urlParams.get('db_url') || urlParams.get('supabase_url') || '').trim();
+          const paramKey = (urlParams.get('db_key') || urlParams.get('supabase_key') || '').trim();
+          if (paramUrl && paramKey) {
+            url = paramUrl;
+            key = paramKey;
+            localStorage.setItem('sladkoezhka_db_url', paramUrl);
+            localStorage.setItem('sladkoezhka_db_key', paramKey);
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch(e) {}
+      }
+
+      SUPABASE_URL = url;
+      SUPABASE_KEY = key;
+      return { url, key };
+    }
+
+    function updateConnectionUI(connected) {
+      const dot = document.getElementById('db-status-dot');
+      if (dot) {
+        dot.className = `w-2.5 h-2.5 rounded-full absolute top-1 right-1 ring-2 ring-white dark:ring-[#19130F] ${connected ? 'bg-emerald-500' : 'bg-red-500'}`;
+        dot.title = connected ? 'База данных: подключено' : 'База данных: отключено';
+      }
+
+      const loginBanner = document.getElementById('web-db-setup-banner');
+      if (loginBanner) {
+        if (!connected) loginBanner.classList.remove('hidden');
+        else loginBanner.classList.add('hidden');
+      }
+
+      const panelWarnings = document.querySelectorAll('.panel-db-warning');
+      panelWarnings.forEach(w => {
+        if (!connected) w.classList.remove('hidden');
+        else w.classList.add('hidden');
+      });
+    }
+
+    // Повторные попытки обнаружения нативного моста Android
+    let bridgeRetries = 0;
+    function checkBridgeLoop() {
+      if (!supabaseClient && bridgeRetries < 20) {
+        bridgeRetries++;
+        const ok = initSupabase();
+        if (ok) {
+          console.log('✓ Подключение установлено на шаге ' + bridgeRetries);
+          refreshAppData();
+        } else {
+          setTimeout(checkBridgeLoop, 120);
+        }
+      }
+    }
+    setTimeout(checkBridgeLoop, 50);
 
     let supabaseClient = null;
     let realtimeChannel = null;
@@ -1135,10 +1241,13 @@
     let customEndDate = null;
     let topSortMode = 'revenue';
 
-    // Кэш данных
+    // Кэш данных с мгновенной загрузкой из LocalStorage
     let cachedCategories = [];
+    try { cachedCategories = JSON.parse(localStorage.getItem('sladkoezhka_cached_categories') || '[]'); } catch(e) {}
     let cachedProducts = [];
-    let cachedIngredients = []; // Техкарты (product_ingredients)
+    try { cachedProducts = JSON.parse(localStorage.getItem('sladkoezhka_cached_products') || '[]'); } catch(e) {}
+    let cachedIngredients = [];
+    try { cachedIngredients = JSON.parse(localStorage.getItem('sladkoezhka_cached_ingredients') || '[]'); } catch(e) {}
     let cachedSales = [];
     let cachedUsers = [];
 
@@ -1463,22 +1572,21 @@
     // 3. ПОДКЛЮЧЕНИЕ К SUPABASE
     // ==========================================
     function initSupabase() {
-      if (!SUPABASE_URL || !SUPABASE_KEY) {
-        // Показываем аккуратный баннер настройки для Web-режима
-        const banner = document.getElementById('web-db-setup-banner');
-        if (banner && !window.AndroidBridge) {
-          banner.classList.remove('hidden');
-        }
+      const creds = resolveCredentials();
+      if (!creds.url || !creds.key) {
+        updateConnectionUI(false);
         return false;
       }
       try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        setupRealtimeSubscriptions();
-        const banner = document.getElementById('web-db-setup-banner');
-        if (banner) banner.classList.add('hidden');
+        if (!supabaseClient) {
+          supabaseClient = window.supabase.createClient(creds.url, creds.key);
+          setupRealtimeSubscriptions();
+        }
+        updateConnectionUI(true);
         return true;
       } catch(err) {
         console.error('Ошибка Supabase:', err);
+        updateConnectionUI(false);
         return false;
       }
     }
@@ -1686,15 +1794,23 @@
     }
 
     function checkSavedSession() {
+      initSupabase();
+
+      // При каждом запуске всегда открываем экран авторизации (логин сотрудника и пароль)
+      currentUser = null;
+      showScreen('login');
+
+      // Подставляем сохраненный логин для быстрого входа
       const saved = localStorage.getItem('sladkoezhka_auth_user');
       if (saved) {
         try {
-          currentUser = JSON.parse(saved);
-          applyUserSession();
-          return;
+          const u = JSON.parse(saved);
+          if (u && u.login) {
+            const loginInp = document.getElementById('login-input');
+            if (loginInp && !loginInp.value) loginInp.value = u.login;
+          }
         } catch(e) {}
       }
-      showScreen('login');
     }
 
     function logout() {
@@ -1757,6 +1873,8 @@
         document.getElementById('screen-manager').classList.remove('hidden');
         document.getElementById('nav-manager').classList.remove('hidden');
       }
+
+      updateConnectionUI(!!supabaseClient);
     }
 
     function enterShowcasePreviewMode() {
@@ -1849,7 +1967,10 @@
           supabaseClient.from('product_ingredients').select('*').catch(() => ({ data: [] }))
         ]);
 
-        if (cRes.data) cachedCategories = cRes.data;
+        if (cRes.data) {
+          cachedCategories = cRes.data;
+          try { localStorage.setItem('sladkoezhka_cached_categories', JSON.stringify(cRes.data)); } catch(e) {}
+        }
         if (pRes.data) {
           cachedProducts = pRes.data.map(p => ({
             ...p,
@@ -1857,8 +1978,12 @@
             unit: p.unit || 'шт',
             image_url: p.image_url || null
           }));
+          try { localStorage.setItem('sladkoezhka_cached_products', JSON.stringify(cachedProducts)); } catch(e) {}
         }
-        if (ingRes && ingRes.data) cachedIngredients = ingRes.data;
+        if (ingRes && ingRes.data) {
+          cachedIngredients = ingRes.data;
+          try { localStorage.setItem('sladkoezhka_cached_ingredients', JSON.stringify(ingRes.data)); } catch(e) {}
+        }
         if (sRes.data) {
           cachedSales = sRes.data.map(s => ({
             ...s,
