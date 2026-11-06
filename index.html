@@ -102,35 +102,36 @@
       position: fixed;
       bottom: calc(16px + var(--safe-bottom));
       left: 50%;
-      transform: translateX(-50%) translateY(0) scale(1);
-      width: fit-content;
-      max-width: min(92vw, 420px);
-      padding: 5px;
+      transform: translateX(-50%);
+      width: min(calc(100% - 24px), 390px);
+      padding: 4px;
       border-radius: 9999px;
       z-index: 40;
       display: flex;
       align-items: center;
-      transition: transform var(--dur-base) var(--ease-spring), opacity var(--dur-base) var(--ease-out);
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      box-shadow: 0 12px 32px -4px rgba(45, 26, 17, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+      justify-content: space-between;
+      gap: 2px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 12px 32px -4px rgba(45, 26, 17, 0.16), 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .dark .floating-liquid-nav {
-      background: rgba(30, 24, 20, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(30, 24, 20, 0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.55);
     }
     @supports not (backdrop-filter: blur(10px)) {
       .floating-liquid-nav { background: #FFFFFF; }
       .dark .floating-liquid-nav { background: #1C1511; }
     }
 
-    .floating-liquid-nav.nav-hidden-scroll {
-      transform: translate(-50%, calc(100% + 24px + var(--safe-bottom))) scale(0.92);
+    .floating-liquid-nav.nav-hidden-keyboard {
+      transform: translate(-50%, calc(100% + 24px + var(--safe-bottom)));
       opacity: 0;
       pointer-events: none;
     }
@@ -138,39 +139,36 @@
     /* Скользящий Liquid-индикатор активного таба */
     .liquid-indicator {
       position: absolute;
-      top: 5px;
-      bottom: 5px;
-      left: 5px;
+      top: 4px;
+      bottom: 4px;
+      left: 0;
+      width: 0;
       border-radius: 9999px;
       pointer-events: none;
       z-index: 0;
       background: #2D1E17;
-      transition: transform var(--dur-base) var(--ease-spring), width var(--dur-base) var(--ease-spring);
-      box-shadow: 0 2px 8px rgba(45, 26, 17, 0.25);
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), width 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 3px 12px rgba(45, 26, 17, 0.28);
     }
     .dark .liquid-indicator {
       background: #FFFFFF;
-      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
-    }
-
-    .liquid-indicator.liquid-stretching {
-      transform-origin: center center;
-      transform: scaleX(1.12);
+      box-shadow: 0 3px 14px rgba(255, 255, 255, 0.25);
     }
 
     /* Кнопки табов внутри бара */
     .liquid-tab-btn {
       position: relative;
       z-index: 1;
+      flex: 1 1 0px;
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      min-height: 44px;
-      min-width: 44px;
-      padding: 0 14px;
+      min-height: 42px;
+      padding: 0 10px;
       border-radius: 9999px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       color: #8E8A85;
       background: transparent;
@@ -178,32 +176,36 @@
       outline: none;
       cursor: pointer;
       user-select: none;
-      transition: color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+      white-space: nowrap;
+      transition: color 0.18s ease;
     }
     .liquid-tab-btn:active {
-      transform: scale(0.88);
+      transform: scale(0.96);
     }
     .liquid-tab-btn.tab-active {
       color: #FFFFFF;
     }
     .dark .liquid-tab-btn.tab-active {
-      color: #2D1E17;
+      color: #1C1511;
     }
-
-    /* Морфинг подписи таба (grid-template-columns 0fr -> 1fr) */
-    .tab-label-wrapper {
-      display: grid;
-      grid-template-columns: 0fr;
-      transition: grid-template-columns var(--dur-base) var(--ease-spring);
-      overflow: hidden;
-      white-space: nowrap;
+    .tab-label {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      pointer-events: none;
     }
-    .liquid-tab-btn.tab-active .tab-label-wrapper {
-      grid-template-columns: 1fr;
+    .liquid-tab-btn svg {
+      pointer-events: none;
+      transition: transform 0.18s ease;
     }
-    .tab-label-inner {
-      min-width: 0;
-      overflow: hidden;
+    .tab-icon-pop {
+      animation: tabIconPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes tabIconPop {
+      0% { transform: scale(0.92); }
+      50% { transform: scale(1.14); }
+      100% { transform: scale(1); }
     }
 
     /* 3. Плавающая панель заказа (Floating Checkout Bar) */
@@ -341,35 +343,13 @@
       40%, 80% { transform: translateX(6px); }
     }
 
-    /* 6. Направленные переходы экранов и табов */
-    .tab-slide-enter-right {
-      animation: tabSlideInRight var(--dur-base) var(--ease-out) forwards;
+    /* 6. Плавные переходы табов без скачков высоты */
+    .tab-fade-in {
+      animation: tabFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .tab-slide-enter-left {
-      animation: tabSlideInLeft var(--dur-base) var(--ease-out) forwards;
-    }
-    .tab-slide-exit-right {
-      animation: tabSlideOutRight var(--dur-fast) var(--ease-in) forwards;
-    }
-    .tab-slide-exit-left {
-      animation: tabSlideOutLeft var(--dur-fast) var(--ease-in) forwards;
-    }
-
-    @keyframes tabSlideInRight {
-      from { opacity: 0; transform: translateX(18px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes tabSlideInLeft {
-      from { opacity: 0; transform: translateX(-18px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes tabSlideOutRight {
-      from { opacity: 1; transform: translateX(0) scale(1); }
-      to { opacity: 0; transform: translateX(-18px) scale(0.98); }
-    }
-    @keyframes tabSlideOutLeft {
-      from { opacity: 1; transform: translateX(0) scale(1); }
-      to { opacity: 0; transform: translateX(18px) scale(0.98); }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Летающая иконка товара (Fly-to-Cart) */
@@ -416,8 +396,7 @@
       100% { transform: translateX(100%); }
     }
     @keyframes chartBarGrow {
-      0% { transform: scaleY(0); opacity: 0; }
-      70% { transform: scaleY(1.06); opacity: 1; }
+      0% { transform: scaleY(0); opacity: 0.2; }
       100% { transform: scaleY(1); opacity: 1; }
     }
 
@@ -549,56 +528,20 @@
       animation: barFillHoriz 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Анимации нижнего бара и иконок */
-    .liquid-tab-btn {
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-    .liquid-tab-btn svg {
-      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease, filter 0.2s ease;
-    }
-    .liquid-tab-btn:hover svg {
-      transform: translateY(-2px) scale(1.12);
-    }
-    .liquid-tab-btn:active svg {
-      transform: scale(0.85);
-    }
-    .liquid-tab-btn.tab-active svg {
-      transform: translateY(-1px) scale(1.15);
-      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
-    }
-    .tab-icon-pop {
-      animation: tabIconPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    @keyframes tabIconPop {
-      0% { transform: scale(1); }
-      35% { transform: translateY(-6px) scale(1.35) rotate(-8deg); }
-      70% { transform: translateY(1.5px) scale(0.92) rotate(3deg); }
-      100% { transform: translateY(-1px) scale(1.15) rotate(0deg); }
-    }
-
-    /* Анимация надписей, бейджей и уведомлений */
+    /* Анимация уведомлений Toast (Dynamic Island style) */
     .dynamic-island-toast.toast-show {
-      animation: toastSpringIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes toastSpringIn {
-      0% { transform: translate(-50%, -100%) scale(0.75); opacity: 0; }
-      60% { transform: translate(-50%, 8px) scale(1.05); opacity: 1; }
+    @keyframes toastSlideDown {
+      0% { transform: translate(-50%, -100%) scale(0.92); opacity: 0; }
       100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
     }
     .dynamic-island-toast.toast-hide {
-      animation: toastFlyUp 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+      animation: toastSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes toastFlyUp {
+    @keyframes toastSlideUp {
       0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-      100% { transform: translate(-50%, -130%) scale(0.7); opacity: 0; pointer-events: none; }
-    }
-
-    h2, h3, .stat-card-title {
-      animation: titleFadeIn 0.35s ease-out;
-    }
-    @keyframes titleFadeIn {
-      from { opacity: 0; transform: translateY(-3px); }
-      to { opacity: 1; transform: translateY(0); }
+      100% { transform: translate(-50%, -120%) scale(0.92); opacity: 0; pointer-events: none; }
     }
 
     /* 8. Доступность: prefers-reduced-motion */
@@ -1183,14 +1126,14 @@
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 10a4 4 0 0 1-8 0"/>
       </svg>
-      <div class="tab-label-wrapper"><span class="tab-label-inner">Витрина</span></div>
+      <span class="tab-label">Витрина</span>
     </button>
     <!-- Вкладка «Заказы смены» -->
     <button onclick="switchEmployeeTab('shift')" id="btn-emp-tab-shift" role="tab" class="liquid-tab-btn">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14 8H8M16 12H8M13 16H8"/>
       </svg>
-      <div class="tab-label-wrapper"><span class="tab-label-inner">Смена</span></div>
+      <span class="tab-label">Смена</span>
     </button>
   </nav>
 
@@ -1202,21 +1145,21 @@
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" d="M18 17V9"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 17V5"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 17v-3"/>
       </svg>
-      <div class="tab-label-wrapper"><span class="tab-label-inner">Отчеты</span></div>
+      <span class="tab-label">Отчеты</span>
     </button>
     <!-- Вкладка «Склад / Витрина» -->
     <button onclick="switchManagerTab('inventory')" id="btn-mgr-tab-inventory" role="tab" class="liquid-tab-btn">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
       </svg>
-      <div class="tab-label-wrapper"><span class="tab-label-inner">Склад</span></div>
+      <span class="tab-label">Склад</span>
     </button>
     <!-- Вкладка «Персонал» -->
     <button onclick="switchManagerTab('staff')" id="btn-mgr-tab-staff" role="tab" class="liquid-tab-btn">
       <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
-      <div class="tab-label-wrapper"><span class="tab-label-inner">Персонал</span></div>
+      <span class="tab-label">Персонал</span>
     </button>
   </nav>
 
@@ -2476,13 +2419,17 @@
         }
         if (Object.keys(cart).length > 0) document.getElementById('floating-checkout-bar').classList.remove('hidden');
         requestAnimationFrame(() => {
-          updateLiquidIndicator('nav-employee', document.getElementById(currentEmpTab === 'sale' ? 'btn-emp-tab-sale' : 'btn-emp-tab-shift'));
+          setTimeout(() => {
+            updateLiquidIndicator('nav-employee', document.getElementById(currentEmpTab === 'sale' ? 'btn-emp-tab-sale' : 'btn-emp-tab-shift'));
+          }, 30);
         });
       } else if (name === 'manager') {
         document.getElementById('screen-manager').classList.remove('hidden');
         document.getElementById('nav-manager').classList.remove('hidden');
         requestAnimationFrame(() => {
-          updateLiquidIndicator('nav-manager', document.getElementById(`btn-mgr-tab-${currentMgrTab}`));
+          setTimeout(() => {
+            updateLiquidIndicator('nav-manager', document.getElementById(`btn-mgr-tab-${currentMgrTab}`));
+          }, 30);
         });
       }
 
@@ -2520,12 +2467,6 @@
       const btnShift = document.getElementById('btn-emp-tab-shift');
       const checkoutBar = document.getElementById('floating-checkout-bar');
 
-      const tabsOrder = ['sale', 'shift'];
-      const dir = tabsOrder.indexOf(tab) > tabsOrder.indexOf(oldTab) ? 'right' : 'left';
-
-      const scrollParent = document.getElementById('screen-employee');
-      if (scrollParent) tabScrollMemory[oldTab] = scrollParent.scrollTop;
-
       currentEmpTab = tab;
       const activeBtn = tab === 'sale' ? btnSale : btnShift;
       const currentEl = oldTab === 'sale' ? tabSale : tabShift;
@@ -2543,26 +2484,19 @@
 
       if (oldTab === tab) return;
 
-      if (currentMotionMode === 'off') {
-        currentEl.classList.add('hidden');
-        nextEl.classList.remove('hidden');
-      } else {
-        currentEl.classList.add(dir === 'right' ? 'tab-slide-exit-left' : 'tab-slide-exit-right');
-        setTimeout(() => {
-          currentEl.classList.add('hidden');
-          currentEl.classList.remove('tab-slide-exit-left', 'tab-slide-exit-right');
+      tabScrollMemory[oldTab] = window.scrollY;
 
-          nextEl.classList.remove('hidden');
-          nextEl.classList.add(dir === 'right' ? 'tab-slide-enter-right' : 'tab-slide-enter-left');
-          setTimeout(() => {
-            nextEl.classList.remove('tab-slide-enter-right', 'tab-slide-enter-left');
-          }, 320);
+      currentEl.classList.add('hidden');
+      nextEl.classList.remove('hidden');
 
-          if (scrollParent && tabScrollMemory[tab] !== undefined) {
-            scrollParent.scrollTop = tabScrollMemory[tab];
-          }
-        }, 120);
+      if (currentMotionMode !== 'off') {
+        nextEl.classList.remove('tab-fade-in');
+        void nextEl.offsetWidth;
+        nextEl.classList.add('tab-fade-in');
       }
+
+      const targetScroll = tabScrollMemory[tab] || 0;
+      window.scrollTo({ top: targetScroll, behavior: 'instant' });
 
       if (tab === 'sale') {
         if (Object.keys(cart).length > 0) checkoutBar.classList.remove('hidden');
@@ -2585,12 +2519,6 @@
         staff: document.getElementById('btn-mgr-tab-staff')
       };
 
-      const tabsOrder = ['stats', 'inventory', 'staff'];
-      const dir = tabsOrder.indexOf(tab) > tabsOrder.indexOf(oldTab) ? 'right' : 'left';
-
-      const scrollParent = document.getElementById('screen-manager');
-      if (scrollParent) tabScrollMemory[oldTab] = scrollParent.scrollTop;
-
       currentMgrTab = tab;
       const activeBtn = btns[tab];
       const currentEl = tabs[oldTab];
@@ -2607,36 +2535,23 @@
       triggerHaptic(6);
 
       if (oldTab !== tab) {
-        if (currentMotionMode === 'off') {
-          Object.keys(tabs).forEach(k => {
-            if (k === tab) tabs[k].classList.remove('hidden');
-            else tabs[k].classList.add('hidden');
-          });
-        } else {
-          if (currentEl) {
-            currentEl.classList.add(dir === 'right' ? 'tab-slide-exit-left' : 'tab-slide-exit-right');
-            setTimeout(() => {
-              Object.keys(tabs).forEach(k => {
-                if (k === tab) {
-                  tabs[k].classList.remove('hidden');
-                  tabs[k].classList.add(dir === 'right' ? 'tab-slide-enter-right' : 'tab-slide-enter-left');
-                  setTimeout(() => {
-                    tabs[k].classList.remove('tab-slide-enter-right', 'tab-slide-enter-left');
-                  }, 320);
-                } else {
-                  tabs[k].classList.add('hidden');
-                  tabs[k].classList.remove('tab-slide-exit-left', 'tab-slide-exit-right');
-                }
-              });
+        tabScrollMemory[oldTab] = window.scrollY;
 
-              if (scrollParent && tabScrollMemory[tab] !== undefined) {
-                scrollParent.scrollTop = tabScrollMemory[tab];
-              }
-            }, 120);
+        Object.keys(tabs).forEach(k => {
+          if (k === tab) {
+            tabs[k].classList.remove('hidden');
+            if (currentMotionMode !== 'off') {
+              tabs[k].classList.remove('tab-fade-in');
+              void tabs[k].offsetWidth;
+              tabs[k].classList.add('tab-fade-in');
+            }
           } else {
-            tabs[tab].classList.remove('hidden');
+            tabs[k].classList.add('hidden');
           }
-        }
+        });
+
+        const targetScroll = tabScrollMemory[tab] || 0;
+        window.scrollTo({ top: targetScroll, behavior: 'instant' });
       }
 
       if (tab === 'stats') renderManagerStats();
@@ -4533,13 +4448,8 @@
       const left = activeBtn.offsetLeft;
       const width = activeBtn.offsetWidth;
 
-      indicator.classList.add('liquid-stretching');
       indicator.style.transform = `translateX(${left}px)`;
       indicator.style.width = `${width}px`;
-
-      setTimeout(() => {
-        indicator.classList.remove('liquid-stretching');
-      }, 160);
 
       nav.querySelectorAll('.liquid-tab-btn').forEach(btn => {
         if (btn === activeBtn) {
@@ -4892,39 +4802,7 @@
       initToastGestures();
       initBottomSheetGestures();
 
-      // Скрытие бара при скролле вниз, возврат при скролле вверх
-      // Плавное скрытие бара при скролле вниз, немедленный возврат при скролле вверх
-      ['screen-employee', 'screen-manager'].forEach(screenId => {
-        const el = document.getElementById(screenId);
-        if (!el) return;
-        let lastScroll = 0;
-        let ticking = false;
-        el.addEventListener('scroll', () => {
-          if (!ticking) {
-            window.requestAnimationFrame(() => {
-              const st = el.scrollTop;
-              const navEmp = document.getElementById('nav-employee');
-              const navMgr = document.getElementById('nav-manager');
-              const diff = st - lastScroll;
-              if (st <= 40) {
-                if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
-                if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
-              } else if (diff > 35 && st > 120) {
-                if (navEmp) navEmp.classList.add('nav-hidden-scroll');
-                if (navMgr) navMgr.classList.add('nav-hidden-scroll');
-              } else if (diff < -20) {
-                if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
-                if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
-              }
-              lastScroll = Math.max(0, st);
-              ticking = false;
-            });
-            ticking = true;
-          }
-        }, { passive: true });
-      });
-
-      // Скрытие бара при экранной клавиатуре
+      // Скрытие бара только при экранной клавиатуре (чтобы не перекрывать поля ввода)
       if (window.visualViewport) {
         let initialHeight = window.visualViewport.height;
         window.visualViewport.addEventListener('resize', () => {
@@ -4933,11 +4811,11 @@
           const navEmp = document.getElementById('nav-employee');
           const navMgr = document.getElementById('nav-manager');
           if (isKeyboardOpen) {
-            if (navEmp) navEmp.classList.add('nav-hidden-scroll');
-            if (navMgr) navMgr.classList.add('nav-hidden-scroll');
+            if (navEmp) navEmp.classList.add('nav-hidden-keyboard');
+            if (navMgr) navMgr.classList.add('nav-hidden-keyboard');
           } else {
-            if (navEmp) navEmp.classList.remove('nav-hidden-scroll');
-            if (navMgr) navMgr.classList.remove('nav-hidden-scroll');
+            if (navEmp) navEmp.classList.remove('nav-hidden-keyboard');
+            if (navMgr) navMgr.classList.remove('nav-hidden-keyboard');
           }
         });
       }
@@ -4978,6 +4856,16 @@
         btn.appendChild(circle);
         setTimeout(() => circle.remove(), 460);
       }, { passive: true });
+
+      // Подгонка позиции индикатора при ресайзе окна или повороте устройства
+      window.addEventListener('resize', () => {
+        requestAnimationFrame(() => {
+          const empBtn = document.getElementById(currentEmpTab === 'sale' ? 'btn-emp-tab-sale' : 'btn-emp-tab-shift');
+          const mgrBtn = document.getElementById(`btn-mgr-tab-${currentMgrTab}`);
+          updateLiquidIndicator('nav-employee', empBtn);
+          updateLiquidIndicator('nav-manager', mgrBtn);
+        });
+      });
 
       setTimeout(() => {
         updateLiquidIndicator('nav-employee', document.getElementById('btn-emp-tab-sale'));
