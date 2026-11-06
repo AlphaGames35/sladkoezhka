@@ -2882,7 +2882,7 @@
         const isValidImg = prod.image_url && (prod.image_url.startsWith('http') || prod.image_url.startsWith('data:') || prod.image_url.startsWith('/'));
 
         return `
-          <div onclick="handleProductCardClick('${prod.id}', ${availQty}, event)" 
+          <div id="emp-prod-card-${prod.id}" onclick="handleProductCardClick('${prod.id}', ${availQty}, event)" 
                class="group relative bg-white dark:bg-cacao-900 rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between ${isOutOfStock ? 'opacity-45 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] dark:border-cream-100 ring-1 ring-[#2D1E17] dark:ring-cream-100 shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
             
             <!-- Верхняя часть: Фотография 4:3 или нейтральная векторная заглушка -->
@@ -2904,13 +2904,13 @@
                 </span>
               ` : ''}
 
-              ${inCartQty > 0 ? `
-                <div class="absolute top-2 right-2 flex items-center bg-[#24140E] text-white rounded-lg p-0.5 shadow-md z-10" onclick="event.stopPropagation()">
+              <div id="emp-prod-counter-${prod.id}" class="absolute top-2 right-2 flex items-center bg-[#24140E] text-white rounded-lg p-0.5 shadow-md z-10 ${inCartQty > 0 ? '' : 'hidden'}" onclick="event.stopPropagation()">
+                ${inCartQty > 0 ? `
                   <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs">-</button>
                   <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
                   <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-6 h-6 flex items-center justify-center opacity-30 cursor-not-allowed text-xs"' : 'class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs"'}>+</button>
-                </div>
-              ` : ''}
+                ` : ''}
+              </div>
             </div>
 
             <!-- Нижняя часть: Инфо о товаре и цене -->
@@ -2946,6 +2946,39 @@
       incrementCart(prodId, maxStock, event);
     }
 
+    function updateProductCardInDOM(prodId) {
+      const card = document.getElementById(`emp-prod-card-${prodId}`);
+      if (!card) return;
+      const inCartQty = cart[prodId] || 0;
+      const prod = cachedProducts.find(p => p.id === prodId);
+      if (!prod) return;
+      const availQty = getProductAvailableStock(prod);
+      const isMax = inCartQty >= availQty;
+      const counterBox = document.getElementById(`emp-prod-counter-${prodId}`);
+
+      if (inCartQty > 0) {
+        card.classList.add('border-[#2D1E17]', 'dark:border-cream-100', 'ring-1', 'ring-[#2D1E17]', 'dark:ring-cream-100', 'shadow-sm');
+        card.classList.remove('border-[#ECE6DE]', 'dark:border-cacao-800', 'shadow-2xs');
+      } else {
+        card.classList.remove('border-[#2D1E17]', 'dark:border-cream-100', 'ring-1', 'ring-[#2D1E17]', 'dark:ring-cream-100', 'shadow-sm');
+        card.classList.add('border-[#ECE6DE]', 'dark:border-cacao-800', 'shadow-2xs');
+      }
+
+      if (counterBox) {
+        if (inCartQty > 0) {
+          counterBox.classList.remove('hidden');
+          counterBox.innerHTML = `
+            <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs">-</button>
+            <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
+            <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-6 h-6 flex items-center justify-center opacity-30 cursor-not-allowed text-xs"' : 'class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs"'}>+</button>
+          `;
+        } else {
+          counterBox.classList.add('hidden');
+          counterBox.innerHTML = '';
+        }
+      }
+    }
+
     function incrementCart(prodId, maxStock, event) {
       const cur = cart[prodId] || 0;
       if (cur >= maxStock) {
@@ -2955,7 +2988,7 @@
       cart[prodId] = cur + 1;
       playBeep('click');
       triggerHaptic(8);
-      updateCartUI();
+      updateCartUI(prodId);
     }
 
     function decrementCart(prodId) {
@@ -2964,16 +2997,21 @@
       else cart[prodId] = cur - 1;
       playBeep('click');
       triggerHaptic();
-      updateCartUI();
+      updateCartUI(prodId);
     }
 
     function clearCart() {
+      const prevIds = Object.keys(cart);
       cart = {};
+      prevIds.forEach(id => updateProductCardInDOM(id));
       updateCartUI();
     }
 
-    function updateCartUI() {
-      renderEmployeeProducts();
+    function updateCartUI(changedProdId = null) {
+      if (changedProdId) {
+        updateProductCardInDOM(changedProdId);
+      }
+
       const checkoutBar = document.getElementById('floating-checkout-bar');
       const itemsLabel = document.getElementById('checkout-items-label');
       const totalPrice = document.getElementById('checkout-total-price');
@@ -2981,7 +3019,7 @@
 
       const itemIds = Object.keys(cart);
       if (itemIds.length === 0) {
-        checkoutBar.classList.add('hidden');
+        if (checkoutBar) checkoutBar.classList.add('hidden');
         return;
       }
 
@@ -2997,18 +3035,22 @@
         }
       });
 
-      itemsLabel.innerText = `${totalCount} ${pluralize(totalCount, ['позиция', 'позиции', 'позиций'])}`;
+      if (itemsLabel) {
+        itemsLabel.innerText = `${totalCount} ${pluralize(totalCount, ['позиция', 'позиции', 'позиций'])}`;
+      }
       if (totalPrice) {
         totalPrice.innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
       }
-      btnSale.innerHTML = `
-        <span class="inline-flex items-center space-x-1.5 font-bold whitespace-nowrap">
-          <span>Оформить (${totalSum.toLocaleString('ru-RU')} ₽)</span>
-          <svg class="w-4 h-4 ml-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-        </span>
-      `;
+      if (btnSale) {
+        btnSale.innerHTML = `
+          <span class="inline-flex items-center space-x-1.5 font-bold whitespace-nowrap">
+            <span>Оформить (${totalSum.toLocaleString('ru-RU')} ₽)</span>
+            <svg class="w-4 h-4 ml-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </span>
+        `;
+      }
 
-      checkoutBar.classList.remove('hidden');
+      if (checkoutBar) checkoutBar.classList.remove('hidden');
     }
 
     async function submitSale() {
