@@ -86,9 +86,58 @@
     .animate-slide-up {
       animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+    @keyframes splashScaleIn {
+      0% { opacity: 0; transform: scale(0.85); }
+      60% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1.0); }
+    }
+    @keyframes splashBadgeIn {
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-splash-logo-scale {
+      animation: splashScaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-splash-badge {
+      animation: splashBadgeIn 0.6s ease-out 0.6s both;
+    }
   </style>
 </head>
 <body class="h-full bg-[#FAF7F2] dark:bg-cacao-950 text-cacao-900 dark:text-cream-50 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
+
+  <!-- ==================== АНИМИРОВАННЫЙ SPLASH SCREEN ==================== -->
+  <div id="app-splash" class="fixed inset-0 z-[100] bg-[#FBF8F5] dark:bg-[#1A120E] flex flex-col items-center justify-between py-12 px-6 transition-all duration-300 pointer-events-auto">
+    <div class="flex-1 flex flex-col items-center justify-center text-center space-y-4 animate-splash-logo-scale">
+      <!-- Минималистичный векторный логотип Сладкоежка (чашка кофе с легким контуром десерта) -->
+      <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 shadow-sm flex items-center justify-center p-3">
+        <svg class="w-14 h-14" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="36" cy="36" r="30" fill="#FAF5EE" stroke="#EFE6D8" stroke-width="1.5" />
+          <path d="M22 28H48V42C48 46.4183 44.4183 50 40 50H30C25.5817 50 22 46.4183 22 42V28Z" fill="#24140E" />
+          <path d="M48 31H51C53.2091 31 55 32.7909 55 35V36C55 38.2091 53.2091 40 51 40H48" stroke="#24140E" stroke-width="2.75" stroke-linecap="round" />
+          <path d="M19 54H51" stroke="#C68A4C" stroke-width="2.5" stroke-linecap="round" />
+          <path d="M28 22C28 22 30 17 35 17C40 17 41 22 41 22" stroke="#C68A4C" stroke-width="2" stroke-linecap="round" />
+          <path d="M33 14C33 14 34.5 11 38 11C41.5 11 42 14 42 14" stroke="#C68A4C" stroke-width="1.5" stroke-linecap="round" opacity="0.75" />
+        </svg>
+      </div>
+
+      <!-- Бренд Сладкоежка -->
+      <div class="space-y-1">
+        <h1 class="text-2xl sm:text-3xl font-black tracking-[0.22em] text-[#24140E] dark:text-cream-50 uppercase">
+          СЛАДКОЕЖКА
+        </h1>
+        <p class="text-xs sm:text-sm text-[#8C827A] font-medium tracking-wide">
+          Учет и продажи
+        </p>
+      </div>
+    </div>
+
+    <!-- Плашка разработчика -->
+    <div class="animate-splash-badge text-center">
+      <span class="text-[12px] text-[#8C827A] font-sans font-medium tracking-wider">
+        Разработка: Alpha Dev
+      </span>
+    </div>
+  </div>
 
   <!-- ==================== ПЛАВАЮЩИЙ БАННЕР ПРЕВЬЮ ДЛЯ УПРАВЛЯЮЩЕГО ==================== -->
   <div id="preview-mode-banner" class="hidden shrink-0 bg-[#2D1E17] text-white px-4 py-2 text-xs font-semibold flex items-center justify-between z-40 border-b border-cacao-800">
@@ -113,11 +162,15 @@
   <!-- ==================== СТРОГИЙ ДЕЛОВОЙ HEADER (BUSINESS MINIMAL) ==================== -->
   <header class="bg-white dark:bg-[#19130F] border-b border-[#ECE6DE] dark:border-cacao-800 px-4 py-2.5 z-30 shrink-0 flex items-center justify-between transition-colors">
     
-    <!-- Левая часть: Монохромный логотип и название -->
+    <!-- Левая часть: Монохромный векторный логотип и название -->
     <div class="flex items-center space-x-2.5 min-w-0">
-      <!-- Минималистичная монограмма в скругленном квадрате 32x32px (фон #2D1E17) -->
-      <div class="w-8 h-8 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] flex items-center justify-center font-bold text-sm tracking-tight shrink-0 shadow-2xs">
-        С
+      <div class="w-8 h-8 rounded-lg bg-[#24140E] text-white flex items-center justify-center shrink-0 shadow-2xs p-1">
+        <svg class="w-6 h-6" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 28H48V42C48 46.4183 44.4183 50 40 50H30C25.5817 50 22 46.4183 22 42V28Z" fill="#FAF5EE" />
+          <path d="M48 31H51C53.2091 31 55 32.7909 55 35V36C55 38.2091 53.2091 40 51 40H48" stroke="#FAF5EE" stroke-width="3" stroke-linecap="round" />
+          <path d="M19 54H51" stroke="#C68A4C" stroke-width="3" stroke-linecap="round" />
+          <path d="M28 22C28 22 30 17 35 17C40 17 41 22 41 22" stroke="#C68A4C" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
       </div>
       <div class="min-w-0">
         <div class="font-bold text-sm sm:text-base tracking-[0.5px] uppercase text-[#1F2937] dark:text-[#F9FAFB] leading-tight truncate">
@@ -162,11 +215,17 @@
       <div class="w-full max-w-sm bg-white dark:bg-cacao-900 rounded-2xl p-6 sm:p-8 shadow-xs border border-[#ECE6DE] dark:border-cacao-800">
         
         <div class="text-center mb-6">
-          <div class="w-12 h-12 rounded-xl bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] mx-auto flex items-center justify-center text-lg font-black tracking-tight mb-3">
-            С
+          <div class="w-14 h-14 rounded-2xl bg-[#FAF5EE] dark:bg-cacao-950 border border-[#EFE6D8] dark:border-cacao-800 mx-auto flex items-center justify-center p-2 mb-3 shadow-2xs">
+            <svg class="w-10 h-10" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 28H48V42C48 46.4183 44.4183 50 40 50H30C25.5817 50 22 46.4183 22 42V28Z" fill="#24140E" />
+              <path d="M48 31H51C53.2091 31 55 32.7909 55 35V36C55 38.2091 53.2091 40 51 40H48" stroke="#24140E" stroke-width="2.75" stroke-linecap="round" />
+              <path d="M19 54H51" stroke="#C68A4C" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M28 22C28 22 30 17 35 17C40 17 41 22 41 22" stroke="#C68A4C" stroke-width="2" stroke-linecap="round" />
+              <path d="M33 14C33 14 34.5 11 38 11C41.5 11 42 14 42 14" stroke="#C68A4C" stroke-width="1.5" stroke-linecap="round" opacity="0.75" />
+            </svg>
           </div>
-          <h1 class="text-xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50 uppercase">СЛАДКОЕЖКА</h1>
-          <p class="text-xs text-[#6B7280] dark:text-neutral-400 font-medium tracking-wide mt-0.5">Внутренний учет и продажи</p>
+          <h1 class="text-xl font-bold tracking-[0.2em] text-[#24140E] dark:text-cream-50 uppercase">СЛАДКОЕЖКА</h1>
+          <p class="text-xs text-[#8C827A] font-medium tracking-wide mt-0.5">Внутренний учет и продажи</p>
         </div>
 
         <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
@@ -200,6 +259,16 @@
             <button onclick="quickLogin('cashier1', '1234')" class="p-2.5 text-left rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] transition bg-[#FAF7F2] dark:bg-cacao-950">
               <div class="font-bold text-xs text-caramel-600 dark:text-caramel-400">Сотрудник</div>
               <div class="text-[10px] text-[#6B7280] font-mono mt-0.5">cashier1</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-5 text-center">
+          <span class="text-[11px] text-[#8C827A] font-medium tracking-wide">Разработка: Alpha Dev</span>
+        </div>
+
+      </div>
+    </div>
             </button>
           </div>
         </div>
@@ -428,6 +497,18 @@
           </div>
         </div>
 
+        <!-- Сегментированный переключатель: Витрина (Готовые блюда) vs Сырье и ингредиенты -->
+        <div class="flex items-center p-1 bg-[#FAF7F2] dark:bg-cacao-950 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 gap-1">
+          <button type="button" onclick="setInventoryViewMode('showcase')" id="inv-view-showcase" 
+                  class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-2xs bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17]">
+            🍽️ Витрина (Готовые блюда)
+          </button>
+          <button type="button" onclick="setInventoryViewMode('ingredients')" id="inv-view-ingredients" 
+                  class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-[#6B7280] dark:text-cream-200 hover:text-[#2D1E17]">
+            📦 Сырье и ингредиенты
+          </button>
+        </div>
+
         <!-- Горизонтальные категории -->
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-1" id="manager-categories-bar">
           <!-- Категории -->
@@ -435,7 +516,7 @@
 
         <!-- Поиск товаров -->
         <div class="relative">
-          <input type="text" id="inventory-search-input" oninput="renderManagerInventory()" placeholder="Поиск десерта или напитка по названию..."
+          <input type="text" id="inventory-search-input" oninput="renderManagerInventory()" placeholder="Поиск десерта, напитка или сырья по названию..."
                  class="w-full pl-9 pr-4 py-2.5 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-cream-100 placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17]">
           <svg class="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -444,7 +525,7 @@
 
         <!-- Таблица позиций склада (с переносом названия на 2 строки и строгими кнопками 8px) -->
         <div class="rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 overflow-hidden shadow-xs">
-          <div class="grid grid-cols-12 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#ECE6DE] dark:border-cacao-800 bg-[#FAF7F2] dark:bg-cacao-950/40">
+          <div id="inventory-table-header" class="grid grid-cols-12 px-4 py-3 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider border-b border-[#ECE6DE] dark:border-cacao-800 bg-[#FAF7F2] dark:bg-cacao-950/40">
             <div class="col-span-5 sm:col-span-6">Позиция меню</div>
             <div class="col-span-3 sm:col-span-2">Цена</div>
             <div class="col-span-4 text-right">Остаток на складе</div>
@@ -791,40 +872,138 @@
     </div>
   </div>
 
-  <!-- 5. МОДАЛКА ТОВАРА -->
+  <!-- 5. МОДАЛКА СОЗДАНИЯ / РЕДАКТИРОВАНИЯ ТОВАРА -->
   <div id="modal-product" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
+    <div class="bg-white dark:bg-cacao-900 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 id="modal-product-title" class="font-bold text-sm uppercase tracking-wide text-[#1F2937] dark:text-cream-50">Добавить позицию</h3>
         <button onclick="closeProductModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
       </div>
-      <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3">
+
+      <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3.5">
         <input type="hidden" id="prod-id">
+        <input type="hidden" id="prod-item-type" value="simple">
+
+        <!-- 1. Загрузка фотографии товара (Client-side сжатие 800px WebP) -->
         <div>
-          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Название позиции меню</label>
-          <input type="text" id="prod-name" required placeholder="Капучино (280 мл)" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1.5">Фотография товара</label>
+          <input type="file" id="prod-image-file" accept="image/*" onchange="handleImageSelect(event)" class="hidden">
+          
+          <div class="flex items-center space-x-3">
+            <div id="prod-image-box" onclick="document.getElementById('prod-image-file').click()"
+                 class="w-20 h-20 rounded-xl border border-dashed border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 flex flex-col items-center justify-center cursor-pointer hover:border-[#2D1E17] dark:hover:border-cream-100 transition overflow-hidden relative group shrink-0 shadow-2xs">
+              <div id="prod-image-placeholder" class="flex flex-col items-center justify-center text-center p-1">
+                <svg class="w-6 h-6 text-[#8E8A85] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                </svg>
+                <span class="text-[9px] text-[#8E8A85] font-semibold leading-tight">+ Фото</span>
+              </div>
+              <img id="prod-image-preview" src="" alt="Превью" class="hidden w-full h-full object-cover">
+            </div>
+
+            <div class="flex-1 space-y-1">
+              <div class="text-[11px] text-[#8E8A85]">
+                Автоматическое сжатие до 800px WebP для быстродействия
+              </div>
+              <div class="flex items-center space-x-2 pt-1">
+                <button type="button" onclick="document.getElementById('prod-image-file').click()" 
+                        class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-700 hover:border-[#2D1E17] text-[#1F2937] dark:text-cream-100 transition shadow-2xs">
+                  Выбрать фото
+                </button>
+                <button type="button" id="btn-remove-image" onclick="removeSelectedImage()" 
+                        class="hidden px-2 py-1 rounded-md text-[11px] font-semibold text-red-500 hover:underline">
+                  Удалить
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- 2. Тип номенклатуры (Штучный / Составное / Сырье) -->
         <div>
-          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Категория</label>
-          <select id="prod-category" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
-            <!-- Категории -->
-          </select>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1.5">Тип номенклатуры</label>
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-[#FAF7F2] dark:bg-cacao-950 rounded-xl border border-[#ECE6DE] dark:border-cacao-800">
+            <button type="button" id="type-btn-simple" onclick="setProductItemType('simple')" class="py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center">
+              Штучный
+            </button>
+            <button type="button" id="type-btn-composite" onclick="setProductItemType('composite')" class="py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center">
+              Блюдо с техкартой
+            </button>
+            <button type="button" id="type-btn-ingredient" onclick="setProductItemType('ingredient')" class="py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center">
+              Ингредиент
+            </button>
+          </div>
         </div>
+
+        <!-- 3. Название позиции -->
+        <div>
+          <label class="block text-xs font-semibold text-[#6B7280] mb-1">Название позиции</label>
+          <input type="text" id="prod-name" required placeholder="Например: Капучино или Котлета говяжья" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+        </div>
+
+        <!-- 4. Категория и Единица измерения -->
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Цена (₽)</label>
-            <input type="number" step="0.01" min="0" id="prod-price" required placeholder="150.00" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Категория</label>
+            <select id="prod-category" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Остаток (шт)</label>
-            <input type="number" min="0" id="prod-stock" required placeholder="30" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Ед. измерения</label>
+            <select id="prod-unit" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white font-semibold">
+              <option value="шт">шт (штуки)</option>
+              <option value="г">г (граммы)</option>
+              <option value="мл">мл (миллилитры)</option>
+              <option value="кг">кг (килограммы)</option>
+              <option value="л">л (литры)</option>
+            </select>
           </div>
         </div>
-        <div class="flex items-center justify-between pt-3">
-          <button type="button" id="btn-delete-prod" onclick="deleteCurrentProduct()" class="text-xs font-semibold text-red-600 hover:underline">Удалить позицию</button>
+
+        <!-- 5. Цена продажи и Остаток на складе -->
+        <div class="grid grid-cols-2 gap-2">
+          <div id="prod-price-wrapper">
+            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Цена продажи (₽)</label>
+            <input type="number" step="0.01" min="0" id="prod-price" placeholder="150.00" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          </div>
+          <div id="prod-stock-wrapper">
+            <label id="prod-stock-label" class="block text-xs font-semibold text-[#6B7280] mb-1">Остаток на складе</label>
+            <input type="number" step="0.001" min="0" id="prod-stock" placeholder="30" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white tabular-nums">
+          </div>
+        </div>
+
+        <!-- 6. Блок Конструктора Техкарты (для composite) -->
+        <div id="prod-tech-card-section" class="hidden space-y-2 pt-2 border-t border-[#ECE6DE] dark:border-cacao-800">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-[#1F2937] dark:text-cream-50 uppercase tracking-wide">
+              Состав блюда (Техкарта)
+            </label>
+            <button type="button" onclick="addTechCardRow()" class="px-2.5 py-1 rounded-md bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#2D1E17] dark:text-cream-100 hover:border-[#2D1E17] text-[11px] font-bold flex items-center space-x-1 shadow-2xs">
+              <span>+ Добавить ингредиент</span>
+            </button>
+          </div>
+
+          <div id="tech-card-empty-notice" class="p-3 text-center text-[#8E8A85] text-xs bg-[#FAF7F2] dark:bg-cacao-950 rounded-lg border border-dashed border-[#ECE6DE] dark:border-cacao-800">
+            Ингредиенты еще не добавлены. Нажмите «+ Добавить ингредиент», чтобы привязать сырье со склада.
+          </div>
+
+          <div id="tech-card-ingredients-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <!-- Строки ингредиентов техкарты -->
+          </div>
+        </div>
+
+        <!-- 7. Кнопки сохранения и удаления -->
+        <div class="flex items-center justify-between pt-3 border-t border-[#ECE6DE] dark:border-cacao-800">
+          <button type="button" id="btn-delete-prod" onclick="deleteCurrentProduct()" class="text-xs font-semibold text-red-600 hover:underline">
+            Удалить позицию
+          </button>
           <div class="flex items-center space-x-2 ml-auto">
-            <button type="button" onclick="closeProductModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">Отмена</button>
-            <button type="submit" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs shadow-2xs">Сохранить</button>
+            <button type="button" onclick="closeProductModal()" class="px-3 py-1.5 text-xs text-[#6B7280] font-semibold">
+              Отмена
+            </button>
+            <button type="submit" id="btn-save-prod" class="px-4 py-2 rounded-lg bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs shadow-2xs">
+              Сохранить
+            </button>
           </div>
         </div>
       </form>
@@ -898,8 +1077,278 @@
     // Кэш данных
     let cachedCategories = [];
     let cachedProducts = [];
+    let cachedIngredients = []; // Техкарты (product_ingredients)
     let cachedSales = [];
     let cachedUsers = [];
+
+    // Режим отображения склада управляющего: 'showcase' (витрина готовых блюд) или 'ingredients' (сырье)
+    let inventoryViewMode = 'showcase';
+
+    // Состояние загрузки изображения товара и редактирования техкарт
+    let pendingImageBlob = null;
+    let pendingImageDeleted = false;
+    let editingRecipes = [];
+
+    // Закрытие анимированного Splash Screen (длительность ~1.85с)
+    function dismissSplash() {
+      const splash = document.getElementById('app-splash');
+      if (splash) {
+        splash.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => { splash.classList.add('hidden'); }, 320);
+      }
+    }
+    setTimeout(dismissSplash, 1850);
+
+    // ==========================================
+    // РАСЧЕТ ДОСТУПНОСТИ БЛЮД ПО ТЕХКАРТАМ
+    // ==========================================
+    function getProductAvailableStock(prod) {
+      if (!prod) return 0;
+      const itemType = prod.item_type || 'simple';
+
+      // Ингредиенты хранят собственный остаток
+      if (itemType === 'ingredient') {
+        return Number(prod.stock_qty || 0);
+      }
+
+      // Составные блюда с техкартой: Минимум(Остаток_ингредиента / Расход_на_порцию)
+      if (itemType === 'composite') {
+        const recipes = cachedIngredients.filter(r => r.parent_product_id === prod.id);
+        if (!recipes || recipes.length === 0) {
+          return Number(prod.stock_qty || 0);
+        }
+        const portions = recipes.map(recipe => {
+          const ing = cachedProducts.find(p => p.id === recipe.ingredient_id && !p.is_deleted);
+          if (!ing || Number(recipe.quantity) <= 0) return 0;
+          return Math.floor(Number(ing.stock_qty || 0) / Number(recipe.quantity));
+        });
+        return Math.max(0, Math.min(...portions));
+      }
+
+      // Обычный штучный товар
+      return Number(prod.stock_qty || 0);
+    }
+
+    function setInventoryViewMode(mode) {
+      inventoryViewMode = mode;
+      const btnShowcase = document.getElementById('inv-view-showcase');
+      const btnIngredients = document.getElementById('inv-view-ingredients');
+      const tableHeader = document.getElementById('inventory-table-header');
+
+      const activeClass = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-2xs bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17]';
+      const inactiveClass = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-[#6B7280] dark:text-cream-200 hover:text-[#2D1E17]';
+
+      if (mode === 'showcase') {
+        if (btnShowcase) btnShowcase.className = activeClass;
+        if (btnIngredients) btnIngredients.className = inactiveClass;
+        if (tableHeader) {
+          tableHeader.innerHTML = `
+            <div class="col-span-5 sm:col-span-6">Позиция меню</div>
+            <div class="col-span-3 sm:col-span-2">Цена продажи</div>
+            <div class="col-span-4 text-right">Доступно к продаже</div>
+          `;
+        }
+      } else {
+        if (btnShowcase) btnShowcase.className = inactiveClass;
+        if (btnIngredients) btnIngredients.className = activeClass;
+        if (tableHeader) {
+          tableHeader.innerHTML = `
+            <div class="col-span-5 sm:col-span-6">Сырье / Ингредиент</div>
+            <div class="col-span-3 sm:col-span-2">Ед. изм.</div>
+            <div class="col-span-4 text-right">Остаток на складе</div>
+          `;
+        }
+      }
+      renderManagerInventory();
+    }
+
+    // ==========================================
+    // МОДУЛЬ РАБОТЫ С ИЗОБРАЖЕНИЯМИ (CANVAS СЖАТИЕ 800px WebP)
+    // ==========================================
+    function handleImageSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_SIZE = 800;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height = Math.round((height * MAX_SIZE) / width);
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(function(blob) {
+            if (blob) {
+              pendingImageBlob = blob;
+              pendingImageDeleted = false;
+              const previewUrl = URL.createObjectURL(blob);
+              showImagePreview(previewUrl);
+            }
+          }, 'image/webp', 0.8);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeSelectedImage() {
+      pendingImageBlob = null;
+      pendingImageDeleted = true;
+      const fileInput = document.getElementById('prod-image-file');
+      if (fileInput) fileInput.value = '';
+      const previewImg = document.getElementById('prod-image-preview');
+      if (previewImg) {
+        previewImg.src = '';
+        previewImg.classList.add('hidden');
+      }
+      document.getElementById('prod-image-placeholder')?.classList.remove('hidden');
+      document.getElementById('btn-remove-image')?.classList.add('hidden');
+    }
+
+    function showImagePreview(url) {
+      const previewImg = document.getElementById('prod-image-preview');
+      if (previewImg) {
+        previewImg.src = url;
+        previewImg.classList.remove('hidden');
+      }
+      document.getElementById('prod-image-placeholder')?.classList.add('hidden');
+      document.getElementById('btn-remove-image')?.classList.remove('hidden');
+    }
+
+    // ==========================================
+    // УПРАВЛЕНИЕ ТИПАМИ И ТЕХКАРТОЙ В МОДАЛКЕ
+    // ==========================================
+    function setProductItemType(type) {
+      document.getElementById('prod-item-type').value = type;
+
+      const btnSimple = document.getElementById('type-btn-simple');
+      const btnComposite = document.getElementById('type-btn-composite');
+      const btnIngredient = document.getElementById('type-btn-ingredient');
+
+      const activeClass = 'py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center bg-[#2D1E17] text-white dark:bg-white dark:text-[#2D1E17] shadow-2xs';
+      const inactiveClass = 'py-1.5 px-2 rounded-lg text-xs font-semibold transition-all text-center text-[#6B7280] dark:text-cream-200 hover:text-[#2D1E17]';
+
+      if (btnSimple) btnSimple.className = type === 'simple' ? activeClass : inactiveClass;
+      if (btnComposite) btnComposite.className = type === 'composite' ? activeClass : inactiveClass;
+      if (btnIngredient) btnIngredient.className = type === 'ingredient' ? activeClass : inactiveClass;
+
+      const techCardSection = document.getElementById('prod-tech-card-section');
+      const stockWrapper = document.getElementById('prod-stock-wrapper');
+      const priceWrapper = document.getElementById('prod-price-wrapper');
+      const stockLabel = document.getElementById('prod-stock-label');
+
+      if (type === 'composite') {
+        techCardSection?.classList.remove('hidden');
+        stockWrapper?.classList.add('hidden');
+        priceWrapper?.classList.remove('hidden');
+        renderTechCardEditor();
+      } else if (type === 'ingredient') {
+        techCardSection?.classList.add('hidden');
+        stockWrapper?.classList.remove('hidden');
+        if (stockLabel) stockLabel.innerText = 'Остаток сырья на складе';
+        priceWrapper?.classList.add('hidden');
+      } else {
+        techCardSection?.classList.add('hidden');
+        stockWrapper?.classList.remove('hidden');
+        if (stockLabel) stockLabel.innerText = 'Остаток на складе';
+        priceWrapper?.classList.remove('hidden');
+      }
+    }
+
+    function renderTechCardEditor() {
+      const container = document.getElementById('tech-card-ingredients-list');
+      const emptyNotice = document.getElementById('tech-card-empty-notice');
+      if (!container) return;
+
+      const rawIngredients = cachedProducts.filter(p => p.item_type === 'ingredient' && !p.is_deleted);
+
+      if (editingRecipes.length === 0) {
+        if (emptyNotice) emptyNotice.classList.remove('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      if (emptyNotice) emptyNotice.classList.add('hidden');
+
+      container.innerHTML = editingRecipes.map((item, idx) => {
+        const selectedIng = rawIngredients.find(i => i.id === item.ingredient_id) || rawIngredients[0];
+        const unit = selectedIng ? (selectedIng.unit || 'шт') : 'ед';
+
+        return `
+          <div class="flex items-center space-x-2 bg-[#FAF7F2] dark:bg-cacao-950 p-2 rounded-lg border border-[#ECE6DE] dark:border-cacao-800 text-xs">
+            <select onchange="updateTechCardIngredient(${idx}, this.value)" class="flex-1 px-2 py-1.5 rounded-md border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-white">
+              ${rawIngredients.map(ing => `
+                <option value="${ing.id}" ${ing.id === item.ingredient_id ? 'selected' : ''}>
+                  ${escapeHtml(ing.name)} (${ing.stock_qty} ${ing.unit || 'шт'})
+                </option>
+              `).join('')}
+            </select>
+            
+            <div class="flex items-center space-x-1 w-24 shrink-0">
+              <input type="number" step="0.001" min="0.001" value="${item.quantity}" 
+                     oninput="updateTechCardQuantity(${idx}, this.value)" 
+                     placeholder="Норма"
+                     class="w-16 px-2 py-1.5 rounded-md border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#1F2937] dark:text-white font-bold tabular-nums text-center">
+              <span class="text-[11px] font-semibold text-[#8E8A85] w-6 truncate">${unit}</span>
+            </div>
+
+            <button type="button" onclick="removeTechCardRow(${idx})" class="w-7 h-7 flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md shrink-0">
+              ✕
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addTechCardRow() {
+      const rawIngredients = cachedProducts.filter(p => p.item_type === 'ingredient' && !p.is_deleted);
+      if (rawIngredients.length === 0) {
+        alert('Для добавления в техкарту сначала создайте на складе хотя бы один товар со статусом "Ингредиент" (например: Молоко, Зерно, Булочка).');
+        return;
+      }
+      editingRecipes.push({
+        ingredient_id: rawIngredients[0].id,
+        quantity: 1
+      });
+      renderTechCardEditor();
+    }
+
+    function removeTechCardRow(idx) {
+      editingRecipes.splice(idx, 1);
+      renderTechCardEditor();
+    }
+
+    function updateTechCardIngredient(idx, ingredientId) {
+      if (editingRecipes[idx]) {
+        editingRecipes[idx].ingredient_id = ingredientId;
+        renderTechCardEditor();
+      }
+    }
+
+    function updateTechCardQuantity(idx, val) {
+      const num = parseFloat(val);
+      if (editingRecipes[idx]) {
+        editingRecipes[idx].quantity = isNaN(num) || num <= 0 ? 1 : num;
+      }
+    }
 
     // ==========================================
     // 2. ЗВУКОВОЙ СИГНАЛ (WEBAUDIO) И ВИБРАЦИЯ
@@ -1025,6 +1474,9 @@
           refreshAppData();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+          refreshAppData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'product_ingredients' }, () => {
           refreshAppData();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
@@ -1271,15 +1723,24 @@
       try {
         if (!supabaseClient) return;
 
-        const [cRes, pRes, sRes, uRes] = await Promise.all([
+        const [cRes, pRes, sRes, uRes, ingRes] = await Promise.all([
           supabaseClient.from('categories').select('*').eq('is_deleted', false).order('sort_order'),
           supabaseClient.from('products').select('*').eq('is_deleted', false).order('name'),
           supabaseClient.from('sales').select('*, sale_items(*), users(name)').order('created_at', { ascending: false }),
-          supabaseClient.from('users').select('*').order('created_at')
+          supabaseClient.from('users').select('*').order('created_at'),
+          supabaseClient.from('product_ingredients').select('*').catch(() => ({ data: [] }))
         ]);
 
         if (cRes.data) cachedCategories = cRes.data;
-        if (pRes.data) cachedProducts = pRes.data;
+        if (pRes.data) {
+          cachedProducts = pRes.data.map(p => ({
+            ...p,
+            item_type: p.item_type || 'simple',
+            unit: p.unit || 'шт',
+            image_url: p.image_url || null
+          }));
+        }
+        if (ingRes && ingRes.data) cachedIngredients = ingRes.data;
         if (sRes.data) {
           cachedSales = sRes.data.map(s => ({
             ...s,
@@ -1367,7 +1828,7 @@
       }
 
       grid.innerHTML = cachedCategories.map(cat => {
-        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted).length;
+        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted && p.item_type !== 'ingredient').length;
         const iconSvg = getCategoryIcon(cat.code, cat.name);
 
         return `
@@ -1428,12 +1889,13 @@
 
       const cat = cachedCategories.find(c => c.id === currentEmployeeCategory);
       if (cat) {
-        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted).length;
+        const count = cachedProducts.filter(p => p.category_id === cat.id && !p.is_deleted && p.item_type !== 'ingredient').length;
         titleEl.innerText = cat.name;
         if (countEl) countEl.innerText = `${count} ${pluralize(count, ['товар', 'товара', 'товаров'])}`;
       } else {
+        const totalReady = cachedProducts.filter(p => !p.is_deleted && p.item_type !== 'ingredient').length;
         titleEl.innerText = 'Все товары';
-        if (countEl) countEl.innerText = `${cachedProducts.length} товаров`;
+        if (countEl) countEl.innerText = `${totalReady} товаров`;
       }
     }
 
@@ -1509,7 +1971,8 @@
       const search = (document.getElementById('employee-search-input')?.value || '').toLowerCase().trim();
       if (!grid) return;
 
-      let list = cachedProducts.filter(p => !p.is_deleted);
+      // Витрина кассира отображает только готовые блюда и штучные товары (сырье скрыто)
+      let list = cachedProducts.filter(p => !p.is_deleted && p.item_type !== 'ingredient');
       if (search) {
         list = list.filter(p => p.name.toLowerCase().includes(search));
       } else if (currentEmployeeCategory !== null) {
@@ -1530,41 +1993,63 @@
 
       grid.innerHTML = list.map(prod => {
         const inCartQty = cart[prod.id] || 0;
-        const isOutOfStock = prod.stock_qty <= 0;
-        const isMax = inCartQty >= prod.stock_qty;
+        const availQty = getProductAvailableStock(prod);
+        const isOutOfStock = availQty <= 0;
+        const isMax = inCartQty >= availQty;
+        const isComposite = prod.item_type === 'composite';
 
         return `
-          <div onclick="handleProductCardClick('${prod.id}', ${prod.stock_qty})" 
-               class="relative bg-white dark:bg-cacao-900 rounded-xl p-3 sm:p-3.5 border transition-all cursor-pointer flex flex-col justify-between h-36 ${isOutOfStock ? 'opacity-40 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] ring-1 ring-[#2D1E17] shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
+          <div onclick="handleProductCardClick('${prod.id}', ${availQty})" 
+               class="group relative bg-white dark:bg-cacao-900 rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between ${isOutOfStock ? 'opacity-45 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] dark:border-cream-100 ring-1 ring-[#2D1E17] dark:ring-cream-100 shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
             
-            <div>
-              <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 min-h-[2.4rem] leading-snug">
-                ${escapeHtml(prod.name)}
-              </div>
+            <!-- Верхняя часть: Фотография 4:3 или нейтральная векторная заглушка -->
+            <div class="relative w-full aspect-[4/3] bg-[#FAF7F2] dark:bg-cacao-950 overflow-hidden flex items-center justify-center">
+              ${prod.image_url ? `
+                <img src="${escapeHtml(prod.image_url)}" alt="${escapeHtml(prod.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+              ` : `
+                <div class="w-full h-full flex flex-col items-center justify-center text-[#C68A4C]/60 dark:text-[#C68A4C]/40 p-3">
+                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 2v2m4-2v2m4-2v2"/>
+                  </svg>
+                </div>
+              `}
+
+              ${isComposite ? `
+                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#24140E]/85 text-white backdrop-blur-xs flex items-center space-x-1 shadow-2xs">
+                  <span>⚡ Рецепт</span>
+                </span>
+              ` : ''}
+
+              ${inCartQty > 0 ? `
+                <div class="absolute top-2 right-2 flex items-center bg-[#24140E] text-white rounded-lg p-0.5 shadow-md z-10" onclick="event.stopPropagation()">
+                  <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs">-</button>
+                  <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
+                  <button onclick="incrementCart('${prod.id}', ${availQty})" ${isMax ? 'disabled class="w-6 h-6 flex items-center justify-center opacity-30 cursor-not-allowed text-xs"' : 'class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs"'}>+</button>
+                </div>
+              ` : ''}
             </div>
 
-            ${inCartQty > 0 ? `
-              <div class="absolute top-2.5 right-2.5 flex items-center space-x-1 z-10" onclick="event.stopPropagation()">
-                <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-[#2D1E17] dark:text-white font-bold flex items-center justify-center hover:bg-[#EAE2D8] text-xs">
-                  -
-                </button>
-                <span class="w-6 h-6 rounded-md bg-[#2D1E17] text-white font-bold flex items-center justify-center text-xs tabular-nums">
-                  ${inCartQty}
-                </span>
-                <button onclick="incrementCart('${prod.id}', ${prod.stock_qty})" ${isMax ? 'disabled class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-neutral-300 opacity-40"' : 'class="w-6 h-6 rounded-md bg-[#F3EDE6] dark:bg-cacao-800 text-[#2D1E17] dark:text-white font-bold flex items-center justify-center hover:bg-[#EAE2D8] text-xs"'}>
-                  +
-                </button>
-              </div>
-            ` : ''}
-
-            <div class="pt-2 border-t border-dashed border-[#ECE6DE] dark:border-cacao-800 flex items-end justify-between">
+            <!-- Нижняя часть: Инфо о товаре и цене -->
+            <div class="p-3 sm:p-3.5 flex flex-col justify-between flex-1 space-y-2">
               <div>
-                <div class="text-[10px] sm:text-[11px] ${prod.stock_qty <= 5 ? 'text-amber-700 font-semibold' : 'text-[#8E8A85] font-medium'}">
-                  ${isOutOfStock ? 'Закончилось' : `Остаток: ${prod.stock_qty} шт`}
+                <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug">
+                  ${escapeHtml(prod.name)}
                 </div>
-                <div class="text-sm sm:text-base font-bold text-[#1F2937] dark:text-cream-50 mt-0.5 tabular-nums">
+                <div class="text-[11px] text-[#8E8A85] mt-1 font-medium">
+                  ${isOutOfStock ? `<span class="text-red-500 font-semibold">${isComposite ? 'Закончилось сырье' : 'Закончился'}</span>` : 
+                    isComposite ? `Доступно: <b class="text-[#1F2937] dark:text-cream-100">${availQty}</b> порц.` : 
+                    `Остаток: <b class="text-[#1F2937] dark:text-cream-100">${availQty}</b> ${prod.unit || 'шт'}`}
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-[#ECE6DE] dark:border-cacao-800 flex items-center justify-between">
+                <span class="text-sm sm:text-base font-black text-[#1F2937] dark:text-cream-50 tabular-nums">
                   ${Number(prod.price).toLocaleString('ru-RU')} ₽
-                </div>
+                </span>
+                <span class="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider">
+                  ${prod.unit || 'шт'}
+                </span>
               </div>
             </div>
 
@@ -1588,6 +2073,7 @@
       playBeep('click');
       triggerHaptic();
       updateCartUI();
+      renderEmployeeProducts();
     }
 
     function decrementCart(prodId) {
@@ -1597,6 +2083,7 @@
       playBeep('click');
       triggerHaptic();
       updateCartUI();
+      renderEmployeeProducts();
     }
 
     function clearCart() {
@@ -1984,7 +2471,15 @@
           if (items && items.length > 0) {
             const stockDeltas = {};
             items.forEach(it => {
-              if (it.product_id) {
+              if (!it.product_id) return;
+              const prod = cachedProducts.find(p => p.id === it.product_id);
+              if (prod && prod.item_type === 'composite') {
+                const recipes = cachedIngredients.filter(r => r.parent_product_id === prod.id);
+                recipes.forEach(r => {
+                  const added = Number(r.quantity) * Number(it.quantity || 0);
+                  stockDeltas[r.ingredient_id] = (stockDeltas[r.ingredient_id] || 0) + added;
+                });
+              } else {
                 stockDeltas[it.product_id] = (stockDeltas[it.product_id] || 0) + Number(it.quantity || 0);
               }
             });
@@ -2034,8 +2529,17 @@
 
         if (items && items.length > 0) {
           for (const it of items) {
-            if (it.product_id) {
-              const prod = cachedProducts.find(p => p.id === it.product_id);
+            if (!it.product_id) continue;
+            const prod = cachedProducts.find(p => p.id === it.product_id);
+            if (prod && prod.item_type === 'composite') {
+              const recipes = cachedIngredients.filter(r => r.parent_product_id === prod.id);
+              for (const r of recipes) {
+                const ing = cachedProducts.find(p => p.id === r.ingredient_id);
+                const cur = ing ? Number(ing.stock_qty || 0) : 0;
+                const added = Number(r.quantity) * Number(it.quantity || 0);
+                await supabaseClient.from('products').update({ stock_qty: cur + added }).eq('id', r.ingredient_id);
+              }
+            } else {
               const curStock = prod ? Number(prod.stock_qty || 0) : 0;
               await supabaseClient.from('products').update({ stock_qty: curStock + Number(it.quantity || 0) }).eq('id', it.product_id);
             }
@@ -2246,7 +2750,14 @@
       const search = (document.getElementById('inventory-search-input')?.value || '').toLowerCase().trim();
       if (!listContainer) return;
 
-      let list = cachedProducts;
+      let list = cachedProducts.filter(p => !p.is_deleted);
+
+      if (inventoryViewMode === 'showcase') {
+        list = list.filter(p => p.item_type !== 'ingredient');
+      } else {
+        list = list.filter(p => p.item_type === 'ingredient');
+      }
+
       if (currentManagerCategory !== 'all') {
         list = list.filter(p => p.category_id === currentManagerCategory);
       }
@@ -2257,7 +2768,7 @@
       if (list.length === 0) {
         listContainer.innerHTML = `
           <div class="p-12 text-center text-[#8E8A85] text-xs font-semibold">
-            Позиций в данной категории нет
+            ${inventoryViewMode === 'showcase' ? 'Позиций готовой витрины не найдено' : 'Сырье и ингредиенты не найдены'}
           </div>
         `;
         return;
@@ -2265,47 +2776,134 @@
 
       listContainer.innerHTML = list.map(prod => {
         const cat = cachedCategories.find(c => c.id === prod.category_id);
-        const isLow = prod.stock_qty <= 5;
+        const availStock = getProductAvailableStock(prod);
+        const isComposite = prod.item_type === 'composite';
+        const recipes = isComposite ? cachedIngredients.filter(r => r.parent_product_id === prod.id) : [];
 
-        return `
-          <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
-            <!-- Название переносится на две строки (line-clamp-2) -->
-            <div class="col-span-5 sm:col-span-6 pr-2 cursor-pointer" onclick="openProductModal('${prod.id}')">
-              <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">${escapeHtml(prod.name)}</div>
-              ${cat ? `<div class="text-[10px] text-[#8E8A85] font-medium truncate mt-0.5">${escapeHtml(cat.name)}</div>` : ''}
-            </div>
-
-            <div class="col-span-3 sm:col-span-2 font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 tabular-nums">
-              ${Number(prod.price).toLocaleString('ru-RU')} ₽
-            </div>
-
-            <!-- Плоские строгие кнопки [-] и [+] (фон #F3EDE6, символ #2D1E17, скругление 8px) -->
-            <div class="col-span-4 flex items-center justify-end space-x-1 sm:space-x-1.5">
-              <button onclick="quickStockChange('${prod.id}', -1)" aria-label="Уменьшить остаток" 
-                      class="w-10 h-10 sm:w-11 sm:h-11 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-lg shrink-0 select-none transition">
-                -
-              </button>
-              
-              <!-- Тап по числу открывает быстрое модальное окно остатка -->
-              <div onclick="openStockModal('${prod.id}', ${prod.stock_qty}, '${escapeHtml(prod.name)}')" title="Изменить остаток" 
-                   class="min-w-[44px] text-center cursor-pointer py-1.5 px-1 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
-                <span class="text-sm sm:text-base font-bold tabular-nums block leading-none ${isLow ? 'text-red-600' : 'text-[#1F2937] dark:text-cream-50'}">
-                  ${prod.stock_qty}
-                </span>
-                <span class="text-[9px] text-[#8E8A85] block mt-0.5">шт</span>
+        if (inventoryViewMode === 'showcase') {
+          return `
+            <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+              <!-- Название и фото -->
+              <div class="col-span-5 sm:col-span-6 pr-2 flex items-center space-x-3 cursor-pointer" onclick="openProductModal('${prod.id}')">
+                <div class="w-10 h-10 rounded-lg bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 overflow-hidden shrink-0 flex items-center justify-center">
+                  ${prod.image_url ? `
+                    <img src="${escapeHtml(prod.image_url)}" alt="" class="w-full h-full object-cover">
+                  ` : `
+                    <svg class="w-5 h-5 text-[#C68A4C]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 2v2m4-2v2m4-2v2"/>
+                    </svg>
+                  `}
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">
+                    ${escapeHtml(prod.name)}
+                  </div>
+                  <div class="flex items-center space-x-1.5 mt-0.5">
+                    ${isComposite ? `
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#24140E] text-white">
+                        ⚡ Рецепт (${recipes.length} ${pluralize(recipes.length, ['компонент', 'компонента', 'компонентов'])})
+                      </span>
+                    ` : `
+                      <span class="px-1.5 py-0.2 rounded text-[10px] font-medium bg-[#ECE6DE] dark:bg-cacao-800 text-[#4B5563] dark:text-cream-200">
+                        Штучный
+                      </span>
+                    `}
+                    ${cat ? `<span class="text-[10px] text-[#8E8A85] truncate">• ${escapeHtml(cat.name)}</span>` : ''}
+                  </div>
+                </div>
               </div>
 
-              <button onclick="quickStockChange('${prod.id}', 1)" aria-label="Увеличить остаток" 
-                      class="w-10 h-10 sm:w-11 sm:h-11 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-lg shrink-0 select-none transition">
-                +
-              </button>
+              <!-- Цена продажи -->
+              <div class="col-span-3 sm:col-span-2 font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 tabular-nums">
+                ${Number(prod.price).toLocaleString('ru-RU')} ₽
+              </div>
 
-              <button onclick="openProductModal('${prod.id}')" title="Редактировать товар" class="w-8 h-8 flex items-center justify-center text-[#8E8A85] hover:text-[#2D1E17] dark:hover:text-white ml-0.5 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
-              </button>
+              <!-- Доступный остаток / кнопки -->
+              <div class="col-span-4 flex items-center justify-end space-x-2">
+                ${isComposite ? `
+                  <div onclick="openProductModal('${prod.id}')" class="text-right cursor-pointer py-1 px-2 rounded-lg hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                    <span class="text-sm sm:text-base font-black tabular-nums block leading-none ${availStock <= 0 ? 'text-red-500' : 'text-[#1F2937] dark:text-cream-50'}">
+                      ${availStock}
+                    </span>
+                    <span class="text-[9px] text-[#8E8A85] block mt-0.5">порц. по сырью</span>
+                  </div>
+                ` : `
+                  <div class="flex items-center space-x-1">
+                    <button onclick="quickStockChange('${prod.id}', -1)" aria-label="Уменьшить" 
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-base shrink-0 transition">
+                      -
+                    </button>
+                    <div onclick="openStockModal('${prod.id}', ${prod.stock_qty}, '${escapeHtml(prod.name)}')" title="Изменить" 
+                         class="min-w-[40px] text-center cursor-pointer py-1 px-1 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                      <span class="text-sm sm:text-base font-bold tabular-nums block leading-none ${prod.stock_qty <= 5 ? 'text-red-600' : 'text-[#1F2937] dark:text-cream-50'}">
+                        ${prod.stock_qty}
+                      </span>
+                      <span class="text-[9px] text-[#8E8A85] block mt-0.5">${prod.unit || 'шт'}</span>
+                    </div>
+                    <button onclick="quickStockChange('${prod.id}', 1)" aria-label="Увеличить" 
+                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-base shrink-0 transition">
+                      +
+                    </button>
+                  </div>
+                `}
+
+                <button onclick="openProductModal('${prod.id}')" title="Редактировать" class="w-8 h-8 flex items-center justify-center text-[#8E8A85] hover:text-[#2D1E17] dark:hover:text-white rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                </button>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        } else {
+          // 'ingredients' (сырье)
+          const isLow = prod.stock_qty <= (prod.unit === 'г' ? 500 : prod.unit === 'мл' ? 1000 : 10);
+          return `
+            <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+              <!-- Название сырья -->
+              <div class="col-span-5 sm:col-span-6 pr-2 cursor-pointer" onclick="openProductModal('${prod.id}')">
+                <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">
+                  ${escapeHtml(prod.name)}
+                </div>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#8E8A85]">
+                    Сырье
+                  </span>
+                  ${cat ? `<span class="text-[10px] text-[#8E8A85] truncate">• ${escapeHtml(cat.name)}</span>` : ''}
+                </div>
+              </div>
+
+              <!-- Единица измерения -->
+              <div class="col-span-3 sm:col-span-2 font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 uppercase">
+                ${prod.unit || 'шт'}
+              </div>
+
+              <!-- Остаток сырья на складе -->
+              <div class="col-span-4 flex items-center justify-end space-x-1 sm:space-x-1.5">
+                <button onclick="quickStockChange('${prod.id}', ${prod.unit === 'г' ? -100 : prod.unit === 'мл' ? -200 : -1})" aria-label="Уменьшить" 
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-base shrink-0 transition">
+                  -
+                </button>
+                
+                <div onclick="openStockModal('${prod.id}', ${prod.stock_qty}, '${escapeHtml(prod.name)}')" title="Изменить остаток" 
+                     class="min-w-[48px] text-center cursor-pointer py-1 px-1 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                  <span class="text-sm sm:text-base font-bold tabular-nums block leading-none ${isLow ? 'text-red-600' : 'text-[#1F2937] dark:text-cream-50'}">
+                    ${prod.stock_qty}
+                  </span>
+                  <span class="text-[9px] text-[#8E8A85] block mt-0.5">${prod.unit || 'шт'}</span>
+                </div>
+
+                <button onclick="quickStockChange('${prod.id}', ${prod.unit === 'г' ? 100 : prod.unit === 'мл' ? 200 : 1})" aria-label="Увеличить" 
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-[8px] bg-[#F3EDE6] dark:bg-[#2D231C] text-[#2D1E17] dark:text-[#F5EFEA] font-semibold flex items-center justify-center hover:bg-[#EAE2D8] dark:hover:bg-[#3B2F26] active:scale-95 text-base shrink-0 transition">
+                  +
+                </button>
+
+                <button onclick="openProductModal('${prod.id}')" title="Редактировать сырье" class="w-8 h-8 flex items-center justify-center text-[#8E8A85] hover:text-[#2D1E17] dark:hover:text-white ml-0.5 rounded-[8px] hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }
       }).join('');
     }
 
@@ -2522,22 +3120,64 @@
         <option value="${c.id}">${escapeHtml(c.name)}</option>
       `).join('');
 
+      // Сброс состояния загрузки фото
+      pendingImageBlob = null;
+      pendingImageDeleted = false;
+
       if (prodId) {
         const prod = cachedProducts.find(p => p.id === prodId);
         if (!prod) return;
         title.innerText = 'Редактировать позицию';
         document.getElementById('prod-id').value = prod.id;
         document.getElementById('prod-name').value = prod.name;
-        document.getElementById('prod-category').value = prod.category_id || '';
-        document.getElementById('prod-price').value = prod.price;
-        document.getElementById('prod-stock').value = prod.stock_qty;
+        document.getElementById('prod-category').value = prod.category_id || (cachedCategories[0]?.id || '');
+        document.getElementById('prod-unit').value = prod.unit || 'шт';
+        document.getElementById('prod-price').value = prod.price ?? '';
+        document.getElementById('prod-stock').value = prod.stock_qty ?? 0;
+        
+        // Установка типа номенклатуры
+        const itemType = prod.item_type || 'simple';
+        setProductItemType(itemType);
+
+        // Фото
+        if (prod.image_url) {
+          showImagePreview(prod.image_url);
+        } else {
+          removeSelectedImage();
+        }
+
+        // Загрузка ингредиентов техкарты
+        if (itemType === 'composite') {
+          editingRecipes = cachedIngredients
+            .filter(r => r.parent_product_id === prod.id)
+            .map(r => ({
+              ingredient_id: r.ingredient_id,
+              quantity: Number(r.quantity)
+            }));
+        } else {
+          editingRecipes = [];
+        }
+        renderTechCardEditor();
+
         btnDel.classList.remove('hidden');
       } else {
         title.innerText = 'Добавить позицию';
         document.getElementById('prod-id').value = '';
         document.getElementById('prod-name').value = '';
-        document.getElementById('prod-price').value = '';
-        document.getElementById('prod-stock').value = '30';
+        document.getElementById('prod-category').value = cachedCategories[0]?.id || '';
+        
+        // По умолчанию: если открыто сырье - создаем ингредиент, иначе штучный
+        const defaultType = (inventoryViewMode === 'ingredients') ? 'ingredient' : 'simple';
+        setProductItemType(defaultType);
+
+        document.getElementById('prod-unit').value = defaultType === 'ingredient' ? 'г' : 'шт';
+        document.getElementById('prod-price').value = defaultType === 'ingredient' ? '0' : '';
+        document.getElementById('prod-stock').value = defaultType === 'composite' ? '0' : '30';
+        
+        removeSelectedImage();
+        editingRecipes = [];
+        renderTechCardEditor();
+
         btnDel.classList.add('hidden');
       }
 
@@ -2546,35 +3186,178 @@
 
     function closeProductModal() {
       document.getElementById('modal-product').classList.add('hidden');
+      pendingImageBlob = null;
+      pendingImageDeleted = false;
+      editingRecipes = [];
     }
 
     async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('prod-id').value;
       const name = document.getElementById('prod-name').value.trim();
-      const category_id = document.getElementById('prod-category').value;
-      const price = parseFloat(document.getElementById('prod-price').value);
-      const stock_qty = parseInt(document.getElementById('prod-stock').value, 10);
+      const category_id = document.getElementById('prod-category').value || null;
+      const unit = document.getElementById('prod-unit').value || 'шт';
+      const item_type = document.getElementById('prod-item-type').value || 'simple';
+      const rawPrice = document.getElementById('prod-price').value;
+      const rawStock = document.getElementById('prod-stock').value;
+
+      if (!name) {
+        alert('Введите название позиции');
+        return;
+      }
+
+      let price = parseFloat(rawPrice);
+      if (isNaN(price) || price < 0) price = 0;
+
+      let stock_qty = parseFloat(rawStock);
+      if (isNaN(stock_qty) || stock_qty < 0) stock_qty = 0;
+
+      if (item_type === 'composite') {
+        if (price <= 0) {
+          alert('Для готового блюда укажите цену продажи больше 0 ₽');
+          return;
+        }
+        if (editingRecipes.length === 0) {
+          if (!confirm('Внимание: В техкарту блюда не добавлен ни один ингредиент. Кассиры не смогут продать это блюдо, пока не добавлены ингредиенты. Продолжить?')) {
+            return;
+          }
+        }
+      }
+
+      const btnSave = document.getElementById('btn-save-prod');
+      const originalBtnText = btnSave.innerText;
+      btnSave.disabled = true;
+      btnSave.innerText = 'Сохранение...';
 
       try {
+        let imageUrl = undefined; // undefined = не изменять существующий
+
+        // 1. Загрузка сжатого фото в Supabase Storage bucket 'product-images'
+        if (pendingImageBlob) {
+          btnSave.innerText = 'Загрузка фото...';
+          const fileExt = 'webp';
+          const fileName = `products/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadErr } = await supabaseClient.storage
+            .from('product-images')
+            .upload(fileName, pendingImageBlob, {
+              contentType: 'image/webp',
+              upsert: true
+            });
+
+          if (uploadErr) {
+            console.error('Ошибка загрузки фото:', uploadErr);
+            showToast('⚠️ Фото не загружено (проверьте bucket в Supabase)', 3500);
+          } else {
+            const { data: urlData } = supabaseClient.storage
+              .from('product-images')
+              .getPublicUrl(fileName);
+            imageUrl = urlData?.publicUrl || null;
+          }
+        } else if (pendingImageDeleted) {
+          imageUrl = null;
+        }
+
+        // 2. Формирование объекта товара
+        const productPayload = {
+          name,
+          category_id,
+          unit,
+          item_type,
+          price: (item_type === 'ingredient') ? 0 : price,
+          stock_qty: (item_type === 'composite') ? 0 : stock_qty,
+          updated_at: new Date().toISOString()
+        };
+
+        if (imageUrl !== undefined) {
+          productPayload.image_url = imageUrl;
+        }
+
+        let targetId = id;
+
+        // Попытка сохранения с расширенными полями v2
+        let saveError = null;
         if (id) {
           const { error } = await supabaseClient
             .from('products')
-            .update({ name, category_id, price, stock_qty, updated_at: new Date().toISOString() })
+            .update(productPayload)
             .eq('id', id);
-          if (error) throw error;
+          saveError = error;
         } else {
-          const { error } = await supabaseClient
+          const { data: inserted, error } = await supabaseClient
             .from('products')
-            .insert({ name, category_id, price, stock_qty });
-          if (error) throw error;
+            .insert(productPayload)
+            .select()
+            .single();
+          saveError = error;
+          if (inserted) targetId = inserted.id;
+        }
+
+        // Фоллбэк: если миграция колонок еще не применена в Supabase
+        if (saveError && (saveError.code === '42703' || saveError.message?.includes('column'))) {
+          console.warn('Колонки v2 отсутствуют, сохраняем базовые поля:', saveError.message);
+          const legacyPayload = {
+            name,
+            category_id,
+            price: (item_type === 'ingredient') ? 0 : price,
+            stock_qty: stock_qty,
+            updated_at: new Date().toISOString()
+          };
+          if (id) {
+            const { error: legErr } = await supabaseClient.from('products').update(legacyPayload).eq('id', id);
+            if (legErr) throw legErr;
+          } else {
+            const { data: insLeg, error: legErr } = await supabaseClient.from('products').insert(legacyPayload).select().single();
+            if (legErr) throw legErr;
+            if (insLeg) targetId = insLeg.id;
+          }
+        } else if (saveError) {
+          throw saveError;
+        }
+
+        // 3. Сохранение связей техкарты (product_ingredients)
+        if (targetId) {
+          try {
+            // Удаляем старые записи техкарты для этого блюда
+            await supabaseClient
+              .from('product_ingredients')
+              .delete()
+              .eq('parent_product_id', targetId);
+
+            // Если составное блюдо и добавлены ингредиенты — сохраняем новые строки
+            if (item_type === 'composite' && editingRecipes.length > 0) {
+              const recipeRows = editingRecipes
+                .filter(r => r.ingredient_id && Number(r.quantity) > 0)
+                .map(r => ({
+                  parent_product_id: targetId,
+                  ingredient_id: r.ingredient_id,
+                  quantity: Number(r.quantity)
+                }));
+
+              if (recipeRows.length > 0) {
+                const { error: insRecErr } = await supabaseClient
+                  .from('product_ingredients')
+                  .insert(recipeRows);
+                if (insRecErr) {
+                  console.warn('Ошибка сохранения техкарты (проверьте миграцию таблицы):', insRecErr);
+                }
+              }
+            }
+          } catch (recipeErr) {
+            console.warn('Пропуск сохранения техкарт (таблица не создана):', recipeErr);
+          }
         }
 
         closeProductModal();
         showToast('✓ Позиция сохранена');
-        refreshAppData();
+        broadcastChange('product_changed', { id: targetId });
+        await refreshAppData();
       } catch (err) {
-        alert('Ошибка при сохранении: ' + err.message);
+        console.error('Ошибка сохранения позиции:', err);
+        alert('Ошибка при сохранении: ' + (err.message || err));
+      } finally {
+        btnSave.disabled = false;
+        btnSave.innerText = originalBtnText;
       }
     }
 
