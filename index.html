@@ -5058,6 +5058,11 @@
         const btnConfirm = document.getElementById('custom-modal-btn-confirm');
         const iconBox = document.getElementById('custom-modal-icon-box');
 
+        if (!backdrop || !card) {
+          resolve(window.confirm(description || title));
+          return;
+        }
+
         titleEl.textContent = title;
         descEl.textContent = description;
         btnCancel.textContent = cancelText;
@@ -5072,10 +5077,10 @@
           btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
         }
 
-        backdrop.classList.remove('pointer-events-none', 'opacity-0');
-        backdrop.classList.add('opacity-100');
-        card.classList.remove('scale-95', 'opacity-0');
-        card.classList.add('scale-100', 'opacity-100');
+        backdrop.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+        card.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
+        card.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
 
         btnConfirm.onclick = () => {
           triggerHaptic(12);
@@ -5100,6 +5105,12 @@
         const btnConfirm = document.getElementById('custom-modal-btn-confirm');
         const iconBox = document.getElementById('custom-modal-icon-box');
 
+        if (!backdrop || !card) {
+          window.alert(description || title);
+          resolve(true);
+          return;
+        }
+
         titleEl.textContent = title;
         descEl.textContent = description;
         btnConfirm.textContent = buttonText;
@@ -5107,10 +5118,10 @@
         iconBox.className = 'w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4';
         btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
 
-        backdrop.classList.remove('pointer-events-none', 'opacity-0');
-        backdrop.classList.add('opacity-100');
-        card.classList.remove('scale-95', 'opacity-0');
-        card.classList.add('scale-100', 'opacity-100');
+        backdrop.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+        card.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
+        card.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
 
         btnConfirm.onclick = () => {
           triggerHaptic(10);
@@ -5124,9 +5135,12 @@
       const card = document.getElementById('custom-modal-card');
       if (backdrop && card) {
         backdrop.classList.add('opacity-0', 'pointer-events-none');
-        backdrop.classList.remove('opacity-100');
-        card.classList.add('scale-95', 'opacity-0');
-        card.classList.remove('scale-100', 'opacity-100');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+        card.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+        card.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+        setTimeout(() => {
+          backdrop.classList.add('hidden');
+        }, 200);
       }
       if (confirmResolver) {
         confirmResolver(result);
@@ -5139,10 +5153,13 @@
       triggerHaptic(12);
       drawerSelectCallback = onSelect;
       const drawer = document.getElementById('custom-action-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
       const content = document.getElementById('drawer-content');
       const titleEl = document.getElementById('drawer-title');
       const descEl = document.getElementById('drawer-desc');
       const optionsContainer = document.getElementById('drawer-options');
+
+      if (!drawer || !content) return;
 
       titleEl.textContent = title;
       descEl.textContent = description;
@@ -5170,10 +5187,12 @@
         `;
       }).join('');
 
-      drawer.classList.remove('pointer-events-none', 'opacity-0');
+      drawer.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
       drawer.classList.add('opacity-100');
-      content.classList.remove('translate-y-full');
-      content.classList.add('translate-y-0');
+      backdrop.classList.remove('pointer-events-none');
+      backdrop.classList.add('pointer-events-auto');
+      content.classList.remove('translate-y-full', 'pointer-events-none');
+      content.classList.add('translate-y-0', 'pointer-events-auto');
     }
 
     function selectDrawerOption(val) {
@@ -5187,98 +5206,29 @@
 
     function closeActionDrawer() {
       const drawer = document.getElementById('custom-action-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
       const content = document.getElementById('drawer-content');
       if (drawer && content) {
-        content.classList.add('translate-y-full');
-        content.classList.remove('translate-y-0');
+        content.classList.add('translate-y-full', 'pointer-events-none');
+        content.classList.remove('translate-y-0', 'pointer-events-auto');
+        if (backdrop) {
+          backdrop.classList.add('pointer-events-none');
+          backdrop.classList.remove('pointer-events-auto');
+        }
         setTimeout(() => {
-          drawer.classList.add('opacity-0', 'pointer-events-none');
+          drawer.classList.add('opacity-0', 'pointer-events-none', 'hidden');
           drawer.classList.remove('opacity-100');
-        }, 200);
+        }, 220);
       }
     }
-
-    function openUnitDrawer() {
-      const currentVal = document.getElementById('prod-unit')?.value || 'шт';
-      openActionDrawer({
-        title: 'Единица измерения',
-        description: 'Выберите единицу учета для ингредиента или блюда',
-        selectedValue: currentVal,
-        options: [
-          { value: 'шт', label: 'шт (штуки)', desc: 'Для десертов, круассанов, бутылок' },
-          { value: 'г', label: 'г (граммы)', desc: 'Для зерен кофе, сахара, муки' },
-          { value: 'мл', label: 'мл (миллилитры)', desc: 'Для сиропов, молока, напитков' },
-          { value: 'кг', label: 'кг (килограммы)', desc: 'Для оптовых складских партий' },
-          { value: 'л', label: 'л (литры)', desc: 'Для объемных жидких ингредиентов' },
-          { value: 'порц', label: 'порц (порции)', desc: 'Для порционных заготовок' }
-        ],
-        onSelect: (val) => {
-          const select = document.getElementById('prod-unit');
-          if (select) {
-            select.value = val;
-            const btnText = document.getElementById('prod-unit-btn-text');
-            if (btnText) btnText.textContent = val;
-          }
-        }
-      });
-    }
-
-    function openCategoryDrawer() {
-      const currentVal = document.getElementById('prod-category')?.value || '';
-      const options = cachedCategories.map(c => ({
-        value: c.id,
-        label: c.name
-      }));
-      openActionDrawer({
-        title: 'Категория товара',
-        description: 'Выберите категорию для витрины кассира',
-        selectedValue: currentVal,
-        options: options,
-        onSelect: (val) => {
-          const select = document.getElementById('prod-category');
-          if (select) {
-            select.value = val;
-            const cat = cachedCategories.find(c => c.id === val);
-            const btnText = document.getElementById('prod-category-btn-text');
-            if (btnText) btnText.textContent = cat ? cat.name : 'Выберите категорию';
-          }
-        }
-      });
-    }
-
-    // Перехват кликов по нативным селектам единиц и категорий для вызова Bottom Sheet
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        const unitEl = document.getElementById('prod-unit');
-        if (unitEl) {
-          unitEl.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            openUnitDrawer();
-          });
-          unitEl.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            openUnitDrawer();
-          }, { passive: false });
-        }
-
-        const catEl = document.getElementById('prod-category');
-        if (catEl) {
-          catEl.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            openCategoryDrawer();
-          });
-          catEl.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            openCategoryDrawer();
-          }, { passive: false });
-        }
-      }, 500);
-    });
+    // Открытие Drawer по клику на селекторы
+    window.openUnitDrawer = openUnitDrawer;
+    window.openCategoryDrawer = openCategoryDrawer;
 </script>
 
   <!-- ==================== RADIX-STYLE CONFIRM & ALERT MODAL ==================== -->
-  <div id="custom-modal-backdrop" class="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none flex items-center justify-center p-4">
-    <div id="custom-modal-card" class="w-full max-w-sm rounded-3xl bg-white dark:bg-[#1C1E22] p-6 border border-neutral-200/80 dark:border-neutral-800/80 shadow-2xl transform scale-95 transition-all duration-200 opacity-0 pointer-events-auto">
+  <div id="custom-modal-backdrop" class="hidden fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none flex items-center justify-center p-4">
+    <div id="custom-modal-card" class="w-full max-w-sm rounded-3xl bg-white dark:bg-[#1C1E22] p-6 border border-neutral-200/80 dark:border-neutral-800/80 shadow-2xl transform scale-95 transition-all duration-200 opacity-0 pointer-events-none">
       <div id="custom-modal-icon-box" class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
         <svg id="custom-modal-icon" class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
@@ -5299,9 +5249,9 @@
   </div>
 
   <!-- ==================== VAUL-STYLE ACTION DRAWER (BOTTOM SHEET) ==================== -->
-  <div id="custom-action-drawer" class="fixed inset-0 z-[120] pointer-events-none transition-opacity duration-200 opacity-0 flex flex-col justify-end">
-    <div id="drawer-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-auto" onclick="closeActionDrawer()"></div>
-    <div id="drawer-content" class="relative z-10 w-full max-h-[85vh] rounded-t-3xl bg-white dark:bg-[#1C1E22] border-t border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 pb-8 flex flex-col transform translate-y-full transition-transform duration-300 ease-out pointer-events-auto">
+  <div id="custom-action-drawer" class="hidden fixed inset-0 z-[120] pointer-events-none transition-opacity duration-200 opacity-0 flex flex-col justify-end">
+    <div id="drawer-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none" onclick="closeActionDrawer()"></div>
+    <div id="drawer-content" class="relative z-10 w-full max-h-[85vh] rounded-t-3xl bg-white dark:bg-[#1C1E22] border-t border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 pb-8 flex flex-col transform translate-y-full transition-transform duration-300 ease-out pointer-events-none">
       <div class="mx-auto -mt-2 mb-3 w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700"></div>
       <div class="flex items-center justify-between mb-1">
         <h3 id="drawer-title" class="text-base font-bold text-neutral-900 dark:text-neutral-50"></h3>
