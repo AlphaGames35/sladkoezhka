@@ -2141,10 +2141,8 @@
     }
 
     function triggerHaptic() {
-      if (!userHasInteracted) return; // Защита от блокировки вибровызова
-      if (navigator.vibrate) {
-        try { navigator.vibrate(20); } catch(e) {}
-      }
+      // Вибрация при нажатиях полностью отключена
+      return;
     }
 
     // ==========================================
