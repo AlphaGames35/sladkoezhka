@@ -604,12 +604,27 @@
     body.motion-reduced .confetti-particle, body.motion-off .confetti-particle {
       display: none !important;
     }
+
+    .hidden {
+      display: none !important;
+    }
+    input, textarea, select, button {
+      -webkit-user-select: auto !important;
+      user-select: auto !important;
+      pointer-events: auto !important;
+    }
+    #custom-modal-backdrop.hidden,
+    #custom-action-drawer.hidden,
+    #app-splash.hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
   </style>
 </head>
 <body class="h-full bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
 
   <!-- ==================== АНИМИРОВАННЫЙ SPLASH SCREEN ==================== -->
-  <div id="app-splash" class="fixed inset-0 z-[100] bg-[#FBF8F5] dark:bg-[#1A120E] flex flex-col items-center justify-between py-12 px-6 transition-all duration-300 pointer-events-auto">
+  <div id="app-splash" class="fixed inset-0 z-[100] bg-[#FBF8F5] dark:bg-[#1A120E] flex flex-col items-center justify-between py-12 px-6 transition-all duration-300">
     <div class="flex-1 flex flex-col items-center justify-center text-center space-y-4 animate-splash-logo-scale">
       <!-- Минималистичный векторный логотип Сладкоежка (чашка кофе с легким контуром десерта) -->
       <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 shadow-sm flex items-center justify-center p-3">
@@ -1807,15 +1822,31 @@
     let pendingImageDeleted = false;
     let editingRecipes = [];
 
-    // Закрытие анимированного Splash Screen (длительность ~1.85с)
+    // Закрытие анимированного Splash Screen
     function dismissSplash() {
       const splash = document.getElementById('app-splash');
       if (splash) {
+        splash.classList.remove('pointer-events-auto');
         splash.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(() => { splash.classList.add('hidden'); }, 320);
+        splash.style.pointerEvents = 'none';
+        splash.style.opacity = '0';
+        setTimeout(() => {
+          splash.style.display = 'none';
+          if (splash.parentNode) {
+            splash.parentNode.removeChild(splash);
+          }
+        }, 250);
       }
     }
-    setTimeout(dismissSplash, 1850);
+    setTimeout(dismissSplash, 900);
+    window.addEventListener('touchstart', () => {
+      const splash = document.getElementById('app-splash');
+      if (splash) { splash.style.display = 'none'; splash.remove(); }
+    }, { once: true, passive: true });
+    window.addEventListener('mousedown', () => {
+      const splash = document.getElementById('app-splash');
+      if (splash) { splash.style.display = 'none'; splash.remove(); }
+    }, { once: true, passive: true });
 
     // ==========================================
     // РАСЧЕТ ДОСТУПНОСТИ БЛЮД ПО ТЕХКАРТАМ
@@ -5077,6 +5108,7 @@
           btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
         }
 
+        backdrop.style.display = 'flex';
         backdrop.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
         backdrop.classList.add('opacity-100', 'pointer-events-auto');
         card.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
@@ -5118,6 +5150,7 @@
         iconBox.className = 'w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4';
         btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
 
+        backdrop.style.display = 'flex';
         backdrop.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
         backdrop.classList.add('opacity-100', 'pointer-events-auto');
         card.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
@@ -5140,6 +5173,7 @@
         card.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
         setTimeout(() => {
           backdrop.classList.add('hidden');
+          backdrop.style.display = 'none';
         }, 200);
       }
       if (confirmResolver) {
@@ -5187,6 +5221,7 @@
         `;
       }).join('');
 
+      drawer.style.display = 'flex';
       drawer.classList.remove('hidden', 'pointer-events-none', 'opacity-0');
       drawer.classList.add('opacity-100');
       backdrop.classList.remove('pointer-events-none');
@@ -5218,6 +5253,7 @@
         setTimeout(() => {
           drawer.classList.add('opacity-0', 'pointer-events-none', 'hidden');
           drawer.classList.remove('opacity-100');
+          drawer.style.display = 'none';
         }, 220);
       }
     }
@@ -5227,7 +5263,7 @@
 </script>
 
   <!-- ==================== RADIX-STYLE CONFIRM & ALERT MODAL ==================== -->
-  <div id="custom-modal-backdrop" class="hidden fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none flex items-center justify-center p-4">
+  <div id="custom-modal-backdrop" style="display: none;" class="hidden fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none items-center justify-center p-4">
     <div id="custom-modal-card" class="w-full max-w-sm rounded-3xl bg-white dark:bg-[#1C1E22] p-6 border border-neutral-200/80 dark:border-neutral-800/80 shadow-2xl transform scale-95 transition-all duration-200 opacity-0 pointer-events-none">
       <div id="custom-modal-icon-box" class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
         <svg id="custom-modal-icon" class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -5249,7 +5285,7 @@
   </div>
 
   <!-- ==================== VAUL-STYLE ACTION DRAWER (BOTTOM SHEET) ==================== -->
-  <div id="custom-action-drawer" class="hidden fixed inset-0 z-[120] pointer-events-none transition-opacity duration-200 opacity-0 flex flex-col justify-end">
+  <div id="custom-action-drawer" style="display: none;" class="hidden fixed inset-0 z-[120] pointer-events-none transition-opacity duration-200 opacity-0 flex-col justify-end">
     <div id="drawer-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none" onclick="closeActionDrawer()"></div>
     <div id="drawer-content" class="relative z-10 w-full max-h-[85vh] rounded-t-3xl bg-white dark:bg-[#1C1E22] border-t border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 pb-8 flex flex-col transform translate-y-full transition-transform duration-300 ease-out pointer-events-none">
       <div class="mx-auto -mt-2 mb-3 w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700"></div>
