@@ -26,6 +26,23 @@
             mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
+            brand: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F',
+              950: '#451A03',
+            },
+            surface: {
+              light: '#FFFFFF',
+              dark: '#1C1E22',
+            },
             cacao: {
               950: '#15100D',
               900: '#1F1712',
@@ -48,6 +65,10 @@
               200: '#ECE3D4',
               300: '#DFD2BE',
             }
+          },
+          boxShadow: {
+            'soft-glow': '0 8px 30px -4px rgba(217, 119, 6, 0.2)',
+            'dock': '0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 0 1px 1px rgba(0, 0, 0, 0.05)',
           },
           borderRadius: {
             'lg': '8px',
@@ -149,13 +170,28 @@
       border-radius: 9999px;
       pointer-events: none;
       z-index: 0;
-      background: #2D1E17;
+      background: #D97706; /* amber-600 */
       transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), width 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 3px 12px rgba(45, 26, 17, 0.28);
+      box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
     }
     .dark .liquid-indicator {
-      background: #FFFFFF;
-      box-shadow: 0 3px 14px rgba(255, 255, 255, 0.25);
+      background: #D97706;
+      box-shadow: 0 4px 18px rgba(217, 119, 6, 0.45);
+    }
+
+    .pwa-scroll-container {
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    @keyframes chartBarGrow {
+      0% {
+        transform: scaleY(0);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scaleY(1);
+        opacity: 1;
+      }
     }
 
     /* Кнопки табов внутри бара */
@@ -570,7 +606,7 @@
     }
   </style>
 </head>
-<body class="h-full bg-[#FAF7F2] dark:bg-cacao-950 text-cacao-900 dark:text-cream-50 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
+<body class="h-full bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
 
   <!-- ==================== АНИМИРОВАННЫЙ SPLASH SCREEN ==================== -->
   <div id="app-splash" class="fixed inset-0 z-[100] bg-[#FBF8F5] dark:bg-[#1A120E] flex flex-col items-center justify-between py-12 px-6 transition-all duration-300 pointer-events-auto">
@@ -763,7 +799,7 @@
     </div>
 
     <!-- 2. ИНТЕРФЕЙС СОТРУДНИКА (ВИТРИНА И ПРОДАЖИ) -->
-    <div id="screen-employee" class="hidden min-h-full pb-32">
+    <div id="screen-employee" class="hidden min-h-full pwa-scroll-container">
       
       <!-- Вкладка 1: ВИТРИНА ПРОДАЖ -->
       <div id="employee-tab-sale" class="p-4 sm:p-6 max-w-6xl mx-auto space-y-4">
@@ -877,7 +913,7 @@
     </div>
 
     <!-- 3. ИНТЕРФЕЙС УПРАВЛЯЮЩЕГО -->
-    <div id="screen-manager" class="hidden min-h-full pb-32">
+    <div id="screen-manager" class="hidden min-h-full pwa-scroll-container">
 
       <!-- Вкладка: СТАТИСТИКА И ОТЧЕТЫ -->
       <div id="manager-tab-stats" class="p-4 sm:p-6 max-w-5xl mx-auto space-y-5">
@@ -2848,12 +2884,31 @@
     }
     window.handleBackPressed = handleBackPressed;
 
+        function getCategoryIconSvg(categoryName) {
+      const norm = (categoryName || '').toLowerCase();
+      if (norm.includes('кофе') || norm.includes('чай') || norm.includes('горяч') || norm.includes('coffee') || norm.includes('tea')) {
+        return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 2v2m4-2v2m4-2v2"/></svg>`;
+      }
+      if (norm.includes('десерт') || norm.includes('торт') || norm.includes('пирож') || norm.includes('сладк') || norm.includes('выпечк') || norm.includes('булочк') || norm.includes('круассан')) {
+        return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path stroke-linecap="round" stroke-linejoin="round" d="M2 21h20"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/></svg>`;
+      }
+      if (norm.includes('пицц') || norm.includes('пирог') || norm.includes('фокачч')) {
+        return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14 11-4-3-4 3"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 0 0 9-9c0-.44-.03-.88-.1-1.3L12 2 3.1 10.7A9 9 0 0 0 12 21Z"/></svg>`;
+      }
+      if (norm.includes('сэндвич') || norm.includes('бутер') || norm.includes('панини') || norm.includes('бургер') || norm.includes('ролл') || norm.includes('шаурм')) {
+        return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m3 11 18-5v12L3 14v-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 11v3l18-2V7L3 11z"/></svg>`;
+      }
+      if (norm.includes('напит') || norm.includes('сок') || norm.includes('лимонад') || norm.includes('баббл') || norm.includes('морс') || norm.includes('вода')) {
+        return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4"/><path stroke-linecap="round" stroke-linejoin="round" d="m5 6 1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16"/></svg>`;
+      }
+      return `<svg class="w-9 h-9 text-amber-600 dark:text-amber-400 stroke-[1.75]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>`;
+    }
+
     function renderEmployeeProducts() {
       const grid = document.getElementById('employee-products-grid');
       const search = (document.getElementById('employee-search-input')?.value || '').toLowerCase().trim();
       if (!grid) return;
 
-      // Витрина кассира отображает только готовые блюда и штучные товары (сырье скрыто)
       let list = cachedProducts.filter(p => !p.is_deleted && p.item_type !== 'ingredient');
       if (search) {
         list = list.filter(p => p.name.toLowerCase().includes(search));
@@ -2863,8 +2918,8 @@
 
       if (list.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-16 text-center text-[#8E8A85]">
-            <svg class="w-8 h-8 mx-auto text-[#8E8A85] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <div class="col-span-full py-16 text-center text-neutral-400">
+            <svg class="w-8 h-8 mx-auto text-neutral-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
             </svg>
             <p class="text-xs font-semibold">Позиции не найдены</p>
@@ -2877,60 +2932,82 @@
         const inCartQty = cart[prod.id] || 0;
         const availQty = getProductAvailableStock(prod);
         const isOutOfStock = availQty <= 0;
+        const isLowStock = !isOutOfStock && availQty < 5;
         const isMax = inCartQty >= availQty;
         const isComposite = prod.item_type === 'composite';
         const isValidImg = prod.image_url && (prod.image_url.startsWith('http') || prod.image_url.startsWith('data:') || prod.image_url.startsWith('/'));
+        const catObj = cachedCategories.find(c => c.id === prod.category_id);
+        const catName = catObj ? catObj.name : 'Категория';
 
         return `
           <div id="emp-prod-card-${prod.id}" onclick="handleProductCardClick('${prod.id}', ${availQty}, event)" 
-               class="group relative bg-white dark:bg-cacao-900 rounded-2xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between ${isOutOfStock ? 'opacity-45 grayscale pointer-events-none border-[#ECE6DE] dark:border-cacao-800' : inCartQty > 0 ? 'border-[#2D1E17] dark:border-cream-100 ring-1 ring-[#2D1E17] dark:ring-cream-100 shadow-sm' : 'border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] shadow-2xs'}">
+               class="group relative bg-white dark:bg-[#1C1E22] rounded-2.5xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between active:scale-[0.97] duration-150 ${isOutOfStock ? 'opacity-50 grayscale pointer-events-none border-neutral-200 dark:border-neutral-800' : inCartQty > 0 ? 'border-amber-600 dark:border-amber-500 ring-2 ring-amber-600/30 dark:ring-amber-500/30 shadow-md' : 'border-neutral-200/80 dark:border-neutral-800/80 hover:border-amber-500/50 shadow-xs'}">
             
-            <!-- Верхняя часть: Фотография 4:3 или нейтральная векторная заглушка -->
-            <div class="relative w-full aspect-[4/3] bg-[#FAF7F2] dark:bg-cacao-950 overflow-hidden flex items-center justify-center">
+            <!-- Верхняя часть: Градиентная подложка / Фотография 4:3 с бейджами -->
+            <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-amber-100/70 via-orange-50 to-neutral-100 dark:from-neutral-900 dark:via-neutral-900/60 dark:to-neutral-950 overflow-hidden flex items-center justify-center">
               ${isValidImg ? `
                 <img src="${escapeHtml(prod.image_url)}" alt="${escapeHtml(prod.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
               ` : `
-                <div class="w-full h-full flex flex-col items-center justify-center text-[#C68A4C]/60 dark:text-[#C68A4C]/40 p-3">
-                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 2v2m4-2v2m4-2v2"/>
-                  </svg>
+                <div class="w-full h-full flex flex-col items-center justify-center gap-1.5 p-3">
+                  ${getCategoryIconSvg(catName)}
+                  <span class="text-[10px] font-bold text-amber-900/60 dark:text-amber-400/60 uppercase tracking-wider">${escapeHtml(catName)}</span>
                 </div>
               `}
 
               ${isComposite ? `
-                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#24140E]/85 text-white backdrop-blur-xs flex items-center space-x-1 shadow-2xs">
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-900/85 text-amber-300 backdrop-blur-md flex items-center gap-1 shadow-xs border border-white/10">
                   <span>⚡ Рецепт</span>
                 </span>
               ` : ''}
 
-              <div id="emp-prod-counter-${prod.id}" class="absolute top-2 right-2 flex items-center bg-[#24140E] text-white rounded-lg p-0.5 shadow-md z-10 ${inCartQty > 0 ? '' : 'hidden'}" onclick="event.stopPropagation()">
+              <!-- Бейдж остатка -->
+              <div class="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
+                ${isOutOfStock ? `
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-xs">
+                    Нет на складе
+                  </span>
+                ` : isLowStock ? `
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 backdrop-blur-md">
+                    Осталось: ${availQty} ${prod.unit || 'шт'}
+                  </span>
+                ` : `
+                  <span class="px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-500 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-700/50 tabular-nums">
+                    ${availQty} ${prod.unit || 'шт'}
+                  </span>
+                `}
+              </div>
+
+              <!-- Селектор корзины в карточке -->
+              <div id="emp-prod-counter-${prod.id}" class="absolute bottom-2 right-2 flex items-center bg-amber-600 text-white rounded-xl p-0.5 shadow-md z-10 ${inCartQty > 0 ? '' : 'hidden'}" onclick="event.stopPropagation()">
                 ${inCartQty > 0 ? `
-                  <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs">-</button>
+                  <button onclick="decrementCart('${prod.id}')" class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm">-</button>
                   <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
-                  <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-6 h-6 flex items-center justify-center opacity-30 cursor-not-allowed text-xs"' : 'class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs"'}>+</button>
+                  <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-7 h-7 flex items-center justify-center opacity-30 cursor-not-allowed text-sm"' : 'class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm"'}>+</button>
                 ` : ''}
               </div>
             </div>
 
-            <!-- Нижняя часть: Инфо о товаре и цене -->
+            <!-- Нижняя часть: Название с line-clamp-2 и цена с tabular-nums -->
             <div class="p-3 sm:p-3.5 flex flex-col justify-between flex-1 space-y-2">
               <div>
-                <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug">
+                <div class="font-bold text-xs sm:text-sm text-neutral-900 dark:text-neutral-50 line-clamp-2 leading-snug min-h-[2.5rem]">
                   ${escapeHtml(prod.name)}
                 </div>
-                <div class="text-[11px] text-[#8E8A85] mt-1 font-medium">
-                  ${isOutOfStock ? `<span class="text-red-500 font-semibold">${isComposite ? 'Закончилось сырье' : 'Закончился'}</span>` : 
-                    isComposite ? `Доступно: <b class="text-[#1F2937] dark:text-cream-100">${availQty}</b> порц.` : 
-                    `Остаток: <b class="text-[#1F2937] dark:text-cream-100">${availQty}</b> ${prod.unit || 'шт'}`}
+                <div class="text-[11px] text-neutral-400 mt-1 font-medium">
+                  ${isOutOfStock ? `<span class="text-rose-500 font-semibold">${isComposite ? 'Закончилось сырье' : 'Закончился'}</span>` : 
+                    isComposite ? `Доступно: <b class="text-neutral-800 dark:text-neutral-200 tabular-nums">${availQty}</b> порц.` : 
+                    `Остаток: <b class="text-neutral-800 dark:text-neutral-200 tabular-nums">${availQty}</b> ${prod.unit || 'шт'}`}
                 </div>
               </div>
 
-              <div class="pt-2 border-t border-[#ECE6DE] dark:border-cacao-800 flex items-center justify-between">
-                <span class="text-sm sm:text-base font-black text-[#1F2937] dark:text-cream-50 tabular-nums">
-                  ${Number(prod.price).toLocaleString('ru-RU')} ₽
-                </span>
-                <span class="text-[10px] font-semibold text-[#8E8A85] uppercase tracking-wider">
+              <div class="pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between">
+                <div class="flex items-baseline gap-0.5">
+                  <span class="text-sm sm:text-base font-extrabold text-neutral-900 dark:text-white tabular-nums">
+                    ${Number(prod.price).toLocaleString('ru-RU')}
+                  </span>
+                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">₽</span>
+                </div>
+                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
                   ${prod.unit || 'шт'}
                 </span>
               </div>
@@ -2957,20 +3034,20 @@
       const counterBox = document.getElementById(`emp-prod-counter-${prodId}`);
 
       if (inCartQty > 0) {
-        card.classList.add('border-[#2D1E17]', 'dark:border-cream-100', 'ring-1', 'ring-[#2D1E17]', 'dark:ring-cream-100', 'shadow-sm');
-        card.classList.remove('border-[#ECE6DE]', 'dark:border-cacao-800', 'shadow-2xs');
+        card.classList.add('border-amber-600', 'dark:border-amber-500', 'ring-2', 'ring-amber-600/30', 'dark:ring-amber-500/30', 'shadow-md');
+        card.classList.remove('border-neutral-200/80', 'dark:border-neutral-800/80', 'shadow-xs');
       } else {
-        card.classList.remove('border-[#2D1E17]', 'dark:border-cream-100', 'ring-1', 'ring-[#2D1E17]', 'dark:ring-cream-100', 'shadow-sm');
-        card.classList.add('border-[#ECE6DE]', 'dark:border-cacao-800', 'shadow-2xs');
+        card.classList.remove('border-amber-600', 'dark:border-amber-500', 'ring-2', 'ring-amber-600/30', 'dark:ring-amber-500/30', 'shadow-md');
+        card.classList.add('border-neutral-200/80', 'dark:border-neutral-800/80', 'shadow-xs');
       }
 
       if (counterBox) {
         if (inCartQty > 0) {
           counterBox.classList.remove('hidden');
           counterBox.innerHTML = `
-            <button onclick="decrementCart('${prod.id}')" class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs">-</button>
+            <button onclick="decrementCart('${prod.id}')" class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm">-</button>
             <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
-            <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-6 h-6 flex items-center justify-center opacity-30 cursor-not-allowed text-xs"' : 'class="w-6 h-6 flex items-center justify-center hover:bg-white/20 rounded font-bold text-xs"'}>+</button>
+            <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-7 h-7 flex items-center justify-center opacity-30 cursor-not-allowed text-sm"' : 'class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm"'}>+</button>
           `;
         } else {
           counterBox.classList.add('hidden');
@@ -3409,11 +3486,16 @@
       }
 
       const shouldRestoreStock = document.getElementById('del-restore-stock').checked;
-      const confirmMsg = `Внимание! Вы собираетесь удалить ${pendingDeleteSaleIds.length} ${pluralize(pendingDeleteSaleIds.length, ['заказ', 'заказа', 'заказов'])}.\n\n` +
-        (shouldRestoreStock ? '✓ Списанные товары будут возвращены на склад.\n' : '⚠️ Товары не будут возвращены на склад.\n') +
-        `Вы уверены, что хотите продолжить?`;
+      const confirmMsg = `Вы собираетесь удалить ${pendingDeleteSaleIds.length} ${pluralize(pendingDeleteSaleIds.length, ['заказ', 'заказа', 'заказов'])}.\n` +
+        (shouldRestoreStock ? 'Товары будут возвращены на склад.' : 'Товары НЕ будут возвращены на склад.');
 
-      if (!confirm(confirmMsg)) return;
+      const ok = await showConfirmDialog({
+        title: 'Удалить выбранные заказы?',
+        description: confirmMsg,
+        confirmText: 'Удалить',
+        variant: 'danger'
+      });
+      if (!ok) return;
 
       const btn = document.getElementById('btn-confirm-delete-sales');
       btn.disabled = true;
@@ -3481,7 +3563,12 @@
         openDbConfigModal();
         return;
       }
-      const shouldRestoreStock = confirm(`Удалить заказ на сумму ${Number(totalAmount).toLocaleString('ru-RU')} ₽?\n\nНажмите ОК для удаления (с возвратом товаров на склад).`);
+      const shouldRestoreStock = await showConfirmDialog({
+        title: 'Удалить заказ?',
+        description: `Удалить заказ на сумму ${Number(totalAmount).toLocaleString('ru-RU')} ₽ с возвратом товаров на склад?`,
+        confirmText: 'Удалить',
+        variant: 'danger'
+      });
       if (!shouldRestoreStock) return;
 
       try {
@@ -3663,7 +3750,6 @@
 
       let buckets = {};
       if (isHourly) {
-        // Динамика с 08:00 до 20:00 (13 часов работы кондитерской)
         for (let h = 8; h <= 20; h++) {
           const key = (h < 10 ? '0' : '') + h + ':00';
           buckets[key] = 0;
@@ -3690,20 +3776,20 @@
       const maxVal = Math.max(...Object.values(buckets), 100);
 
       chartContainer.innerHTML = `
-        <div class="w-full h-full flex items-end justify-between gap-0.5 sm:gap-1.5 pt-4 px-0.5 box-border overflow-hidden">
+        <div class="w-full h-full flex items-end justify-between gap-1 sm:gap-2 pt-6 px-1 box-border overflow-hidden">
           ${keys.map((k, idx) => {
             const val = buckets[k];
-            const heightPercent = Math.max(Math.round((val / maxVal) * 100), 4);
+            const heightPercent = Math.max(Math.round((val / maxVal) * 100), 6);
             const isZero = val === 0;
             const hourNum = k.split(':')[0];
-            const delayMs = idx * 20;
+            const delayMs = idx * 35;
             return `
               <div class="flex-1 min-w-0 flex flex-col items-center h-full justify-end group relative cursor-pointer" onclick="showToast('${k}: ${val.toLocaleString('ru-RU')} ₽')">
-                <div class="opacity-0 group-hover:opacity-100 transition absolute -top-7 text-[10px] font-bold bg-[#1F2937] text-white px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap shadow-sm z-10">
+                <div class="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 absolute -top-8 text-[11px] font-bold bg-neutral-900 text-white px-2 py-1 rounded-lg pointer-events-none whitespace-nowrap shadow-lg z-20 tabular-nums">
                   ${val.toLocaleString('ru-RU')} ₽
                 </div>
-                <div class="w-full ${isZero ? 'bg-[#2D1E17]/20 dark:bg-white/20' : 'bg-[#2D1E17] dark:bg-white'} hover:opacity-80 rounded-t-xs transition-all duration-300 origin-bottom" style="height: ${heightPercent}%; animation: chartBarGrow var(--dur-slow) var(--ease-sheet) forwards; animation-delay: ${delayMs}ms;"></div>
-                <span class="text-[7.5px] sm:text-[9px] text-[#8E8A85] mt-1.5 font-mono w-full text-center tracking-tighter truncate block select-none">
+                <div class="w-full ${isZero ? 'bg-neutral-200 dark:bg-neutral-800' : 'bg-gradient-to-t from-amber-600 to-amber-500'} hover:opacity-90 rounded-t-lg transition-all duration-300 origin-bottom shadow-xs" style="height: ${heightPercent}%; animation: chartBarGrow 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: ${delayMs}ms;"></div>
+                <span class="text-[8px] sm:text-[10px] text-neutral-400 mt-2 font-mono w-full text-center tracking-tighter truncate block select-none">
                   ${isHourly ? `${hourNum}<span class="hidden sm:inline">:00</span>` : k}
                 </span>
               </div>
@@ -4076,7 +4162,13 @@
         openDbConfigModal();
         return;
       }
-      if (!confirm(`Удалить категорию "${catName}"? Привязанные товары сохранятся в каталоге.`)) return;
+      const okCat = await showConfirmDialog({
+        title: 'Удалить категорию?',
+        description: `Удалить категорию "${catName}"? Привязанные товары останутся в общем каталоге.`,
+        confirmText: 'Удалить',
+        variant: 'danger'
+      });
+      if (!okCat) return;
 
       try {
         const { error } = await supabaseClient
@@ -4361,7 +4453,14 @@
         return;
       }
       const id = document.getElementById('prod-id').value;
-      if (!id || !confirm('Удалить позицию с витрины? Прошлые заказы сохранятся.')) return;
+      if (!id) return;
+      const okProd = await showConfirmDialog({
+        title: 'Удалить позицию?',
+        description: 'Удалить позицию с витрины и склада? Прошлые заказы сохранятся.',
+        confirmText: 'Удалить',
+        variant: 'danger'
+      });
+      if (!okProd) return;
 
       try {
         const { error } = await supabaseClient
@@ -4457,7 +4556,13 @@
         openDbConfigModal();
         return;
       }
-      if (!confirm('Заблокировать доступ сотруднику? История его продаж сохранится.')) return;
+      const okStaff = await showConfirmDialog({
+        title: 'Заблокировать доступ?',
+        description: 'Заблокировать доступ сотруднику к терминалу? История его продаж сохранится.',
+        confirmText: 'Заблокировать',
+        variant: 'danger'
+      });
+      if (!okStaff) return;
       try {
         const { error } = await supabaseClient
           .from('users')
@@ -4934,6 +5039,277 @@
         }
       });
     });
-  </script>
+  
+    // ==========================================
+    // СОВРЕМЕННЫЕ МОДАЛЬНЫЕ ДИАЛОГИ И BOTTOM SHEET
+    // ==========================================
+    let confirmResolver = null;
+    let drawerSelectCallback = null;
+
+    function showConfirmDialog({ title, description, confirmText = 'Подтвердить', cancelText = 'Отмена', variant = 'danger' }) {
+      triggerHaptic(15);
+      return new Promise((resolve) => {
+        confirmResolver = resolve;
+        const backdrop = document.getElementById('custom-modal-backdrop');
+        const card = document.getElementById('custom-modal-card');
+        const titleEl = document.getElementById('custom-modal-title');
+        const descEl = document.getElementById('custom-modal-desc');
+        const btnCancel = document.getElementById('custom-modal-btn-cancel');
+        const btnConfirm = document.getElementById('custom-modal-btn-confirm');
+        const iconBox = document.getElementById('custom-modal-icon-box');
+
+        titleEl.textContent = title;
+        descEl.textContent = description;
+        btnCancel.textContent = cancelText;
+        btnConfirm.textContent = confirmText;
+        btnCancel.classList.remove('hidden');
+
+        if (variant === 'danger') {
+          iconBox.className = 'w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4';
+          btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/20 transition-all';
+        } else {
+          iconBox.className = 'w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4';
+          btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
+        }
+
+        backdrop.classList.remove('pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+
+        btnConfirm.onclick = () => {
+          triggerHaptic(12);
+          closeCustomModal(true);
+        };
+        btnCancel.onclick = () => {
+          triggerHaptic(8);
+          closeCustomModal(false);
+        };
+      });
+    }
+
+    function showAlertDialog({ title = 'Внимание', description = '', buttonText = 'Понятно' }) {
+      triggerHaptic(15);
+      return new Promise((resolve) => {
+        confirmResolver = resolve;
+        const backdrop = document.getElementById('custom-modal-backdrop');
+        const card = document.getElementById('custom-modal-card');
+        const titleEl = document.getElementById('custom-modal-title');
+        const descEl = document.getElementById('custom-modal-desc');
+        const btnCancel = document.getElementById('custom-modal-btn-cancel');
+        const btnConfirm = document.getElementById('custom-modal-btn-confirm');
+        const iconBox = document.getElementById('custom-modal-icon-box');
+
+        titleEl.textContent = title;
+        descEl.textContent = description;
+        btnConfirm.textContent = buttonText;
+        btnCancel.classList.add('hidden');
+        iconBox.className = 'w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4';
+        btnConfirm.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all';
+
+        backdrop.classList.remove('pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+
+        btnConfirm.onclick = () => {
+          triggerHaptic(10);
+          closeCustomModal(true);
+        };
+      });
+    }
+
+    function closeCustomModal(result) {
+      const backdrop = document.getElementById('custom-modal-backdrop');
+      const card = document.getElementById('custom-modal-card');
+      if (backdrop && card) {
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+        card.classList.remove('scale-100', 'opacity-100');
+      }
+      if (confirmResolver) {
+        confirmResolver(result);
+        confirmResolver = null;
+      }
+    }
+
+    // VAUL BOTTOM SHEET DRAWER
+    function openActionDrawer({ title, description = '', options = [], selectedValue = '', onSelect }) {
+      triggerHaptic(12);
+      drawerSelectCallback = onSelect;
+      const drawer = document.getElementById('custom-action-drawer');
+      const content = document.getElementById('drawer-content');
+      const titleEl = document.getElementById('drawer-title');
+      const descEl = document.getElementById('drawer-desc');
+      const optionsContainer = document.getElementById('drawer-options');
+
+      titleEl.textContent = title;
+      descEl.textContent = description;
+      descEl.style.display = description ? 'block' : 'none';
+
+      optionsContainer.innerHTML = options.map(opt => {
+        const isSel = opt.value === selectedValue;
+        return `
+          <button type="button" onclick="selectDrawerOption('${escapeHtml(String(opt.value))}')" 
+                  class="w-full flex items-center justify-between p-3.5 rounded-2xl transition-all ${
+                    isSel 
+                      ? 'bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200' 
+                      : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-transparent'
+                  }">
+            <div class="flex flex-col items-start text-left">
+              <span class="text-sm font-semibold">${escapeHtml(opt.label)}</span>
+              ${opt.desc ? `<span class="text-xs text-neutral-400 mt-0.5">${escapeHtml(opt.desc)}</span>` : ''}
+            </div>
+            ${isSel ? `
+              <div class="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+              </div>
+            ` : ''}
+          </button>
+        `;
+      }).join('');
+
+      drawer.classList.remove('pointer-events-none', 'opacity-0');
+      drawer.classList.add('opacity-100');
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+    }
+
+    function selectDrawerOption(val) {
+      triggerHaptic(10);
+      if (drawerSelectCallback) {
+        drawerSelectCallback(val);
+        drawerSelectCallback = null;
+      }
+      closeActionDrawer();
+    }
+
+    function closeActionDrawer() {
+      const drawer = document.getElementById('custom-action-drawer');
+      const content = document.getElementById('drawer-content');
+      if (drawer && content) {
+        content.classList.add('translate-y-full');
+        content.classList.remove('translate-y-0');
+        setTimeout(() => {
+          drawer.classList.add('opacity-0', 'pointer-events-none');
+          drawer.classList.remove('opacity-100');
+        }, 200);
+      }
+    }
+
+    function openUnitDrawer() {
+      const currentVal = document.getElementById('prod-unit')?.value || 'шт';
+      openActionDrawer({
+        title: 'Единица измерения',
+        description: 'Выберите единицу учета для ингредиента или блюда',
+        selectedValue: currentVal,
+        options: [
+          { value: 'шт', label: 'шт (штуки)', desc: 'Для десертов, круассанов, бутылок' },
+          { value: 'г', label: 'г (граммы)', desc: 'Для зерен кофе, сахара, муки' },
+          { value: 'мл', label: 'мл (миллилитры)', desc: 'Для сиропов, молока, напитков' },
+          { value: 'кг', label: 'кг (килограммы)', desc: 'Для оптовых складских партий' },
+          { value: 'л', label: 'л (литры)', desc: 'Для объемных жидких ингредиентов' },
+          { value: 'порц', label: 'порц (порции)', desc: 'Для порционных заготовок' }
+        ],
+        onSelect: (val) => {
+          const select = document.getElementById('prod-unit');
+          if (select) {
+            select.value = val;
+            const btnText = document.getElementById('prod-unit-btn-text');
+            if (btnText) btnText.textContent = val;
+          }
+        }
+      });
+    }
+
+    function openCategoryDrawer() {
+      const currentVal = document.getElementById('prod-category')?.value || '';
+      const options = cachedCategories.map(c => ({
+        value: c.id,
+        label: c.name
+      }));
+      openActionDrawer({
+        title: 'Категория товара',
+        description: 'Выберите категорию для витрины кассира',
+        selectedValue: currentVal,
+        options: options,
+        onSelect: (val) => {
+          const select = document.getElementById('prod-category');
+          if (select) {
+            select.value = val;
+            const cat = cachedCategories.find(c => c.id === val);
+            const btnText = document.getElementById('prod-category-btn-text');
+            if (btnText) btnText.textContent = cat ? cat.name : 'Выберите категорию';
+          }
+        }
+      });
+    }
+
+    // Перехват кликов по нативным селектам единиц и категорий для вызова Bottom Sheet
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const unitEl = document.getElementById('prod-unit');
+        if (unitEl) {
+          unitEl.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            openUnitDrawer();
+          });
+          unitEl.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            openUnitDrawer();
+          }, { passive: false });
+        }
+
+        const catEl = document.getElementById('prod-category');
+        if (catEl) {
+          catEl.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            openCategoryDrawer();
+          });
+          catEl.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            openCategoryDrawer();
+          }, { passive: false });
+        }
+      }, 500);
+    });
+</script>
+
+  <!-- ==================== RADIX-STYLE CONFIRM & ALERT MODAL ==================== -->
+  <div id="custom-modal-backdrop" class="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm transition-opacity duration-200 opacity-0 pointer-events-none flex items-center justify-center p-4">
+    <div id="custom-modal-card" class="w-full max-w-sm rounded-3xl bg-white dark:bg-[#1C1E22] p-6 border border-neutral-200/80 dark:border-neutral-800/80 shadow-2xl transform scale-95 transition-all duration-200 opacity-0 pointer-events-auto">
+      <div id="custom-modal-icon-box" class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+        <svg id="custom-modal-icon" class="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+        </svg>
+      </div>
+      <h3 id="custom-modal-title" class="text-base font-bold text-neutral-900 dark:text-neutral-50"></h3>
+      <p id="custom-modal-desc" class="mt-2 text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed"></p>
+      
+      <div id="custom-modal-actions" class="mt-6 flex items-center justify-end gap-2.5">
+        <button id="custom-modal-btn-cancel" type="button" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 transition-colors">
+          Отмена
+        </button>
+        <button id="custom-modal-btn-confirm" type="button" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-md shadow-amber-600/20 transition-all">
+          Подтвердить
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VAUL-STYLE ACTION DRAWER (BOTTOM SHEET) ==================== -->
+  <div id="custom-action-drawer" class="fixed inset-0 z-[120] pointer-events-none transition-opacity duration-200 opacity-0 flex flex-col justify-end">
+    <div id="drawer-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-auto" onclick="closeActionDrawer()"></div>
+    <div id="drawer-content" class="relative z-10 w-full max-h-[85vh] rounded-t-3xl bg-white dark:bg-[#1C1E22] border-t border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 pb-8 flex flex-col transform translate-y-full transition-transform duration-300 ease-out pointer-events-auto">
+      <div class="mx-auto -mt-2 mb-3 w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700"></div>
+      <div class="flex items-center justify-between mb-1">
+        <h3 id="drawer-title" class="text-base font-bold text-neutral-900 dark:text-neutral-50"></h3>
+        <button type="button" onclick="closeActionDrawer()" class="text-neutral-400 hover:text-neutral-600 p-1 rounded-lg">✕</button>
+      </div>
+      <p id="drawer-desc" class="text-xs text-neutral-400 mb-4"></p>
+      <div id="drawer-options" class="space-y-1.5 overflow-y-auto max-h-[55vh] pr-1"></div>
+    </div>
+  </div>
 </body>
 </html>
