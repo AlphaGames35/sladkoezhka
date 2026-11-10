@@ -4556,8 +4556,8 @@
             </div>
 
             ${!isSelf ? `
-              <button onclick="deleteStaff('${user.id}')" title="Деактивировать" class="text-xs text-red-600 hover:underline font-semibold">
-                Удалить доступ
+              <button onclick="deleteStaff('${user.id}')" title="Удалить сотрудника навсегда" class="text-xs text-red-600 hover:underline font-semibold">
+                Удалить
               </button>
             ` : '<span class="text-xs text-[#8E8A85] font-mono font-bold">вы</span>'}
           </div>
@@ -4567,27 +4567,39 @@
 
     async function deleteStaff(userId) {
       if (!supabaseClient) {
-        alert('База данных не подключена. Нажмите иконку ⚙️ вверху для настройки подключения.');
+        showAlertDialog({ title: 'Ошибка', description: 'База данных не подключена. Нажмите иконку ⚙️ вверху для настройки подключения.' });
         openDbConfigModal();
         return;
       }
       const okStaff = await showConfirmDialog({
-        title: 'Заблокировать доступ?',
-        description: 'Заблокировать доступ сотруднику к терминалу? История его продаж сохранится.',
-        confirmText: 'Заблокировать',
+        title: 'Удалить сотрудника навсегда?',
+        description: 'Учётная запись будет полностью и безвозвратно удалена из базы данных.',
+        confirmText: 'Удалить навсегда',
         variant: 'danger'
       });
       if (!okStaff) return;
       try {
+        // Отвязываем чеки сотрудника от внешнего ключа, чтобы удаление прошло без ограничений БД
+        try {
+          await supabaseClient
+            .from('sales')
+            .update({ employee_id: null })
+            .eq('employee_id', userId);
+        } catch (e) {
+          console.warn('Unlink sales error:', e);
+        }
+
+        // Физическое удаление записи из таблицы users
         const { error } = await supabaseClient
           .from('users')
-          .update({ is_deleted: true })
+          .delete()
           .eq('id', userId);
+
         if (error) throw error;
-        showToast('✓ Доступ сотрудника заблокирован');
+        showToast('✓ Сотрудник полностью удален из базы данных');
         refreshAppData();
       } catch (err) {
-        alert('Ошибка: ' + err.message);
+        showAlertDialog({ title: 'Ошибка удаления', description: err.message });
       }
     }
 
