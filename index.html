@@ -630,6 +630,22 @@
       display: none !important;
       pointer-events: none !important;
     }
+
+    /* Индикаторы темы в шапке */
+    html.dark #theme-icon-sun {
+      display: block !important;
+      color: #F59E0B !important;
+    }
+    html.dark #theme-icon-moon {
+      display: none !important;
+    }
+    html:not(.dark) #theme-icon-sun {
+      display: none !important;
+    }
+    html:not(.dark) #theme-icon-moon {
+      display: block !important;
+      color: #4B5563 !important;
+    }
   </style>
 </head>
 <body class="h-full bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-150 antialiased font-sans flex flex-col overflow-hidden">
@@ -715,13 +731,13 @@
     <div class="flex items-center space-x-1 shrink-0">
       
       <!-- Кнопка смены темы оформления (Sun/Moon, Lucide strokeWidth=1.75 size=18) -->
-      <button onclick="toggleTheme()" title="Сменить тему оформления" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-neutral-300 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center">
+      <button onclick="toggleTheme()" title="Сменить тему оформления" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-amber-400 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center">
         <!-- Lucide Sun -->
-        <svg id="theme-icon-sun" class="w-[18px] h-[18px] hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <svg id="theme-icon-sun" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
           <circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
         </svg>
         <!-- Lucide Moon -->
-        <svg id="theme-icon-moon" class="w-[18px] h-[18px] block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <svg id="theme-icon-moon" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
         </svg>
       </button>
@@ -769,7 +785,7 @@
         <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-[#4B5563] dark:text-cream-200 uppercase tracking-wider mb-1.5">Логин сотрудника</label>
-            <input type="text" id="login-input" required autocomplete="username" placeholder="admin или cashier1" 
+            <input type="text" id="login-input" required autocomplete="username" placeholder="Логин (admin или prod)" 
                    class="w-full px-3.5 py-2.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17] text-sm">
           </div>
 
@@ -785,21 +801,6 @@
             Войти в систему
           </button>
         </form>
-
-        <!-- Быстрый выбор роли -->
-        <div class="mt-8 pt-5 border-t border-[#ECE6DE] dark:border-cacao-800">
-          <div class="text-[11px] text-[#9CA3AF] uppercase font-semibold tracking-wider mb-2.5 text-center">Тестовые аккаунты:</div>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="quickLogin('admin', 'admin123')" class="p-2.5 text-left rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] transition bg-[#FAF7F2] dark:bg-cacao-950">
-              <div class="font-bold text-xs text-[#1F2937] dark:text-cream-50">Управляющий</div>
-              <div class="text-[10px] text-[#6B7280] font-mono mt-0.5">admin</div>
-            </button>
-            <button onclick="quickLogin('cashier1', '1234')" class="p-2.5 text-left rounded-lg border border-[#ECE6DE] dark:border-cacao-800 hover:border-[#2D1E17] transition bg-[#FAF7F2] dark:bg-cacao-950">
-              <div class="font-bold text-xs text-caramel-600 dark:text-caramel-400">Сотрудник</div>
-              <div class="text-[10px] text-[#6B7280] font-mono mt-0.5">cashier1</div>
-            </button>
-          </div>
-        </div>
 
         <!-- Баннер настройки подключения для Web-режима (когда открыто в браузере) -->
         <div id="web-db-setup-banner" class="mt-4 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700 text-left">
@@ -2279,6 +2280,18 @@
       if (isDark) html.classList.add('dark');
       else html.classList.remove('dark');
 
+      const sunIcon = document.getElementById('theme-icon-sun');
+      const moonIcon = document.getElementById('theme-icon-moon');
+      if (sunIcon && moonIcon) {
+        if (isDark) {
+          sunIcon.style.setProperty('display', 'block', 'important');
+          moonIcon.style.setProperty('display', 'none', 'important');
+        } else {
+          sunIcon.style.setProperty('display', 'none', 'important');
+          moonIcon.style.setProperty('display', 'block', 'important');
+        }
+      }
+
       document.querySelectorAll('.theme-btn').forEach(b => {
         if (b.dataset.theme === pref) {
           b.className = 'theme-btn flex-1 py-1.5 rounded-md font-semibold bg-white dark:bg-cacao-800 text-[#1F2937] dark:text-cream-50 shadow-2xs';
@@ -2322,56 +2335,45 @@
       btn.innerText = 'Проверка...';
 
       try {
+        const normLogin = (login || '').trim().toLowerCase();
+        const normPass = (password || '').trim();
+
+        // Доступ строго для двух аккаунтов: admin (sladkopass) и prod (prod123)
+        const isAdmin = (normLogin === 'admin' && normPass === 'sladkopass');
+        const isProd = (normLogin === 'prod' && normPass === 'prod123');
+
+        if (!isAdmin && !isProd) {
+          throw new Error('Неверный логин или пароль');
+        }
+
+        let verifiedUser = {
+          id: isAdmin ? 'user-admin' : 'user-prod',
+          name: isAdmin ? 'Управляющий' : 'Сотрудник',
+          login: normLogin,
+          role: isAdmin ? 'manager' : 'employee'
+        };
+
+        // Синхронизация профиля из базы данных Supabase (если подключена)
         if (!supabaseClient) {
           initSupabase();
         }
-        if (!supabaseClient) {
-          openDbConfigModal();
-          throw new Error('Для работы в браузере укажите параметры подключения (нажмите «Настроить подключение»)');
-        }
-
-        let verifiedUser = null;
-
-        // Попытка 1: через RPC функцию verify_user
-        try {
-          const { data, error } = await supabaseClient.rpc('verify_user', {
-            p_login: login,
-            p_password: password
-          });
-          if (!error && data && data.success && data.user) {
-            verifiedUser = data.user;
-          }
-        } catch (rpcErr) {
-          console.warn('RPC verify_user error/fallback:', rpcErr);
-        }
-
-        // Попытка 2: прямой запрос к таблице users (fallback)
-        if (!verifiedUser) {
+        if (supabaseClient) {
           try {
-            const { data: uData, error: uErr } = await supabaseClient
+            const { data: uData } = await supabaseClient
               .from('users')
               .select('*')
-              .ilike('login', login)
+              .ilike('login', normLogin)
               .eq('is_deleted', false)
               .maybeSingle();
 
-            if (uData && !uErr) {
-              if (uData.password_hash === password || (login === 'admin' && password === 'admin123') || (login === 'cashier1' && password === '1234')) {
-                verifiedUser = {
-                  id: uData.id,
-                  name: uData.name,
-                  login: uData.login,
-                  role: uData.role
-                };
-              }
+            if (uData) {
+              verifiedUser.id = uData.id;
+              if (uData.name) verifiedUser.name = uData.name;
+              if (uData.role) verifiedUser.role = uData.role;
             }
-          } catch (directErr) {
-            console.warn('Direct user query error:', directErr);
+          } catch (e) {
+            console.warn('Supabase profile fetch fallback:', e);
           }
-        }
-
-        if (!verifiedUser) {
-          throw new Error('Неверный логин или пароль');
         }
 
         currentUser = verifiedUser;
@@ -2381,7 +2383,6 @@
       } catch (err) {
         errorEl.innerText = err.message || 'Ошибка входа';
         errorEl.classList.remove('hidden');
-        triggerHaptic(30);
         const card = document.querySelector('#screen-login > div');
         if (card) {
           card.classList.remove('shake-modal');
