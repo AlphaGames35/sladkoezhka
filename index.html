@@ -193,31 +193,6 @@
 
     .pwa-scroll-container {
       padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
-      transition: padding-bottom 0.2s ease;
-    }
-    .pwa-scroll-container.cart-active-padding {
-      padding-bottom: calc(11.5rem + env(safe-area-inset-bottom, 0px)) !important;
-    }
-
-    /* Гарантированная яркая иконка солнца на темной теме */
-    html.dark #btn-theme-toggle {
-      color: #F59E0B !important;
-    }
-    html.dark #theme-icon-sun {
-      display: block !important;
-      stroke: #F59E0B !important;
-      color: #F59E0B !important;
-    }
-    html.dark #theme-icon-moon {
-      display: none !important;
-    }
-    html:not(.dark) #theme-icon-sun {
-      display: none !important;
-    }
-    html:not(.dark) #theme-icon-moon {
-      display: block !important;
-      stroke: #4B5563 !important;
-      color: #4B5563 !important;
     }
 
     @keyframes chartBarGrow {
@@ -757,7 +732,7 @@
     <div class="flex items-center space-x-1 shrink-0">
       
       <!-- Кнопка смены темы оформления (Sun/Moon, Lucide strokeWidth=1.75 size=18) -->
-      <button id="btn-theme-toggle" onclick="toggleTheme()" title="Сменить тему оформления" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-amber-400 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center">
+      <button onclick="toggleTheme()" title="Сменить тему оформления" class="w-9 h-9 p-2 rounded-lg text-[#4B5563] dark:text-amber-400 hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 active:scale-95 transition flex items-center justify-center">
         <!-- Lucide Sun -->
         <svg id="theme-icon-sun" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
           <circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -811,13 +786,13 @@
         <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-[#4B5563] dark:text-cream-200 uppercase tracking-wider mb-1.5">Логин сотрудника</label>
-            <input type="text" id="login-input" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Введите логин" 
+            <input type="text" id="login-input" required autocomplete="username" placeholder="Введите логин" 
                    class="w-full px-3.5 py-2.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17] text-sm">
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-[#4B5563] dark:text-cream-200 uppercase tracking-wider mb-1.5">Пароль</label>
-            <input type="password" id="password-input" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="••••••••" 
+            <input type="password" id="password-input" required autocomplete="current-password" placeholder="••••••••" 
                    class="w-full px-3.5 py-2.5 rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white placeholder-[#9CA3AF] focus:outline-none focus:ring-1 focus:ring-[#2D1E17] text-sm">
           </div>
 
@@ -922,46 +897,26 @@
 
       </div>
 
-      <!-- Вкладка 2: МОЯ СМЕНА (УПРАВЛЕНИЕ И ЗАКАЗЫ) -->
-      <div id="employee-tab-shift" class="hidden p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+      <!-- Вкладка 2: МОЯ СМЕНА (ЗАКАЗЫ ЗА СЕГОДНЯ) -->
+      <div id="employee-tab-shift" class="hidden p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
         
-        <!-- Верхняя плашка статуса смены и кнопки отчетов -->
-        <div class="p-4 rounded-2xl bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div class="flex items-center justify-between">
           <div>
-            <div class="flex items-center space-x-2">
-              <span id="shift-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h2 class="text-base sm:text-lg font-extrabold text-[#1F2937] dark:text-cream-50" id="shift-status-title">Кассовая смена активна</h2>
-            </div>
-            <p class="text-xs text-[#8E8A85] mt-0.5" id="shift-status-subtitle">Открыта: сегодня</p>
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1F2937] dark:text-cream-50">Заказы за смену</h2>
+            <p class="text-xs text-[#6B7280]">Сводка оформленных заказов за сегодня</p>
           </div>
-          
-          <div class="flex items-center space-x-2">
-            <button onclick="showXReportModal()" type="button" class="px-3 py-2 rounded-xl border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-xs font-bold text-[#1F2937] dark:text-cream-100 hover:border-amber-600 transition flex items-center space-x-1">
-              <span>📄 X-отчет</span>
-            </button>
-            <button onclick="openCloseShiftModal()" type="button" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition flex items-center space-x-1 shadow-xs">
-              <span>🛑 Закрыть смену (Z-отчет)</span>
-            </button>
-          </div>
+          <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-[#ECE6DE] dark:bg-cacao-800 text-[#1F2937] dark:text-cream-200" id="shift-date-label">Сегодня</span>
         </div>
 
-        <!-- 4 Сводные KPI карточки смены (Выручка, Чеков, Наличные, Карта/СБП) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div class="p-3.5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-2xs">
-            <div class="text-[10px] text-[#8E8A85] font-bold uppercase tracking-wider">Всего выручка</div>
-            <div id="shift-total-amount" class="text-lg sm:text-xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0 ₽</div>
+        <!-- Сводные KPI карточки смены -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">Выручка за смену</div>
+            <div id="shift-total-amount" class="text-xl sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0 ₽</div>
           </div>
-          <div class="p-3.5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-2xs">
-            <div class="text-[10px] text-[#8E8A85] font-bold uppercase tracking-wider">Чеков пробито</div>
-            <div id="shift-total-count" class="text-lg sm:text-xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-2xs">
-            <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">💵 Нал в кассе</div>
-            <div id="shift-cash-amount" class="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1 tabular-nums">0 ₽</div>
-          </div>
-          <div class="p-3.5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-2xs">
-            <div class="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">💳 Безнал (Карта+СБП)</div>
-            <div id="shift-card-amount" class="text-lg sm:text-xl font-black text-blue-700 dark:text-blue-400 mt-1 tabular-nums">0 ₽</div>
+          <div class="p-4 sm:p-5 rounded-xl border border-[#ECE6DE] dark:border-cacao-800 bg-white dark:bg-cacao-900 shadow-xs">
+            <div class="text-[11px] text-[#6B7280] font-semibold uppercase tracking-wider">Продаж за смену</div>
+            <div id="shift-total-count" class="text-xl sm:text-2xl font-black text-[#1F2937] dark:text-cream-50 mt-1 tabular-nums">0</div>
           </div>
         </div>
 
@@ -1219,7 +1174,7 @@
         </div>
       </div>
 
-      <button id="btn-process-sale" onclick="openPaymentModal()" class="shrink-0 whitespace-nowrap relative overflow-hidden py-2.5 px-3.5 sm:px-6 rounded-xl bg-white hover:bg-cream-100 text-[#2D1E17] font-bold text-xs sm:text-sm transition flex items-center space-x-1.5 shadow-sm active:scale-95">
+      <button id="btn-process-sale" onclick="submitSale()" class="shrink-0 whitespace-nowrap relative overflow-hidden py-2.5 px-3.5 sm:px-6 rounded-xl bg-white hover:bg-cream-100 text-[#2D1E17] font-bold text-xs sm:text-sm transition flex items-center space-x-1.5 shadow-sm active:scale-95">
         <span id="btn-process-sale-text">Оформить заказ</span>
         <svg id="btn-process-sale-icon" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -1276,127 +1231,6 @@
   </nav>
 
   <!-- ==================== МОДАЛЬНЫЕ ОКНА ==================== -->
-
-    <!-- 0.1 МОДАЛКА ОПЛАТЫ И РАСЧЕТА СДАЧИ -->
-  <div id="modal-payment" class="hidden modal-sheet-backdrop fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="modal-sheet-dialog bg-white dark:bg-cacao-900 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="font-extrabold text-base text-[#1F2937] dark:text-cream-50">Оплата заказа</h3>
-          <p class="text-xs text-[#8E8A85]">Выберите способ оплаты и рассчитайте сдачу</p>
-        </div>
-        <button onclick="closePaymentModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1 text-base">✕</button>
-      </div>
-
-      <!-- Сумма к оплате -->
-      <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-center">
-        <span class="text-[11px] uppercase font-bold text-[#8E8A85] tracking-wider block">Итого к оплате:</span>
-        <div class="text-3xl font-black text-[#2D1E17] dark:text-white tabular-nums mt-0.5" id="pay-modal-total">0 ₽</div>
-      </div>
-
-      <!-- Способы оплаты (3 кнопки) -->
-      <div class="grid grid-cols-3 gap-2" id="pay-method-selector">
-        <button type="button" onclick="selectPayMethod('cash')" id="btn-method-cash" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 border-2 border-amber-600 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 shadow-xs">
-          <span class="text-lg">💵</span>
-          <span>Наличные</span>
-        </button>
-        <button type="button" onclick="selectPayMethod('card')" id="btn-method-card" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#4B5563] dark:text-cream-200 hover:border-amber-500/50">
-          <span class="text-lg">💳</span>
-          <span>Карта</span>
-        </button>
-        <button type="button" onclick="selectPayMethod('sbp')" id="btn-method-sbp" class="py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#4B5563] dark:text-cream-200 hover:border-amber-500/50">
-          <span class="text-lg">📱</span>
-          <span>СБП / QR</span>
-        </button>
-      </div>
-
-      <!-- Блок калькулятора сдачи при наличных -->
-      <div id="box-cash-calc" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-[#6B7280] dark:text-cream-200 uppercase tracking-wider mb-1.5">Получено от гостя:</label>
-          <div class="relative">
-            <input type="number" id="pay-cash-input" oninput="updateCashChange()" placeholder="0" class="w-full pl-3.5 pr-8 py-2.5 text-lg font-bold rounded-xl border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-600 tabular-nums">
-            <span class="absolute right-3.5 top-3 text-sm font-bold text-neutral-400">₽</span>
-          </div>
-        </div>
-
-        <!-- Быстрые купюры -->
-        <div class="flex items-center gap-1.5 flex-wrap" id="quick-cash-chips"></div>
-
-        <!-- Сдача -->
-        <div id="box-change-display" class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
-          <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">Сдача гостю:</span>
-          <span class="text-lg font-black text-emerald-700 dark:text-emerald-400 tabular-nums" id="pay-change-val">0 ₽</span>
-        </div>
-      </div>
-
-      <!-- Инфо-подсказка для безнала -->
-      <div id="box-card-info" class="hidden p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-center space-y-1">
-        <div class="text-xs font-bold text-blue-900 dark:text-blue-200" id="card-info-title">Приложите карту к терминалу эквайринга</div>
-        <p class="text-[11px] text-blue-700 dark:text-blue-300">После звукового сигнала терминала нажмите кнопку завершения</p>
-      </div>
-
-      <!-- Кнопка подтверждения продажи -->
-      <button type="button" id="btn-confirm-payment" onclick="confirmPaymentAndSale()" class="w-full py-3.5 px-4 rounded-xl font-black text-white bg-amber-600 hover:bg-amber-700 transition active:scale-[0.99] text-sm shadow-md flex items-center justify-center space-x-2">
-        <span id="btn-confirm-pay-text">Провести чек и выдать сдачу</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 0.2 МОДАЛКА X-ОТЧЕТА (СВЕРКА БЕЗ ЗАКРЫТИЯ) -->
-  <div id="modal-x-report" class="hidden modal-sheet-backdrop fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="modal-sheet-dialog bg-white dark:bg-cacao-900 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
-      <div class="flex items-center justify-between border-b border-[#ECE6DE] dark:border-cacao-800 pb-3">
-        <div>
-          <h3 class="font-extrabold text-base text-[#1F2937] dark:text-cream-50">X-ОТЧЕТ (Сверка)</h3>
-          <p class="text-[11px] text-[#8E8A85]">Промежуточный отчет текущей смены</p>
-        </div>
-        <button onclick="closeModal('modal-x-report')" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
-      </div>
-      
-      <div class="space-y-2 text-xs divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800" id="x-report-content">
-        <!-- Заполняется JS -->
-      </div>
-
-      <button type="button" onclick="closeModal('modal-x-report')" class="w-full py-2.5 rounded-xl bg-[#2D1E17] dark:bg-white text-white dark:text-[#2D1E17] font-bold text-xs">
-        Закрыть просмотр
-      </button>
-    </div>
-  </div>
-
-  <!-- 0.3 МОДАЛКА Z-ОТЧЕТА (ЗАКРЫТИЕ СМЕНЫ И ГАШЕНИЕ) -->
-  <div id="modal-z-report" class="hidden modal-sheet-backdrop fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="modal-sheet-dialog bg-white dark:bg-cacao-900 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#ECE6DE] dark:border-cacao-800 space-y-4">
-      <div class="flex items-center justify-between border-b border-[#ECE6DE] dark:border-cacao-800 pb-3">
-        <div>
-          <h3 class="font-extrabold text-base text-red-600 dark:text-red-400">Z-ОТЧЕТ (Закрытие смены)</h3>
-          <p class="text-[11px] text-[#8E8A85]">Гашение смены и инкассация кассы</p>
-        </div>
-        <button onclick="closeModal('modal-z-report')" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1">✕</button>
-      </div>
-      
-      <div class="space-y-2.5 text-xs divide-y divide-dashed divide-[#ECE6DE] dark:divide-cacao-800" id="z-report-content">
-        <!-- Заполняется JS -->
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-[#6B7280] dark:text-cream-200 uppercase tracking-wider mb-1">Фактическая наличность в кассе при пересчете:</label>
-        <div class="relative">
-          <input type="number" id="z-actual-cash" placeholder="0" class="w-full px-3 py-2 text-sm font-bold rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white tabular-nums">
-          <span class="absolute right-3 top-2 text-xs font-bold text-neutral-400">₽</span>
-        </div>
-      </div>
-
-      <div class="flex items-center space-x-2 pt-2">
-        <button type="button" onclick="closeModal('modal-z-report')" class="flex-1 py-2.5 rounded-xl border border-[#ECE6DE] dark:border-cacao-700 text-xs font-semibold text-[#6B7280]">
-          Отмена
-        </button>
-        <button type="button" onclick="confirmShiftClosure()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs">
-          Закрыть смену
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- 1. МОДАЛКА БЫСТРОГО ПОПОЛНЕНИЯ ОСТАТКА (ВМЕСТО PROMPT) -->
   <div id="modal-stock-edit" class="hidden modal-sheet-backdrop fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
@@ -1771,11 +1605,11 @@
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Логин для входа</label>
-          <input type="text" id="staff-login" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="anna1" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+          <input type="text" id="staff-login" required autocomplete="username" placeholder="anna1" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Пароль</label>
-          <input type="password" id="staff-password" required autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
+          <input type="password" id="staff-password" required autocomplete="new-password" placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950">
         </div>
         <div>
           <label class="block text-xs text-[#6B7280] mb-1">Роль</label>
@@ -2028,28 +1862,9 @@
     }, { once: true, passive: true });
 
     // ==========================================
-    // РАСЧЕТ ДОСТУПНОСТИ БЛЮД ПО ТЕХКАРТАМ И СЫРЬЮ В КОРЗИНЕ
+    // РАСЧЕТ ДОСТУПНОСТИ БЛЮД ПО ТЕХКАРТАМ
     // ==========================================
-    function getCartIngredientUsage(excludeProdId = null) {
-      const usage = {};
-      for (const [pId, qty] of Object.entries(cart)) {
-        if (!qty || qty <= 0) continue;
-        if (excludeProdId && pId === excludeProdId) continue;
-        const p = cachedProducts.find(item => item.id === pId && !item.is_deleted);
-        if (!p) continue;
-        if (p.item_type === 'composite') {
-          const recipes = cachedIngredients.filter(r => r.parent_product_id === p.id);
-          recipes.forEach(r => {
-            usage[r.ingredient_id] = (usage[r.ingredient_id] || 0) + (Number(r.quantity) * qty);
-          });
-        } else if (p.item_type === 'simple') {
-          usage[p.id] = (usage[p.id] || 0) + qty;
-        }
-      }
-      return usage;
-    }
-
-    function getProductAvailableStock(prod, cartUsage = null) {
+    function getProductAvailableStock(prod) {
       if (!prod) return 0;
       const itemType = prod.item_type || 'simple';
 
@@ -2058,7 +1873,7 @@
         return Number(prod.stock_qty || 0);
       }
 
-      // Составные блюда с техкартой: Минимум((Остаток_ингредиента - Занято_в_корзине) / Расход_на_порцию)
+      // Составные блюда с техкартой: Минимум(Остаток_ингредиента / Расход_на_порцию)
       if (itemType === 'composite') {
         const recipes = cachedIngredients.filter(r => r.parent_product_id === prod.id);
         if (!recipes || recipes.length === 0) {
@@ -2067,16 +1882,13 @@
         const portions = recipes.map(recipe => {
           const ing = cachedProducts.find(p => p.id === recipe.ingredient_id && !p.is_deleted);
           if (!ing || Number(recipe.quantity) <= 0) return 0;
-          const used = cartUsage ? (cartUsage[recipe.ingredient_id] || 0) : 0;
-          const availableRests = Math.max(0, Number(ing.stock_qty || 0) - used);
-          return Math.floor(availableRests / Number(recipe.quantity));
+          return Math.floor(Number(ing.stock_qty || 0) / Number(recipe.quantity));
         });
         return Math.max(0, Math.min(...portions));
       }
 
       // Обычный штучный товар
-      const used = cartUsage ? (cartUsage[prod.id] || 0) : 0;
-      return Math.max(0, Math.floor(Number(prod.stock_qty || 0) - used));
+      return Number(prod.stock_qty || 0);
     }
 
     function setInventoryViewMode(mode) {
@@ -2529,7 +2341,7 @@
 
         let verifiedUser = null;
 
-        // 1. Дефолтные системные учетные записи (гарантированный мгновенный оффлайн-вход)
+        // 1. Дефолтные системные учетные записи (гарантированный оффлайн/онлайн вход)
         if (normLogin === 'admin' && normPass === 'sladkopass') {
           verifiedUser = {
             id: '141c59cc-5494-477d-844d-a18209d50d4f',
@@ -2546,57 +2358,35 @@
           };
         }
 
-        // 2. Онлайн-проверка учетных записей через Supabase
+        // 2. Проверка через базу данных Supabase (для сотрудников, добавленных через систему)
         if (!supabaseClient) {
           initSupabase();
         }
-        if (supabaseClient && (!verifiedUser || (normLogin !== 'admin' && normLogin !== 'prod'))) {
-          // А. Пробуем безопасный RPC verify_user
+        if (supabaseClient) {
           try {
-            const { data: rpcData, error: rpcErr } = await supabaseClient.rpc('verify_user', {
-              p_login: normLogin,
-              p_password: normPass
-            });
+            const { data: uData, error: uErr } = await supabaseClient
+              .from('users')
+              .select('*')
+              .ilike('login', normLogin)
+              .eq('is_deleted', false)
+              .maybeSingle();
 
-            if (rpcData && rpcData.success && rpcData.user) {
-              verifiedUser = {
-                id: rpcData.user.id,
-                name: rpcData.user.name || (rpcData.user.role === 'manager' ? 'Управляющий' : 'Сотрудник'),
-                login: rpcData.user.login,
-                role: rpcData.user.role || 'employee'
-              };
-            }
-          } catch (rpcEx) {
-            console.warn('RPC verify_user error fallback:', rpcEx);
-          }
+            if (uData && !uErr) {
+              const passMatches = (uData.password_hash === normPass) ||
+                                  (normLogin === 'admin' && normPass === 'sladkopass') ||
+                                  (normLogin === 'prod' && normPass === 'prod123');
 
-          // Б. Фоллбэк: прямой запрос к таблице users
-          if (!verifiedUser) {
-            try {
-              const { data: uData, error: uErr } = await supabaseClient
-                .from('users')
-                .select('*')
-                .ilike('login', normLogin)
-                .eq('is_deleted', false)
-                .maybeSingle();
-
-              if (uData && !uErr) {
-                const passMatches = (uData.password_hash === normPass) ||
-                                    (normLogin === 'admin' && normPass === 'sladkopass') ||
-                                    (normLogin === 'prod' && normPass === 'prod123');
-
-                if (passMatches) {
-                  verifiedUser = {
-                    id: uData.id,
-                    name: uData.name || (uData.role === 'manager' ? 'Управляющий' : 'Сотрудник'),
-                    login: uData.login,
-                    role: uData.role || 'employee'
-                  };
-                }
+              if (passMatches) {
+                verifiedUser = {
+                  id: uData.id,
+                  name: uData.name || (uData.role === 'manager' ? 'Управляющий' : 'Сотрудник'),
+                  login: uData.login,
+                  role: uData.role || 'employee'
+                };
               }
-            } catch (tableEx) {
-              console.warn('Users table query fallback:', tableEx);
             }
+          } catch (e) {
+            console.warn('Supabase profile fetch fallback:', e);
           }
         }
 
@@ -2608,11 +2398,8 @@
         isManagerInPreview = false;
         localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
         applyUserSession();
-        initShift();
-        refreshAppData(true);
-        playBeep('success');
       } catch (err) {
-        errorEl.innerText = err.message || 'Неверный логин или пароль';
+        errorEl.innerText = err.message || 'Ошибка входа';
         errorEl.classList.remove('hidden');
         const card = document.querySelector('#screen-login > div');
         if (card) {
@@ -2620,7 +2407,6 @@
           void card.offsetWidth;
           card.classList.add('shake-modal');
         }
-        playBeep('error');
       } finally {
         btn.disabled = false;
         btn.innerText = 'Войти в систему';
@@ -3305,13 +3091,9 @@
     function incrementCart(prodId, maxStock, event) {
       const cur = cart[prodId] || 0;
       const prod = cachedProducts.find(p => p.id === prodId);
-      if (!prod) return;
-
-      const otherUsage = getCartIngredientUsage(prodId);
-      const remainingAvail = getProductAvailableStock(prod, otherUsage);
-
-      if (cur >= remainingAvail || remainingAvail <= 0) {
-        showToast('Достигнут максимальный остаток с учетом ингредиентов');
+      const effectiveMax = prod ? getProductAvailableStock(prod) : (maxStock !== undefined ? maxStock : 9999);
+      if (effectiveMax <= 0 || cur >= effectiveMax) {
+        showToast('Достигнут максимальный остаток');
         return;
       }
       cart[prodId] = cur + 1;
@@ -3349,17 +3131,13 @@
       const btnSale = document.getElementById('btn-process-sale');
 
       const itemIds = Object.keys(cart);
-      const scrollContainers = document.querySelectorAll('.pwa-scroll-container');
-
       if (itemIds.length === 0) {
         if (checkoutBar) checkoutBar.classList.add('hidden');
-        if (btnSale) btnSale.disabled = false;
-        scrollContainers.forEach(c => c.classList.remove('cart-active-padding'));
+        if (btnSale) {
+          btnSale.disabled = false;
+        }
         return;
       }
-
-      // Добавляем отступ вниз, чтобы плавающий бар не перекрывал нижние товары
-      scrollContainers.forEach(c => c.classList.add('cart-active-padding'));
 
       let totalCount = 0;
       let totalSum = 0;
@@ -3369,7 +3147,7 @@
         if (prod) {
           const qty = cart[id];
           totalCount += qty;
-          totalSum += Math.round(Number(prod.price) * qty);
+          totalSum += Number(prod.price) * qty;
         }
       });
 
@@ -3392,156 +3170,9 @@
       if (checkoutBar) checkoutBar.classList.remove('hidden');
     }
 
-    // ==========================================
-    // ЛОГИКА ОПЛАТЫ И РАСЧЕТА СДАЧИ (PAYMENT MODAL)
-    // ==========================================
-    let currentPayMethod = 'cash'; // 'cash', 'card', 'sbp'
-
-    function getCartTotalSum() {
-      return Object.keys(cart).reduce((sum, id) => {
-        const prod = cachedProducts.find(p => p.id === id);
-        return sum + (prod ? Math.round(Number(prod.price) * cart[id]) : 0);
-      }, 0);
-    }
-
-    function openPaymentModal() {
-      const itemIds = Object.keys(cart);
-      if (itemIds.length === 0) return;
-      const total = getCartTotalSum();
-      if (total <= 0) return;
-
-      const totalEl = document.getElementById('pay-modal-total');
-      if (totalEl) totalEl.innerText = `${total.toLocaleString('ru-RU')} ₽`;
-
-      selectPayMethod('cash');
-      setupQuickCashButtons(total);
-
-      const cashInp = document.getElementById('pay-cash-input');
-      if (cashInp) {
-        cashInp.value = total; // по умолчанию без сдачи
-        updateCashChange();
-      }
-
-      openModal('modal-payment');
-    }
-
-    function closePaymentModal() {
-      closeModal('modal-payment');
-    }
-
-    function selectPayMethod(method) {
-      currentPayMethod = method;
-      const btnCash = document.getElementById('btn-method-cash');
-      const btnCard = document.getElementById('btn-method-card');
-      const btnSbp = document.getElementById('btn-method-sbp');
-      const boxCash = document.getElementById('box-cash-calc');
-      const boxCard = document.getElementById('box-card-info');
-      const confirmText = document.getElementById('btn-confirm-pay-text');
-
-      [btnCash, btnCard, btnSbp].forEach(b => {
-        if (!b) return;
-        b.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 border border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#4B5563] dark:text-cream-200 hover:border-amber-500/50';
-      });
-
-      const activeBtn = method === 'cash' ? btnCash : (method === 'card' ? btnCard : btnSbp);
-      if (activeBtn) {
-        activeBtn.className = 'py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center gap-1 border-2 border-amber-600 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 shadow-xs';
-      }
-
-      if (method === 'cash') {
-        if (boxCash) boxCash.classList.remove('hidden');
-        if (boxCard) boxCard.classList.add('hidden');
-        if (confirmText) confirmText.innerText = 'Провести чек и выдать сдачу';
-        updateCashChange();
-      } else {
-        if (boxCash) boxCash.classList.add('hidden');
-        if (boxCard) boxCard.classList.remove('hidden');
-        const cardTitle = document.getElementById('card-info-title');
-        if (cardTitle) {
-          cardTitle.innerText = method === 'card' ? 'Приложите карту к банковскому терминалу' : 'Покажите QR-код СБП для оплаты гостем';
-        }
-        if (confirmText) confirmText.innerText = method === 'card' ? 'Оплата картой подтверждена' : 'Оплата по СБП получена';
-      }
-    }
-
-    function setupQuickCashButtons(total) {
-      const chipsBox = document.getElementById('quick-cash-chips');
-      if (!chipsBox) return;
-
-      const bills = [total, 500, 1000, 2000, 5000].filter((v, i, a) => a.indexOf(v) === i && v >= total);
-      if (bills.length < 4) {
-        if (!bills.includes(500) && total <= 500) bills.push(500);
-        if (!bills.includes(1000) && total <= 1000) bills.push(1000);
-        if (!bills.includes(2000) && total <= 2000) bills.push(2000);
-        if (!bills.includes(5000) && total <= 5000) bills.push(5000);
-      }
-      bills.sort((a,b) => a-b);
-
-      chipsBox.innerHTML = bills.map(amount => {
-        const isExact = amount === total;
-        return `
-          <button type="button" onclick="setCashTender(${amount})" class="px-2.5 py-1.5 rounded-lg border text-xs font-bold transition ${isExact ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-[#FAF7F2] dark:bg-cacao-950 border-[#ECE6DE] dark:border-cacao-700 text-[#1F2937] dark:text-cream-50 hover:border-amber-600'}">
-            ${isExact ? 'Точно (' + amount + ' ₽)' : amount + ' ₽'}
-          </button>
-        `;
-      }).join('');
-    }
-
-    function setCashTender(val) {
-      const inp = document.getElementById('pay-cash-input');
-      if (inp) {
-        inp.value = val;
-        updateCashChange();
-      }
-    }
-
-    function updateCashChange() {
-      const total = getCartTotalSum();
-      const inp = document.getElementById('pay-cash-input');
-      const changeVal = document.getElementById('pay-change-val');
-      const changeBox = document.getElementById('box-change-display');
-      const confirmBtn = document.getElementById('btn-confirm-payment');
-
-      const given = Number(inp?.value || 0);
-      const change = Math.round(given - total);
-
-      if (given < total) {
-        if (changeVal) changeVal.innerText = `Не хватает ${(total - given).toLocaleString('ru-RU')} ₽`;
-        if (changeBox) {
-          changeBox.className = 'p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 flex items-center justify-between text-rose-700 dark:text-rose-400 font-bold';
-        }
-        if (confirmBtn) confirmBtn.disabled = true;
-      } else {
-        if (changeVal) changeVal.innerText = `${change.toLocaleString('ru-RU')} ₽`;
-        if (changeBox) {
-          changeBox.className = 'p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between text-emerald-700 dark:text-emerald-400 font-black';
-        }
-        if (confirmBtn) confirmBtn.disabled = false;
-      }
-    }
-
-    async function confirmPaymentAndSale() {
-      const total = getCartTotalSum();
-      let given = total;
-      let change = 0;
-
-      if (currentPayMethod === 'cash') {
-        const inp = document.getElementById('pay-cash-input');
-        given = Number(inp?.value || total);
-        if (given < total) {
-          showToast('Введенная сумма меньше суммы чека!');
-          return;
-        }
-        change = given - total;
-      }
-
-      closePaymentModal();
-      await submitSale(currentPayMethod, given, change);
-    }
-
     let isSubmittingSale = false;
 
-    async function submitSale(paymentMethod = 'cash', tenderAmount = 0, changeAmount = 0) {
+    async function submitSale() {
       if (isSubmittingSale) return;
       if (!currentUser) return;
       if (!supabaseClient) {
@@ -3572,50 +3203,20 @@
         quantity: cart[id]
       }));
 
-      const shift = getCurrentShift();
-
       try {
-        let saleRes = null;
-        try {
-          saleRes = await supabaseClient.rpc('process_sale', {
-            p_employee_id: currentUser.id,
-            p_items: payloadItems,
-            p_payment_method: paymentMethod,
-            p_shift_id: shift ? shift.id : null
-          });
-        } catch (rpcV3Err) {
-          // Фоллбэк: если миграция v3 еще не применена в Supabase
-          console.warn('RPC process_sale v3 fallback to v2:', rpcV3Err);
-          saleRes = await supabaseClient.rpc('process_sale', {
-            p_employee_id: currentUser.id,
-            p_items: payloadItems
-          });
-        }
-
-        const data = saleRes.data;
-        if (saleRes.error) throw saleRes.error;
-
-        const saleId = typeof data === 'string' ? data : (data?.sale_id || data?.id || '');
-
-        // Сохраняем метаданные оплаты локально для мгновенной отрисовки
-        saveSalePaymentMeta(saleId, {
-          payment_method: paymentMethod,
-          tender: tenderAmount,
-          change: changeAmount
+        const { data, error } = await supabaseClient.rpc('process_sale', {
+          p_employee_id: currentUser.id,
+          p_items: payloadItems
         });
 
+        if (error) throw error;
+
         if (data && window.AndroidBridge && typeof window.AndroidBridge.registerSeenSale === 'function') {
-          window.AndroidBridge.registerSeenSale(saleId);
+          window.AndroidBridge.registerSeenSale(typeof data === 'string' ? data : (data.id || ''));
         }
 
         broadcastChange('sale_created', { employeeId: currentUser.id });
-        
-        const successMsg = paymentMethod === 'cash' && changeAmount > 0 
-          ? `✓ Чек оформлен! Сдача: ${changeAmount.toLocaleString('ru-RU')} ₽`
-          : '✓ Чек успешно оплачен и оформлен';
-        
-        showToast(successMsg);
-
+        showToast('✓ Заказ успешно оформлен');
         triggerSaleSuccessAnimation(btn, () => {
           isSubmittingSale = false;
           if (btn) btn.disabled = false;
@@ -3624,7 +3225,7 @@
         });
       } catch (err) {
         console.error(err);
-        alert('Ошибка при оформлении чека: ' + (err.message || 'Сбой'));
+        alert('Ошибка при оформлении: ' + (err.message || 'Сбой'));
         isSubmittingSale = false;
         if (btn) btn.disabled = false;
         updateCartUI();
@@ -3634,272 +3235,29 @@
     // ==========================================
     // 9. МОЯ СМЕНА (СПИСОК ЗАКАЗОВ В СТИЛЕ RESTIK)
     // ==========================================
-    // ==========================================
-    // СИСТЕМА КАССОВЫХ СМЕН И ОТЧЕТОВ (X-ОТЧЕТ, Z-ОТЧЕТ)
-    // ==========================================
-    const SALES_META_KEY = 'sladkoezhka_sales_meta_v1';
-    const CURRENT_SHIFT_KEY = 'sladkoezhka_current_shift_v1';
-
-    function getSalesMetaMap() {
-      try {
-        return JSON.parse(localStorage.getItem(SALES_META_KEY) || '{}');
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function saveSalePaymentMeta(saleId, meta) {
-      if (!saleId) return;
-      try {
-        const map = getSalesMetaMap();
-        map[saleId] = {
-          ...meta,
-          timestamp: Date.now()
-        };
-        localStorage.setItem(SALES_META_KEY, JSON.stringify(map));
-      } catch (e) {}
-    }
-
-    function getSalePaymentMeta(saleId) {
-      const map = getSalesMetaMap();
-      return map[saleId] || { payment_method: 'cash' };
-    }
-
-    function getCurrentShift() {
-      try {
-        const raw = localStorage.getItem(CURRENT_SHIFT_KEY);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {}
-      return null;
-    }
-
-    function initShift() {
-      if (!currentUser) return;
-      let shift = getCurrentShift();
-      if (!shift || shift.status === 'closed') {
-        const now = new Date();
-        shift = {
-          id: 'shift-' + Date.now(),
-          employee_id: currentUser.id,
-          employee_name: currentUser.name,
-          opened_at: now.toISOString(),
-          opening_cash: 5000, // дефолтный разменный фонд 5000 ₽
-          status: 'open'
-        };
-        localStorage.setItem(CURRENT_SHIFT_KEY, JSON.stringify(shift));
-      }
-      renderShiftData();
-    }
-
-    function showXReportModal() {
-      const shift = getCurrentShift();
-      if (!shift) {
-        showToast('Смена не инициализирована');
-        return;
-      }
-
-      const shiftStart = new Date(shift.opened_at).getTime();
-      const shiftSales = cachedSales.filter(s => {
-        const t = new Date(s.created_at).getTime();
-        return (s.employee_id === currentUser?.id || isManagerInPreview) && t >= shiftStart;
-      });
-
-      let totalRev = 0;
-      let cashSales = 0;
-      let cardSales = 0;
-      let sbpSales = 0;
-
-      shiftSales.forEach(s => {
-        const amt = Math.round(Number(s.total_amount || 0));
-        totalRev += amt;
-        const meta = getSalePaymentMeta(s.id);
-        const method = s.payment_method || meta.payment_method || 'cash';
-        if (method === 'cash') cashSales += amt;
-        else if (method === 'card') cardSales += amt;
-        else sbpSales += amt;
-      });
-
-      const openingCash = Number(shift.opening_cash || 5000);
-      const totalCashInDrawer = openingCash + cashSales;
-
-      const content = document.getElementById('x-report-content');
-      if (content) {
-        content.innerHTML = `
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Кассир:</span>
-            <span class="font-bold text-[#1F2937] dark:text-cream-50">${escapeHtml(shift.employee_name || currentUser?.name || 'Сотрудник')}</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Смена открыта:</span>
-            <span class="font-mono font-bold text-[#1F2937] dark:text-cream-50">${new Date(shift.opened_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Разменный фонд (внесение):</span>
-            <span class="font-mono font-bold text-[#1F2937] dark:text-cream-50">${openingCash.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Всего чеков:</span>
-            <span class="font-mono font-bold text-[#1F2937] dark:text-cream-50">${shiftSales.length} шт</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Выручка наличными:</span>
-            <span class="font-mono font-bold text-emerald-600">${cashSales.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Выручка картой:</span>
-            <span class="font-mono font-bold text-blue-600">${cardSales.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Выручка СБП:</span>
-            <span class="font-mono font-bold text-purple-600">${sbpSales.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-2.5 flex justify-between items-baseline border-t-2 border-[#2D1E17] dark:border-white text-sm font-extrabold">
-            <span>ИТОГО ВЫРУЧКА:</span>
-            <span class="text-base font-black text-amber-600 tabular-nums">${totalRev.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-2 flex justify-between items-baseline bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl font-bold">
-            <span class="text-amber-900 dark:text-amber-200">Денег в кассе (нал):</span>
-            <span class="text-base font-black text-amber-700 dark:text-amber-300 tabular-nums">${totalCashInDrawer.toLocaleString('ru-RU')} ₽</span>
-          </div>
-        `;
-      }
-
-      openModal('modal-x-report');
-    }
-
-    function openCloseShiftModal() {
-      const shift = getCurrentShift();
-      if (!shift) {
-        showToast('Смена не инициализирована');
-        return;
-      }
-
-      const shiftStart = new Date(shift.opened_at).getTime();
-      const shiftSales = cachedSales.filter(s => {
-        const t = new Date(s.created_at).getTime();
-        return (s.employee_id === currentUser?.id || isManagerInPreview) && t >= shiftStart;
-      });
-
-      let totalRev = 0;
-      let cashSales = 0;
-      shiftSales.forEach(s => {
-        const amt = Math.round(Number(s.total_amount || 0));
-        totalRev += amt;
-        const meta = getSalePaymentMeta(s.id);
-        const method = s.payment_method || meta.payment_method || 'cash';
-        if (method === 'cash') cashSales += amt;
-      });
-
-      const openingCash = Number(shift.opening_cash || 5000);
-      const expectedCash = openingCash + cashSales;
-
-      const content = document.getElementById('z-report-content');
-      if (content) {
-        content.innerHTML = `
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Сотрудник:</span>
-            <span class="font-bold text-[#1F2937] dark:text-cream-50">${escapeHtml(shift.employee_name || currentUser?.name || 'Сотрудник')}</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Чеков за смену:</span>
-            <span class="font-mono font-bold text-[#1F2937] dark:text-cream-50">${shiftSales.length} шт</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Итоговая выручка:</span>
-            <span class="font-mono font-bold text-amber-600">${totalRev.toLocaleString('ru-RU')} ₽</span>
-          </div>
-          <div class="py-1.5 flex justify-between">
-            <span class="text-[#8E8A85]">Ожидаемая наличность:</span>
-            <span class="font-mono font-black text-emerald-600">${expectedCash.toLocaleString('ru-RU')} ₽</span>
-          </div>
-        `;
-      }
-
-      const cashInp = document.getElementById('z-actual-cash');
-      if (cashInp) cashInp.value = expectedCash;
-
-      openModal('modal-z-report');
-    }
-
-    async function confirmShiftClosure() {
-      const shift = getCurrentShift();
-      if (!shift) return;
-
-      const cashInp = document.getElementById('z-actual-cash');
-      const actualCash = Number(cashInp?.value || 0);
-
-      closeModal('modal-z-report');
-
-      // Закрываем смену
-      shift.closed_at = new Date().toISOString();
-      shift.closing_cash = actualCash;
-      shift.status = 'closed';
-      localStorage.setItem(CURRENT_SHIFT_KEY, JSON.stringify(shift));
-
-      showToast('✓ Z-отчет сформирован. Смена успешно закрыта');
-      playBeep('success');
-
-      // Инициализируем новую смену на завтра/следующую
-      setTimeout(() => {
-        initShift();
-      }, 500);
-    }
-
     function renderShiftData() {
       if (!currentUser) return;
       const listEl = document.getElementById('shift-sales-list');
       const shiftSumEl = document.getElementById('shift-total-amount');
       const shiftCountEl = document.getElementById('shift-total-count');
-      const shiftCashEl = document.getElementById('shift-cash-amount');
-      const shiftCardEl = document.getElementById('shift-card-amount');
-      const shiftStatusDot = document.getElementById('shift-status-dot');
-      const shiftStatusTitle = document.getElementById('shift-status-title');
-      const shiftStatusSub = document.getElementById('shift-status-subtitle');
       if (!listEl) return;
 
-      const shift = getCurrentShift();
-      const shiftStart = shift ? new Date(shift.opened_at).getTime() : new Date().setHours(0,0,0,0);
-
-      if (shiftStatusTitle && shift) {
-        shiftStatusTitle.innerText = shift.status === 'open' ? 'Кассовая смена активна' : 'Смена закрыта';
-        if (shiftStatusDot) {
-          shiftStatusDot.className = shift.status === 'open' ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse' : 'w-2.5 h-2.5 rounded-full bg-neutral-400';
-        }
-        if (shiftStatusSub) {
-          const openTime = new Date(shift.opened_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-          shiftStatusSub.innerText = `Открыта в ${openTime} (размен: ${Number(shift.opening_cash || 5000).toLocaleString('ru-RU')} ₽)`;
-        }
-      }
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
       const todaySales = cachedSales.filter(s => {
         const t = new Date(s.created_at).getTime();
-        return (s.employee_id === currentUser.id || isManagerInPreview) && t >= shiftStart;
+        return (s.employee_id === currentUser.id || isManagerInPreview) && t >= startOfDay;
       });
 
-      let totalShiftAmount = 0;
-      let cashAmount = 0;
-      let nonCashAmount = 0;
-
-      todaySales.forEach(s => {
-        const amt = Math.round(Number(s.total_amount || 0));
-        totalShiftAmount += amt;
-        const meta = getSalePaymentMeta(s.id);
-        const method = s.payment_method || meta.payment_method || 'cash';
-        if (method === 'cash') cashAmount += amt;
-        else nonCashAmount += amt;
-      });
-
-      const openingCash = Number(shift?.opening_cash || 5000);
-
-      if (shiftSumEl) shiftSumEl.innerText = `${totalShiftAmount.toLocaleString('ru-RU')} ₽`;
-      if (shiftCountEl) shiftCountEl.innerText = todaySales.length.toString();
-      if (shiftCashEl) shiftCashEl.innerText = `${(openingCash + cashAmount).toLocaleString('ru-RU')} ₽`;
-      if (shiftCardEl) shiftCardEl.innerText = `${nonCashAmount.toLocaleString('ru-RU')} ₽`;
+      const totalShiftAmount = todaySales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      shiftSumEl.innerText = `${totalShiftAmount.toLocaleString('ru-RU')} ₽`;
+      shiftCountEl.innerText = todaySales.length.toString();
 
       if (todaySales.length === 0) {
         listEl.innerHTML = `
           <div class="p-10 text-center text-[#8E8A85] text-xs font-semibold">
-            В текущей смене заказов пока нет
+            За сегодняшнюю смену заказов пока нет
           </div>
         `;
         return;
@@ -3910,21 +3268,12 @@
         const time = new Date(sale.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         const items = sale.items || [];
         const itemsSummary = items.map(it => `${escapeHtml(it.product_name_snapshot)} × ${it.quantity}`).join(', ');
-        
-        const meta = getSalePaymentMeta(sale.id);
-        const payMethod = sale.payment_method || meta.payment_method || 'cash';
-        const methodBadge = payMethod === 'cash' 
-          ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300/40">💵 Нал</span>'
-          : (payMethod === 'card'
-            ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-300/40">💳 Карта</span>'
-            : '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-300/40">📱 СБП</span>');
 
         return `
           <div class="grid grid-cols-12 px-4 py-3.5 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
             <div class="col-span-2 font-mono text-xs font-bold text-[#8E8A85]">#${orderNum}</div>
             <div class="col-span-3 font-bold text-sm sm:text-base text-[#1F2937] dark:text-cream-50 tabular-nums">
-              ${Math.round(Number(sale.total_amount)).toLocaleString('ru-RU')} ₽
-              <div class="mt-0.5">${methodBadge}</div>
+              ${Number(sale.total_amount).toLocaleString('ru-RU')} ₽
             </div>
             <div class="col-span-5 text-xs text-[#4B5563] dark:text-cream-200 truncate pr-2 font-medium">
               ${itemsSummary}
@@ -4429,51 +3778,29 @@
       const subtitle = document.getElementById('chart-subtitle');
       if (!chartContainer) return;
 
+      subtitle.innerText = isHourly ? 'По часам (08:00 - 20:00)' : 'По дням';
+
       let buckets = {};
       if (isHourly) {
-        // Определяем реальный диапазон часов из продаж (по умолчанию 08:00 - 21:00)
-        let minH = 8;
-        let maxH = 21;
-        sales.forEach(s => {
-          const h = new Date(s.created_at).getHours();
-          if (h < minH) minH = Math.max(0, h);
-          if (h > maxH) maxH = Math.min(23, h);
-        });
-
-        subtitle.innerText = `По часам (${(minH < 10 ? '0' : '') + minH}:00 - ${(maxH < 10 ? '0' : '') + maxH}:00)`;
-
-        for (let h = minH; h <= maxH; h++) {
+        for (let h = 8; h <= 20; h++) {
           const key = (h < 10 ? '0' : '') + h + ':00';
           buckets[key] = 0;
         }
-
         sales.forEach(s => {
           const h = new Date(s.created_at).getHours();
-          const key = (h < 10 ? '0' : '') + h + ':00';
-          if (buckets[key] !== undefined) buckets[key] += Math.round(Number(s.total_amount || 0));
+          const targetH = Math.min(Math.max(h, 8), 20);
+          const key = (targetH < 10 ? '0' : '') + targetH + ':00';
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount || 0);
         });
       } else {
-        // Динамический диапазон дней в зависимости от выбранного периода
-        let daysCount = 7;
-        if (statsPeriod === 'month') daysCount = 30;
-        else if (statsPeriod === 'week') daysCount = 7;
-        else if (statsPeriod === 'custom' && customStartDate && customEndDate) {
-          const diffDays = Math.round((customEndDate - customStartDate) / (24 * 3600000));
-          daysCount = Math.max(2, Math.min(60, diffDays + 1));
-        }
-
-        subtitle.innerText = `По дням (${daysCount} дн)`;
-
-        const now = new Date();
-        for (let d = daysCount - 1; d >= 0; d--) {
+        for (let d = 6; d >= 0; d--) {
           const dayDate = new Date(Date.now() - d * 24 * 3600000);
           const key = dayDate.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
           buckets[key] = 0;
         }
-
         sales.forEach(s => {
           const key = new Date(s.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-          if (buckets[key] !== undefined) buckets[key] += Math.round(Number(s.total_amount || 0));
+          if (buckets[key] !== undefined) buckets[key] += Number(s.total_amount || 0);
         });
       }
 
@@ -4487,7 +3814,7 @@
             const heightPercent = Math.max(Math.round((val / maxVal) * 100), 6);
             const isZero = val === 0;
             const hourNum = k.split(':')[0];
-            const delayMs = Math.min(idx * 25, 600);
+            const delayMs = idx * 35;
             return `
               <div class="flex-1 min-w-0 flex flex-col items-center h-full justify-end group relative cursor-pointer" onclick="showToast('${k}: ${val.toLocaleString('ru-RU')} ₽')">
                 <div class="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-150 absolute -top-8 text-[11px] font-bold bg-neutral-900 text-white px-2 py-1 rounded-lg pointer-events-none whitespace-nowrap shadow-lg z-20 tabular-nums">
@@ -5205,49 +4532,21 @@
       const password = document.getElementById('staff-password').value.trim();
       const role = document.getElementById('staff-role').value;
 
-      if (!name || !login || !password) {
-        alert('Пожалуйста, заполните все обязательные поля');
-        return;
-      }
-
-      // Проверка на уникальность логина в кэше
-      if (cachedUsers.some(u => !u.is_deleted && u.login.toLowerCase() === login.toLowerCase())) {
-        alert(`Сотрудник с логином "${login}" уже существует в системе!`);
-        return;
-      }
-
       try {
-        let createdOk = false;
-        // А. Пробуем безопасный RPC create_staff_user
-        try {
-          const { data: rpcRes, error: rpcErr } = await supabaseClient.rpc('create_staff_user', {
-            p_name: name,
-            p_login: login,
-            p_password: password,
-            p_role: role
-          });
-          if (rpcRes && rpcRes.success) createdOk = true;
-        } catch (rpcEx) {
-          console.warn('RPC create_staff_user fallback:', rpcEx);
-        }
-
-        // Б. Фоллбэк: прямой insert
-        if (!createdOk) {
-          const { error } = await supabaseClient.from('users').insert({
-            name,
-            login,
-            password_hash: password,
-            role,
-            is_deleted: false
-          });
-          if (error) throw error;
-        }
+        const { error } = await supabaseClient.from('users').insert({
+          name,
+          login,
+          password_hash: password,
+          role,
+          is_deleted: false
+        });
+        if (error) throw error;
 
         closeStaffModal();
-        showToast('✓ Сотрудник успешно добавлен');
+        showToast('✓ Сотрудник добавлен');
         refreshAppData();
       } catch (err) {
-        alert('Ошибка при добавлении: ' + (err.message || 'Сбой'));
+        alert('Ошибка: ' + err.message);
       }
     }
 
@@ -5289,60 +4588,35 @@
         openDbConfigModal();
         return;
       }
-
-      // Защита: нельзя удалить самого себя
-      if (currentUser && currentUser.id === userId) {
-        showAlertDialog({ title: 'Действие запрещено', description: 'Вы не можете удалить собственный аккаунт, находясь под ним в системе.' });
-        return;
-      }
-
-      // Защита: нельзя удалить последнего управляющего
-      const targetUser = cachedUsers.find(u => u.id === userId);
-      if (targetUser && targetUser.role === 'manager') {
-        const activeManagers = cachedUsers.filter(u => u.role === 'manager' && !u.is_deleted);
-        if (activeManagers.length <= 1) {
-          showAlertDialog({ title: 'Действие запрещено', description: 'Нельзя удалить единственного управляющего в системе!' });
-          return;
-        }
-      }
-
       const okStaff = await showConfirmDialog({
         title: 'Удалить сотрудника навсегда?',
-        description: `Учётная запись "${targetUser ? targetUser.name : 'пользователя'}" будет полностью удалена из базы данных.`,
+        description: 'Учётная запись будет полностью и безвозвратно удалена из базы данных.',
         confirmText: 'Удалить навсегда',
         variant: 'danger'
       });
       if (!okStaff) return;
-
       try {
-        let deletedOk = false;
-        // А. Пробуем безопасный RPC delete_staff_user
+        // Отвязываем чеки сотрудника от внешнего ключа, чтобы удаление прошло без ограничений БД
         try {
-          const { data: rpcDel, error: rpcDelErr } = await supabaseClient.rpc('delete_staff_user', {
-            p_user_id: userId
-          });
-          if (rpcDel && rpcDel.success) deletedOk = true;
-        } catch (rpcDelEx) {
-          console.warn('RPC delete_staff_user fallback:', rpcDelEx);
+          await supabaseClient
+            .from('sales')
+            .update({ employee_id: null })
+            .eq('employee_id', userId);
+        } catch (e) {
+          console.warn('Unlink sales error:', e);
         }
 
-        // Б. Фоллбэк: отвязка чеков и физическое удаление
-        if (!deletedOk) {
-          try {
-            await supabaseClient.from('sales').update({ employee_id: null }).eq('employee_id', userId);
-          } catch (e) {}
+        // Физическое удаление записи из таблицы users
+        const { error } = await supabaseClient
+          .from('users')
+          .delete()
+          .eq('id', userId);
 
-          const { error } = await supabaseClient.from('users').delete().eq('id', userId);
-          if (error) {
-            // Если внешний ключ все еще блокирует, мягкое удаление
-            await supabaseClient.from('users').update({ is_deleted: true }).eq('id', userId);
-          }
-        }
-
-        showToast('✓ Сотрудник успешно удален');
+        if (error) throw error;
+        showToast('✓ Сотрудник полностью удален из базы данных');
         refreshAppData();
       } catch (err) {
-        alert('Ошибка при удалении: ' + (err.message || 'Сбой'));
+        showAlertDialog({ title: 'Ошибка удаления', description: err.message });
       }
     }
 
