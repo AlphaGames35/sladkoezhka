@@ -18,6 +18,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#FFFFFF" id="theme-color-meta">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
   <title>СЛАДКОЕЖКА — POS-система</title>
   
   <!-- Font: Plus Jakarta Sans for crisp business minimalist typography -->
@@ -5241,6 +5242,39 @@
       }
     }
     // Открытие Drawer по клику на селекторы
+    function openUnitDrawer(currentUnit, onSelect) {
+      const units = [
+        { value: 'шт', label: 'Штуки (шт)', desc: 'Поштучный учет' },
+        { value: 'кг', label: 'Килограммы (кг)', desc: 'Весовой товар' },
+        { value: 'г', label: 'Граммы (г)', desc: 'Для весовых порций' },
+        { value: 'л', label: 'Литры (л)', desc: 'Объем напитков' },
+        { value: 'мл', label: 'Миллилитры (мл)', desc: 'Точный объем' },
+        { value: 'порц', label: 'Порции (порц)', desc: 'Готовые блюда' }
+      ];
+      openActionDrawer({
+        title: 'Единица измерения',
+        description: 'Выберите единицу для списания и учета',
+        options: units,
+        selectedValue: currentUnit,
+        onSelect: onSelect
+      });
+    }
+
+    function openCategoryDrawer(currentCatId, onSelect) {
+      const catList = (typeof categories !== 'undefined' && Array.isArray(categories) ? categories : []).map(c => ({
+        value: c.id,
+        label: c.name,
+        desc: ''
+      }));
+      openActionDrawer({
+        title: 'Категория товара',
+        description: 'Выберите категорию для меню',
+        options: catList,
+        selectedValue: currentCatId,
+        onSelect: onSelect
+      });
+    }
+
     window.openUnitDrawer = openUnitDrawer;
     window.openCategoryDrawer = openCategoryDrawer;
 </script>
