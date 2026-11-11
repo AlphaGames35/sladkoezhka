@@ -1532,6 +1532,18 @@
           </div>
         </div>
 
+        <!-- 4.1 Цвет карточки товара на витрине -->
+        <div class="space-y-1.5 p-3 rounded-xl bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-[#1F2937] dark:text-cream-50">Цвет карточки на витрине</label>
+            <span id="prod-color-preview-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300">
+              По умолчанию
+            </span>
+          </div>
+          <div id="prod-color-palette" class="grid grid-cols-6 gap-1.5 pt-1"></div>
+          <input type="hidden" id="prod-color-val" value="">
+        </div>
+
         <!-- 5. Цена продажи и Остаток на складе -->
         <div class="grid grid-cols-2 gap-2">
           <div id="prod-price-wrapper">
@@ -1975,15 +1987,34 @@
     // ПАЛИТРА И СТИЛИ КАТЕГОРИЙ
     // ==========================================
     const PRESET_CATEGORY_COLORS = [
-      { hex: '#D97706', name: 'Янтарный', label: 'Кофе', icon: '☕', bg: 'bg-amber-500/15', text: 'text-amber-800 dark:text-amber-300', border: 'border-amber-500/40' },
-      { hex: '#E11D48', name: 'Малиновый', label: 'Десерты', icon: '🍰', bg: 'bg-rose-500/15', text: 'text-rose-800 dark:text-rose-300', border: 'border-rose-500/40' },
-      { hex: '#059669', name: 'Изумрудный', label: 'Чай', icon: '🍃', bg: 'bg-emerald-500/15', text: 'text-emerald-800 dark:text-emerald-300', border: 'border-emerald-500/40' },
-      { hex: '#0284C7', name: 'Лазурный', label: 'Холодное', icon: '🥤', bg: 'bg-sky-500/15', text: 'text-sky-800 dark:text-sky-300', border: 'border-sky-500/40' },
-      { hex: '#7C3AED', name: 'Фиолетовый', label: 'Особое', icon: '✨', bg: 'bg-purple-500/15', text: 'text-purple-800 dark:text-purple-300', border: 'border-purple-500/40' },
-      { hex: '#EA580C', name: 'Оранжевый', label: 'Выпечка', icon: '🥐', bg: 'bg-orange-500/15', text: 'text-orange-800 dark:text-orange-300', border: 'border-orange-500/40' },
-      { hex: '#0D9488', name: 'Бирюзовый', label: 'Фреши', icon: '🍹', bg: 'bg-teal-500/15', text: 'text-teal-800 dark:text-teal-300', border: 'border-teal-500/40' },
-      { hex: '#4F46E5', name: 'Индиго', label: 'Торты', icon: '🎂', bg: 'bg-indigo-500/15', text: 'text-indigo-800 dark:text-indigo-300', border: 'border-indigo-500/40' }
+      { hex: '#D97706', name: 'Карамель', bg: 'bg-amber-500/15', text: 'text-amber-800 dark:text-amber-300', border: 'border-amber-500/40' },
+      { hex: '#854D0E', name: 'Шоколад', bg: 'bg-yellow-900/15', text: 'text-yellow-900 dark:text-yellow-300', border: 'border-yellow-900/40' },
+      { hex: '#E11D48', name: 'Малина', bg: 'bg-rose-500/15', text: 'text-rose-800 dark:text-rose-300', border: 'border-rose-500/40' },
+      { hex: '#059669', name: 'Матча', bg: 'bg-emerald-500/15', text: 'text-emerald-800 dark:text-emerald-300', border: 'border-emerald-500/40' },
+      { hex: '#0284C7', name: 'Айс', bg: 'bg-sky-500/15', text: 'text-sky-800 dark:text-sky-300', border: 'border-sky-500/40' },
+      { hex: '#7C3AED', name: 'Черника', bg: 'bg-purple-500/15', text: 'text-purple-800 dark:text-purple-300', border: 'border-purple-500/40' },
+      { hex: '#EA580C', name: 'Выпечка', bg: 'bg-orange-500/15', text: 'text-orange-800 dark:text-orange-300', border: 'border-orange-500/40' },
+      { hex: '#0D9488', name: 'Фреш', bg: 'bg-teal-500/15', text: 'text-teal-800 dark:text-teal-300', border: 'border-teal-500/40' },
+      { hex: '#4F46E5', name: 'Торты', bg: 'bg-indigo-500/15', text: 'text-indigo-800 dark:text-indigo-300', border: 'border-indigo-500/40' },
+      { hex: '#DB2777', name: 'Клубника', bg: 'bg-pink-500/15', text: 'text-pink-800 dark:text-pink-300', border: 'border-pink-500/40' },
+      { hex: '#65A30D', name: 'Лайм', bg: 'bg-lime-500/15', text: 'text-lime-800 dark:text-lime-300', border: 'border-lime-500/40' },
+      { hex: '#475569', name: 'Классика', bg: 'bg-slate-500/15', text: 'text-slate-800 dark:text-slate-300', border: 'border-slate-500/40' }
     ];
+
+    function getProductColor(prod) {
+      if (!prod) return PRESET_CATEGORY_COLORS[0];
+      const prodStyles = JSON.parse(localStorage.getItem('sladkoezhka_product_colors') || '{}');
+      if (prod.id && prodStyles[prod.id]) {
+        const hex = prodStyles[prod.id];
+        const match = PRESET_CATEGORY_COLORS.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+        if (match) return match;
+        return { hex, name: 'Свой цвет' };
+      }
+      const cat = cachedCategories.find(c => c.id === prod.category_id);
+      if (cat) return getCategoryColor(cat);
+      const charCode = (prod.name && prod.name.length) ? prod.name.charCodeAt(0) : 0;
+      return PRESET_CATEGORY_COLORS[charCode % PRESET_CATEGORY_COLORS.length];
+    }
 
     function getCategoryColor(cat) {
       if (!cat) return PRESET_CATEGORY_COLORS[0];
@@ -3411,6 +3442,45 @@
       if (checkoutBar) checkoutBar.classList.remove('hidden');
     }
 
+    
+    // ==========================================
+    // ОФФЛАЙН-ОЧЕРЕДЬ И СИНХРОНИЗАЦИЯ ПРОДАЖ
+    // ==========================================
+    let isSyncingOfflineSales = false;
+
+    async function syncOfflineSales() {
+      if (isSyncingOfflineSales || !navigator.onLine || !supabaseClient) return;
+      let queue = [];
+      try { queue = JSON.parse(localStorage.getItem('sladkoezhka_offline_sales') || '[]'); } catch(e) {}
+      if (queue.length === 0) return;
+
+      isSyncingOfflineSales = true;
+      const remaining = [];
+
+      for (const item of queue) {
+        try {
+          const { error } = await supabaseClient.rpc('process_sale', {
+            p_employee_id: item.p_employee_id,
+            p_items: item.p_items
+          });
+          if (error) throw error;
+        } catch (err) {
+          remaining.push(item);
+        }
+      }
+
+      localStorage.setItem('sladkoezhka_offline_sales', JSON.stringify(remaining));
+      isSyncingOfflineSales = false;
+
+      if (remaining.length === 0 && queue.length > 0) {
+        showToast(`✓ Оффлайн-заказы (${queue.length}) синхронизированы с базой!`, 3500);
+        refreshAppData(true);
+      }
+    }
+
+    setInterval(syncOfflineSales, 20000);
+    window.addEventListener('online', syncOfflineSales);
+
     let isSubmittingSale = false;
 
     async function submitSale() {
@@ -3444,33 +3514,87 @@
         quantity: cart[id]
       }));
 
+      let onlineSuccess = false;
+      let createdSaleId = null;
+
       try {
-        const { data, error } = await supabaseClient.rpc('process_sale', {
+        // Таймаут сетевого запроса 5.5 секунд
+        const rpcPromise = supabaseClient.rpc('process_sale', {
           p_employee_id: currentUser.id,
           p_items: payloadItems
         });
 
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Network timeout (5.5s)')), 5500);
+        });
+
+        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
         if (error) throw error;
 
-        if (data && window.AndroidBridge && typeof window.AndroidBridge.registerSeenSale === 'function') {
-          window.AndroidBridge.registerSeenSale(typeof data === 'string' ? data : (data.id || ''));
-        }
+        onlineSuccess = true;
+        createdSaleId = typeof data === 'string' ? data : (data?.id || '');
+      } catch (err) {
+        console.warn('Online RPC sale submission failed, saving to offline queue:', err);
+      }
 
+      if (onlineSuccess) {
+        if (createdSaleId && window.AndroidBridge && typeof window.AndroidBridge.registerSeenSale === 'function') {
+          window.AndroidBridge.registerSeenSale(createdSaleId);
+        }
         broadcastChange('sale_created', { employeeId: currentUser.id });
         showToast('✓ Заказ успешно оформлен');
-        triggerSaleSuccessAnimation(btn, () => {
-          isSubmittingSale = false;
-          if (btn) btn.disabled = false;
-          clearCart();
-          refreshAppData(true);
+      } else {
+        // Оффлайн-сохранение: заказ гарантированно принимается без блокировки кассы
+        const localSaleId = 'offline_' + Date.now();
+        const offlineSale = {
+          id: localSaleId,
+          employee_id: currentUser.id,
+          employee_name: currentUser.name || 'Сотрудник',
+          total_amount: itemIds.reduce((sum, id) => {
+            const p = cachedProducts.find(x => x.id === id);
+            return sum + (p ? Number(p.price) * cart[id] : 0);
+          }, 0),
+          created_at: new Date().toISOString(),
+          is_offline: true,
+          items: payloadItems.map(it => {
+            const prod = cachedProducts.find(p => p.id === it.product_id);
+            return {
+              product_id: it.product_id,
+              product_name_snapshot: prod ? prod.name : 'Позиция',
+              quantity: it.quantity,
+              unit_price: prod ? Number(prod.price) : 0,
+              total_price: (prod ? Number(prod.price) : 0) * it.quantity
+            };
+          })
+        };
+
+        // Локальное списание остатка
+        payloadItems.forEach(it => {
+          const p = cachedProducts.find(x => x.id === it.product_id);
+          if (p && p.stock_qty !== undefined) {
+            p.stock_qty = Math.max(0, p.stock_qty - it.quantity);
+          }
         });
-      } catch (err) {
-        console.error(err);
-        alert('Ошибка при оформлении: ' + (err.message || 'Сбой'));
+
+        // Добавление в очередь синхронизации
+        let offlineQueue = [];
+        try { offlineQueue = JSON.parse(localStorage.getItem('sladkoezhka_offline_sales') || '[]'); } catch(e) {}
+        offlineQueue.push({ p_employee_id: currentUser.id, p_items: payloadItems, sale: offlineSale });
+        localStorage.setItem('sladkoezhka_offline_sales', JSON.stringify(offlineQueue));
+
+        // Добавление в кэш продаж для мгновенного отображения в смене
+        cachedSales.unshift(offlineSale);
+
+        showToast('✓ Заказ принят оффлайн! (Сохранён на устройстве)', 4000);
+        setTimeout(syncOfflineSales, 1000);
+      }
+
+      triggerSaleSuccessAnimation(btn, () => {
         isSubmittingSale = false;
         if (btn) btn.disabled = false;
-        updateCartUI();
-      }
+        clearCart();
+        refreshAppData(true);
+      });
     }
 
     // ==========================================
@@ -4570,6 +4694,52 @@
     // ==========================================
     // 13. ДЕЙСТВИЯ С ТОВАРАМИ И СОТРУДНИКАМИ
     // ==========================================
+    
+    function renderProductColorPalette(selectedHex = '') {
+      const palette = document.getElementById('prod-color-palette');
+      const badge = document.getElementById('prod-color-preview-badge');
+      const input = document.getElementById('prod-color-val');
+      if (!palette) return;
+
+      input.value = selectedHex;
+      if (badge) {
+        if (!selectedHex) {
+          badge.innerText = 'По категории';
+          badge.style.backgroundColor = '';
+          badge.style.color = '';
+        } else {
+          const found = PRESET_CATEGORY_COLORS.find(c => c.hex.toLowerCase() === selectedHex.toLowerCase());
+          badge.innerText = found ? found.name : 'Выбран цвет';
+          badge.style.backgroundColor = selectedHex + '25';
+          badge.style.color = selectedHex;
+        }
+      }
+
+      let html = `
+        <button type="button" onclick="selectProductColor('')" 
+                class="col-span-2 py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${!selectedHex ? 'ring-2 ring-amber-600 border-amber-600 bg-amber-100/60 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200' : 'border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#6B7280]'}">
+          По категории
+        </button>
+      `;
+
+      html += PRESET_CATEGORY_COLORS.map(c => {
+        const isSel = selectedHex && c.hex.toLowerCase() === selectedHex.toLowerCase();
+        return `
+          <button type="button" onclick="selectProductColor('${c.hex}')" title="${c.name}"
+                  class="h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${isSel ? 'ring-2 ring-offset-1 ring-neutral-900 dark:ring-white scale-105' : 'hover:scale-105 opacity-90'}"
+                  style="background-color: ${c.hex};">
+            ${isSel ? '<span class="text-white text-xs font-black">✓</span>' : ''}
+          </button>
+        `;
+      }).join('');
+
+      palette.innerHTML = html;
+    }
+
+    function selectProductColor(hex) {
+      renderProductColorPalette(hex);
+    }
+
     function openProductModal(prodId = null) {
       const modal = document.getElementById('modal-product');
       const title = document.getElementById('modal-product-title');
@@ -4607,6 +4777,10 @@
           removeSelectedImage();
         }
 
+        // Цвет позиции
+        const prodColors = JSON.parse(localStorage.getItem('sladkoezhka_product_colors') || '{}');
+        renderProductColorPalette(prodColors[prod.id] || '');
+
         // Загрузка ингредиентов техкарты
         if (itemType === 'composite') {
           editingRecipes = cachedIngredients
@@ -4638,6 +4812,7 @@
         removeSelectedImage();
         editingRecipes = [];
         renderTechCardEditor();
+        renderProductColorPalette('');
 
         btnDel.classList.add('hidden');
       }
