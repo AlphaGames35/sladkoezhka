@@ -2781,21 +2781,26 @@
     function checkSavedSession() {
       initSupabase();
 
-      // При каждом запуске всегда открываем экран авторизации (логин сотрудника и пароль)
-      currentUser = null;
-      showScreen('login');
-
-      // Подставляем сохраненный логин для быстрого входа
+      // Постоянная сессия: если пользователь уже авторизован, сразу открываем рабочий интерфейс!
+      // Окно авторизации больше не появится до тех пор, пока пользователь явно не нажмет "Выйти"
       const saved = localStorage.getItem('sladkoezhka_auth_user');
       if (saved) {
         try {
           const u = JSON.parse(saved);
-          if (u && u.login) {
-            const loginInp = document.getElementById('login-input');
-            if (loginInp && !loginInp.value) loginInp.value = u.login;
+          if (u && u.id && u.role) {
+            currentUser = u;
+            applyUserSession();
+            refreshAppData(true, true);
+            return;
           }
-        } catch(e) {}
+        } catch(e) {
+          console.warn('Ошибка чтения сохраненной сессии:', e);
+        }
       }
+
+      // Если сессия не сохранена или был выполнен выход — показываем экран авторизации
+      currentUser = null;
+      showScreen('login');
     }
 
     function logout() {
@@ -2998,14 +3003,83 @@
     // ==========================================
     // 7. СИНХРОНИЗАЦИЯ ДАННЫХ
     // ==========================================
+    
+    // ==========================================
+    // ЗАЩИТА ОТ ЗАКРЫТИЯ КЛАВИАТУРЫ И СБИВАНИЯ ФОКУСА ПРИ ВВОДЕ ТЕКСТА
+    // ==========================================
+    let isUserTypingActive = false;
+    let typingDebounceTimer = null;
+    let pendingDeferredRefresh = false;
+
+    function isInputActive() {
+      const activeEl = document.activeElement;
+      if (!activeEl) return false;
+      const tag = (activeEl.tagName || '').toUpperCase();
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (activeEl.isContentEditable) return true;
+      if (activeEl.getAttribute && activeEl.getAttribute('role') === 'textbox') return true;
+      return false;
+    }
+
+    // Слушатели фокуса: при вводе в любое поле страница НЕ будет перерисовываться
+    document.addEventListener('focusin', (e) => {
+      const tag = (e.target?.tagName || '').toUpperCase();
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        isUserTypingActive = true;
+      }
+    }, true);
+
+    document.addEventListener('focusout', () => {
+      clearTimeout(typingDebounceTimer);
+      typingDebounceTimer = setTimeout(() => {
+        isUserTypingActive = isInputActive();
+        // Когда пользователь закончил ввод — если были отложенные фоновые обновления, плавно обновляем
+        if (!isUserTypingActive && pendingDeferredRefresh) {
+          pendingDeferredRefresh = false;
+          refreshAppData(true, false);
+        }
+      }, 700);
+    }, true);
+
+    document.addEventListener('input', () => {
+      isUserTypingActive = true;
+    }, true);
+
+    // Предотвращение случайного сабмита по Enter в строках поиска
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active && (active.id === 'inventory-search-input' || active.id === 'employee-search-input')) {
+          e.preventDefault();
+          active.blur();
+        }
+      }
+    });
+
     let isRefreshingAppData = false;
     let refreshDebounceTimer = null;
     let lastRefreshTimestamp = 0;
 
-    async function refreshAppData(forceImmediate = false) {
+    async function refreshAppData(forceImmediate = false, allowWhileTyping = false) {
       if (!forceImmediate) {
         clearTimeout(refreshDebounceTimer);
-        refreshDebounceTimer = setTimeout(() => refreshAppData(true), 400);
+        refreshDebounceTimer = setTimeout(() => refreshAppData(true, allowWhileTyping), 400);
+        return;
+      }
+
+      // БЛОКИРОВКА ПЕРЕРИСОВКИ: если пользователь прямо сейчас набирает текст на клавиатуре,
+      // страница НЕ ОБНОВЛЯЕТСЯ и DOM не пересоздается, чтобы клавиатура не скрывалась!
+      if (!allowWhileTyping && (isUserTypingActive || isInputActive())) {
+        console.log('⌨️ Пользователь вводит данные в поле. Фоновое обновление отложено.');
+        pendingDeferredRefresh = true;
+        return;
+      }
+
+      // Проверка открытого модального окна (редактирование товара, сотрудника и т.д.)
+      const activeModal = document.querySelector('.modal-sheet-dialog:not(.hidden), [id^="modal-"]:not(.hidden)');
+      if (!allowWhileTyping && activeModal && (isUserTypingActive || isInputActive())) {
+        console.log('Открыто модальное окно. Фоновое обновление отложено.');
+        pendingDeferredRefresh = true;
         return;
       }
 
@@ -5383,6 +5457,10 @@
       }
 
       activeModalStack = activeModalStack.filter(m => m !== id);
+      if (activeModalStack.length === 0 && pendingDeferredRefresh) {
+        pendingDeferredRefresh = false;
+        setTimeout(() => refreshAppData(true, true), 150);
+      }
     }
 
     function shakeModal(id) {
@@ -5726,10 +5804,10 @@
         if (gwb) gwb.classList.remove('hidden');
       }
 
-      // Фоновая сверка только при возврате на вкладку (не чаще раза в 30 секунд)
+      // Фоновая сверка только при возврате на вкладку (не чаще раза в 30 секунд и ТОЛЬКО если нет активного ввода)
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && currentUser) {
-          if (Date.now() - lastRefreshTimestamp > 30000) {
+          if (!isUserTypingActive && !isInputActive() && Date.now() - lastRefreshTimestamp > 30000) {
             refreshAppData();
           }
         }
