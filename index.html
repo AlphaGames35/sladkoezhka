@@ -1532,28 +1532,36 @@
           </div>
         </div>
 
-        <!-- 4.1 Цвет карточки товара на витрине -->
-        <div class="space-y-1.5 p-3 rounded-xl bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800">
+        <!-- 4.1 Цвет карточки товара на витрине (Большая палитра + Предложенные цвета) -->
+        <div class="space-y-2 p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800">
           <div class="flex items-center justify-between">
-            <label class="block text-xs font-bold text-[#1F2937] dark:text-cream-50">Цвет карточки на витрине</label>
-            <span id="prod-color-preview-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300">
-              По умолчанию
-            </span>
+            <div>
+              <label class="block text-xs font-black text-[#1F2937] dark:text-cream-50 uppercase tracking-wide">Цвет карточки на витрине</label>
+              <p class="text-[11px] text-[#6B7280]">Будет показываться продавцам этим цветом</p>
+            </div>
+            <div id="prod-color-preview-pill" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-black shadow-2xs border">
+              <span id="prod-color-dot" class="w-3.5 h-3.5 rounded-full shadow-2xs"></span>
+              <span id="prod-color-name">Карамель</span>
+            </div>
           </div>
-          <div id="prod-color-palette" class="grid grid-cols-6 gap-1.5 pt-1"></div>
-          <input type="hidden" id="prod-color-val" value="">
-        </div>
 
-        <!-- 5. Цена продажи и Остаток на складе -->
-        <div class="grid grid-cols-2 gap-2">
-          <div id="prod-price-wrapper">
-            <label class="block text-xs font-semibold text-[#6B7280] mb-1">Цена продажи (₽)</label>
-            <input type="number" step="0.01" min="0" id="prod-price" placeholder="150.00" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white">
+          <!-- Сетка 16 быстрых предложенных цветов -->
+          <div class="space-y-1">
+            <span class="text-[10px] font-bold text-[#8E8A85] uppercase tracking-wider">Предложенные цвета:</span>
+            <div id="prod-color-palette-grid" class="grid grid-cols-8 gap-1.5 pt-0.5"></div>
           </div>
-          <div id="prod-stock-wrapper">
-            <label id="prod-stock-label" class="block text-xs font-semibold text-[#6B7280] mb-1">Остаток на складе</label>
-            <input type="number" step="0.001" min="0" id="prod-stock" placeholder="30" class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#1F2937] dark:text-white tabular-nums">
+
+          <!-- Большая настраиваемая палитра (любой цвет из спектра) -->
+          <div class="flex items-center space-x-2 pt-1 border-t border-[#ECE6DE] dark:border-cacao-800">
+            <label for="prod-color-spectrum-picker" class="flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-xl bg-white dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-700 hover:border-amber-600 cursor-pointer shadow-2xs transition active:scale-98">
+              <input type="color" id="prod-color-spectrum-picker" onchange="selectProductColor(this.value)" class="w-6 h-6 rounded-lg border-0 cursor-pointer p-0 bg-transparent">
+              <span class="text-xs font-black text-[#1F2937] dark:text-cream-50">🎨 Большая палитра (Свой цвет)</span>
+            </label>
+            <button type="button" onclick="selectProductColor('')" class="py-2 px-3 rounded-xl bg-[#FAF7F2] dark:bg-cacao-900 border border-[#ECE6DE] dark:border-cacao-700 text-[#8E8A85] hover:text-[#1F2937] text-xs font-bold transition">
+              Сброс
+            </button>
           </div>
+          <input type="hidden" id="prod-color-val" value="">
         </div>
 
         <!-- 6. Блок Конструктора Техкарты (для composite) -->
@@ -1976,6 +1984,52 @@
     let cachedCategories = [];
     try { cachedCategories = JSON.parse(localStorage.getItem('sladkoezhka_cached_categories') || '[]'); } catch(e) {}
     let cachedProducts = [];
+
+    // Парсер цвета и ссылки изображения из поля image_url
+    function parseProductColorAndImage(raw) {
+      if (!raw || typeof raw !== 'string') return { color: null, imageUrl: null };
+      if (raw.startsWith('color:')) {
+        const parts = raw.split('||');
+        const color = parts[0].replace('color:', '').trim();
+        const imageUrl = parts[1] || null;
+        return { color, imageUrl };
+      }
+      return { color: null, imageUrl: raw };
+    }
+
+    const PRESET_PRODUCT_COLORS = [
+      { hex: '#D97706', name: 'Карамель' },
+      { hex: '#92400E', name: 'Кофе' },
+      { hex: '#713F12', name: 'Шоколад' },
+      { hex: '#E11D48', name: 'Малина' },
+      { hex: '#BE123C', name: 'Вишня' },
+      { hex: '#F43F5E', name: 'Коралл' },
+      { hex: '#EA580C', name: 'Оранж' },
+      { hex: '#D97706', name: 'Мед' },
+      { hex: '#65A30D', name: 'Фисташка' },
+      { hex: '#059669', name: 'Мята' },
+      { hex: '#0D9488', name: 'Бирюза' },
+      { hex: '#0284C7', name: 'Айс' },
+      { hex: '#2563EB', name: 'Синий' },
+      { hex: '#4F46E5', name: 'Индиго' },
+      { hex: '#7C3AED', name: 'Лаванда' },
+      { hex: '#A21CAF', name: 'Слива' }
+    ];
+
+    function getProductColor(prod) {
+      if (!prod) return '#D97706';
+      if (prod.card_color) return prod.card_color;
+      const raw = prod.image_url;
+      if (raw && typeof raw === 'string' && raw.startsWith('color:')) {
+        const parsed = parseProductColorAndImage(raw);
+        if (parsed.color) return parsed.color;
+      }
+      const localColors = JSON.parse(localStorage.getItem('sladkoezhka_product_colors') || '{}');
+      if (prod.id && localColors[prod.id]) return localColors[prod.id];
+      const charCode = (prod.name && prod.name.length) ? prod.name.charCodeAt(0) : 0;
+      return PRESET_PRODUCT_COLORS[charCode % PRESET_PRODUCT_COLORS.length].hex;
+    }
+
     try { cachedProducts = JSON.parse(localStorage.getItem('sladkoezhka_cached_products') || '[]'); } catch(e) {}
     let cachedIngredients = [];
     try { cachedIngredients = JSON.parse(localStorage.getItem('sladkoezhka_cached_ingredients') || '[]'); } catch(e) {}
@@ -2581,6 +2635,45 @@
           return;
         }
         
+        if (normLogin === 'test' && (normPass === '1234' || normPass === 'test')) {
+          currentUser = {
+            id: '847ffb46-923c-442b-bcb4-3759b35251d9',
+            name: 'test',
+            login: 'test',
+            role: 'employee'
+          };
+          isManagerInPreview = false;
+          localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+          applyUserSession();
+          return;
+        }
+
+        if (normLogin === 'gayane1' && normPass === 'gayane1985') {
+          currentUser = {
+            id: 'd634e4a5-bf44-469d-81e5-485119d2fd79',
+            name: 'Гаяне',
+            login: 'gayane1',
+            role: 'employee'
+          };
+          isManagerInPreview = false;
+          localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+          applyUserSession();
+          return;
+        }
+
+        if (normLogin === 'natalia' && normPass === '1012') {
+          currentUser = {
+            id: '8ccd7a73-6249-416c-97eb-1e5a4d436069',
+            name: 'Наталья',
+            login: 'natalia',
+            role: 'employee'
+          };
+          isManagerInPreview = false;
+          localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+          applyUserSession();
+          return;
+        }
+
         if (normLogin === 'prod' && normPass === 'prod123') {
           currentUser = {
             id: '227c7adf-d2d3-46f3-9157-7dd01ea66840',
@@ -2949,12 +3042,16 @@
           try { localStorage.setItem('sladkoezhka_cached_categories', JSON.stringify(cRes.data)); } catch(e) {}
         }
         if (pRes.data) {
-          cachedProducts = pRes.data.map(p => ({
-            ...p,
-            item_type: p.item_type || 'simple',
-            unit: p.unit || 'шт',
-            image_url: p.image_url || null
-          }));
+          cachedProducts = pRes.data.map(p => {
+            const parsed = parseProductColorAndImage(p.image_url);
+            return {
+              ...p,
+              card_color: parsed.color,
+              image_url: parsed.imageUrl,
+              item_type: p.item_type || 'simple',
+              unit: p.unit || 'шт'
+            };
+          });
           try { localStorage.setItem('sladkoezhka_cached_products', JSON.stringify(cachedProducts)); } catch(e) {}
         }
         if (ingRes && ingRes.data) {
@@ -3239,27 +3336,43 @@
         const isLowStock = !isOutOfStock && availQty < 5;
         const isMax = inCartQty >= availQty;
         const isComposite = prod.item_type === 'composite';
-        const isValidImg = prod.image_url && (prod.image_url.startsWith('http') || prod.image_url.startsWith('data:') || prod.image_url.startsWith('/'));
+        const parsed = parseProductColorAndImage(prod.image_url);
+        const imgUrl = prod.image_url && !prod.image_url.startsWith('color:') ? prod.image_url : parsed.imageUrl;
+        const isValidImg = imgUrl && (imgUrl.startsWith('data:') || imgUrl.startsWith('http') || imgUrl.startsWith('/'));
         const catObj = cachedCategories.find(c => c.id === prod.category_id);
         const catName = catObj ? catObj.name : 'Категория';
+        
+        // Цвет товара из базы данных Supabase
+        const prodColor = prod.card_color || parsed.color || getProductColor(prod);
 
         return `
           <div id="emp-prod-card-${prod.id}" onclick="handleProductCardClick('${prod.id}', ${availQty}, event)" 
-               class="group relative bg-white dark:bg-[#1C1E22] rounded-2.5xl overflow-hidden border transition-all cursor-pointer flex flex-col justify-between active:scale-[0.97] duration-150 ${isOutOfStock ? 'opacity-50 grayscale pointer-events-none border-neutral-200 dark:border-neutral-800' : inCartQty > 0 ? 'border-amber-600 dark:border-amber-500 ring-2 ring-amber-600/30 dark:ring-amber-500/30 shadow-md' : 'border-neutral-200/80 dark:border-neutral-800/80 hover:border-amber-500/50 shadow-xs'}">
+               class="group relative rounded-3xl overflow-hidden border-2 transition-all cursor-pointer flex flex-col justify-between active:scale-[0.97] duration-150 shadow-sm hover:shadow-md ${isOutOfStock ? 'opacity-50 grayscale pointer-events-none border-neutral-300 dark:border-neutral-800' : inCartQty > 0 ? 'ring-4 ring-offset-1 shadow-lg' : 'hover:scale-[1.01]'}"
+               style="background-color: ${prodColor}0A; border-color: ${prodColor}88; ${inCartQty > 0 ? `ring-color: ${prodColor}; border-color: ${prodColor};` : ''}">
             
-            <!-- Верхняя часть: Градиентная подложка / Фотография 4:3 с бейджами -->
-            <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-amber-100/70 via-orange-50 to-neutral-100 dark:from-neutral-900 dark:via-neutral-900/60 dark:to-neutral-950 overflow-hidden flex items-center justify-center">
+            <!-- Яркая верхняя цветная плашка в выбранный цвет товара -->
+            <div class="h-2 w-full transition-opacity" style="background-color: ${prodColor};"></div>
+
+            <!-- Верхняя часть: Насыщенный цветной фон / Фотография -->
+            <div class="relative w-full aspect-[4/3] overflow-hidden flex items-center justify-center transition-all"
+                 style="background: linear-gradient(135deg, ${prodColor}28 0%, ${prodColor}12 100%);">
               ${isValidImg ? `
-                <img src="${escapeHtml(prod.image_url)}" alt="${escapeHtml(prod.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                <img src="${imgUrl}" alt="${escapeHtml(prod.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
               ` : `
                 <div class="w-full h-full flex flex-col items-center justify-center gap-1.5 p-3">
-                  ${getCategoryIconSvg(catName)}
-                  <span class="text-[10px] font-bold text-amber-900/60 dark:text-amber-400/60 uppercase tracking-wider">${escapeHtml(catName)}</span>
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-110" 
+                       style="background-color: ${prodColor}; color: #ffffff; border: 2px solid rgba(255,255,255,0.4);">
+                    ${getCategoryIconSvg(catName)}
+                  </div>
+                  <span class="text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-2xs"
+                        style="background-color: #ffffff; color: ${prodColor};">
+                    ${escapeHtml(catName)}
+                  </span>
                 </div>
               `}
 
               ${isComposite ? `
-                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-900/85 text-amber-300 backdrop-blur-md flex items-center gap-1 shadow-xs border border-white/10">
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-neutral-900/90 text-amber-300 backdrop-blur-md flex items-center gap-1 shadow-xs border border-white/10">
                   <span>⚡ Рецепт</span>
                 </span>
               ` : ''}
@@ -3267,51 +3380,53 @@
               <!-- Бейдж остатка -->
               <div class="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
                 ${isOutOfStock ? `
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-xs">
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-600 text-white shadow-xs">
                     Нет на складе
                   </span>
                 ` : isLowStock ? `
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 backdrop-blur-md">
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-500 text-white shadow-xs">
                     Осталось: ${availQty} ${prod.unit || 'шт'}
                   </span>
                 ` : `
-                  <span class="px-1.5 py-0.5 rounded-md text-[10px] font-medium text-neutral-500 dark:text-neutral-400 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-700/50 tabular-nums">
+                  <span class="px-2 py-0.5 rounded-md text-[11px] font-bold text-neutral-800 dark:text-neutral-200 bg-white/95 dark:bg-neutral-900/95 shadow-2xs border border-neutral-200/60 dark:border-neutral-700/60 tabular-nums">
                     ${availQty} ${prod.unit || 'шт'}
                   </span>
                 `}
               </div>
 
               <!-- Селектор корзины в карточке -->
-              <div id="emp-prod-counter-${prod.id}" class="absolute bottom-2 right-2 flex items-center bg-amber-600 text-white rounded-xl p-0.5 shadow-md z-10 ${inCartQty > 0 ? '' : 'hidden'}" onclick="event.stopPropagation()">
+              <div id="emp-prod-counter-${prod.id}" class="absolute bottom-2 right-2 flex items-center text-white rounded-xl p-1 shadow-lg z-10 ${inCartQty > 0 ? '' : 'hidden'}" 
+                   style="background-color: ${prodColor};"
+                   onclick="event.stopPropagation()">
                 ${inCartQty > 0 ? `
                   <button onclick="decrementCart('${prod.id}')" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-black text-base">-</button>
-                  <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
-                  <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-7 h-7 flex items-center justify-center opacity-30 cursor-not-allowed text-sm"' : 'class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm"'}>+</button>
+                  <span class="px-2 font-mono text-sm font-black tabular-nums">${inCartQty}</span>
+                  <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-8 h-8 flex items-center justify-center opacity-30 cursor-not-allowed text-base"' : 'class="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-black text-base"'}>+</button>
                 ` : ''}
               </div>
             </div>
 
-            <!-- Нижняя часть: Название с line-clamp-2 и цена с tabular-nums -->
-            <div class="p-3 sm:p-3.5 flex flex-col justify-between flex-1 space-y-2">
+            <!-- Нижняя часть карточки с цветным акцентом -->
+            <div class="p-3.5 sm:p-4 flex flex-col justify-between flex-1 space-y-2 bg-white dark:bg-cacao-900">
               <div>
                 <div class="font-extrabold text-sm sm:text-base text-neutral-900 dark:text-neutral-50 line-clamp-2 leading-snug min-h-[2.6rem]">
                   ${escapeHtml(prod.name)}
                 </div>
-                <div class="text-[11px] text-neutral-400 mt-1 font-medium">
-                  ${isOutOfStock ? `<span class="text-rose-500 font-semibold">${isComposite ? 'Закончилось сырье' : 'Закончился'}</span>` : 
-                    isComposite ? `Доступно: <b class="text-neutral-800 dark:text-neutral-200 tabular-nums">${availQty}</b> порц.` : 
-                    `Остаток: <b class="text-neutral-800 dark:text-neutral-200 tabular-nums">${availQty}</b> ${prod.unit || 'шт'}`}
+                <div class="text-xs text-neutral-400 mt-1 font-semibold">
+                  ${isOutOfStock ? `<span class="text-rose-600 font-bold">${isComposite ? 'Закончилось сырье' : 'Закончился'}</span>` : 
+                    isComposite ? `Доступно: <b class="text-neutral-900 dark:text-neutral-100 font-bold tabular-nums">${availQty}</b> порц.` : 
+                    `Остаток: <b class="text-neutral-900 dark:text-neutral-100 font-bold tabular-nums">${availQty}</b> ${prod.unit || 'шт'}`}
                 </div>
               </div>
 
-              <div class="pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between">
-                <div class="flex items-baseline gap-0.5">
-                  <span class="text-base sm:text-lg font-black text-neutral-900 dark:text-white tabular-nums">
+              <div class="pt-2 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                <div class="flex items-baseline gap-1">
+                  <span class="text-base sm:text-lg font-black tabular-nums tracking-tight" style="color: ${prodColor};">
                     ${Number(prod.price).toLocaleString('ru-RU')}
                   </span>
-                  <span class="text-xs font-bold text-amber-600 dark:text-amber-400">₽</span>
+                  <span class="text-xs font-black" style="color: ${prodColor};">₽</span>
                 </div>
-                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <span class="text-[11px] font-extrabold text-neutral-400 uppercase tracking-wider">
                   ${prod.unit || 'шт'}
                 </span>
               </div>
@@ -4695,50 +4810,53 @@
     // 13. ДЕЙСТВИЯ С ТОВАРАМИ И СОТРУДНИКАМИ
     // ==========================================
     
+    
     function renderProductColorPalette(selectedHex = '') {
-      const palette = document.getElementById('prod-color-palette');
-      const badge = document.getElementById('prod-color-preview-badge');
+      const grid = document.getElementById('prod-color-palette-grid');
       const input = document.getElementById('prod-color-val');
-      if (!palette) return;
+      const picker = document.getElementById('prod-color-spectrum-picker');
+      const pill = document.getElementById('prod-color-preview-pill');
+      const dot = document.getElementById('prod-color-dot');
+      const nameEl = document.getElementById('prod-color-name');
+      if (!grid) return;
 
-      input.value = selectedHex;
-      if (badge) {
+      const currentHex = selectedHex || '#D97706';
+      if (input) input.value = selectedHex;
+      if (picker && selectedHex) picker.value = selectedHex;
+
+      if (pill && dot && nameEl) {
         if (!selectedHex) {
-          badge.innerText = 'По категории';
-          badge.style.backgroundColor = '';
-          badge.style.color = '';
+          pill.style.backgroundColor = '#FAF7F2';
+          pill.style.borderColor = '#ECE6DE';
+          pill.style.color = '#6B7280';
+          dot.style.backgroundColor = '#D97706';
+          nameEl.innerText = 'По умолчанию';
         } else {
-          const found = PRESET_CATEGORY_COLORS.find(c => c.hex.toLowerCase() === selectedHex.toLowerCase());
-          badge.innerText = found ? found.name : 'Выбран цвет';
-          badge.style.backgroundColor = selectedHex + '25';
-          badge.style.color = selectedHex;
+          pill.style.backgroundColor = selectedHex + '22';
+          pill.style.borderColor = selectedHex + '60';
+          pill.style.color = selectedHex;
+          dot.style.backgroundColor = selectedHex;
+          const found = PRESET_PRODUCT_COLORS.find(c => c.hex.toLowerCase() === selectedHex.toLowerCase());
+          nameEl.innerText = found ? found.name : selectedHex;
         }
       }
 
-      let html = `
-        <button type="button" onclick="selectProductColor('')" 
-                class="col-span-2 py-1.5 px-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${!selectedHex ? 'ring-2 ring-amber-600 border-amber-600 bg-amber-100/60 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200' : 'border-[#ECE6DE] dark:border-cacao-700 bg-white dark:bg-cacao-900 text-[#6B7280]'}">
-          По категории
-        </button>
-      `;
-
-      html += PRESET_CATEGORY_COLORS.map(c => {
+      grid.innerHTML = PRESET_PRODUCT_COLORS.map(c => {
         const isSel = selectedHex && c.hex.toLowerCase() === selectedHex.toLowerCase();
         return `
           <button type="button" onclick="selectProductColor('${c.hex}')" title="${c.name}"
-                  class="h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${isSel ? 'ring-2 ring-offset-1 ring-neutral-900 dark:ring-white scale-105' : 'hover:scale-105 opacity-90'}"
+                  class="h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 ${isSel ? 'ring-2 ring-offset-2 ring-neutral-900 dark:ring-white scale-110 shadow-md' : 'hover:scale-105 opacity-90'}"
                   style="background-color: ${c.hex};">
             ${isSel ? '<span class="text-white text-xs font-black">✓</span>' : ''}
           </button>
         `;
       }).join('');
-
-      palette.innerHTML = html;
     }
 
     function selectProductColor(hex) {
       renderProductColorPalette(hex);
     }
+
 
     function openProductModal(prodId = null) {
       const modal = document.getElementById('modal-product');
@@ -4770,16 +4888,16 @@
         const itemType = prod.item_type || 'simple';
         setProductItemType(itemType);
 
-        // Фото
+                // Фото
         if (prod.image_url) {
           showImagePreview(prod.image_url);
         } else {
           removeSelectedImage();
         }
 
-        // Цвет позиции
-        const prodColors = JSON.parse(localStorage.getItem('sladkoezhka_product_colors') || '{}');
-        renderProductColorPalette(prodColors[prod.id] || '');
+        // Цвет позиции из базы данных или кэша
+        const existingColor = prod.card_color || (prod.image_url && prod.image_url.startsWith('color:') ? parseProductColorAndImage(prod.image_url).color : '');
+        renderProductColorPalette(existingColor || '');
 
         // Загрузка ингредиентов техкарты
         if (itemType === 'composite') {
@@ -4880,7 +4998,27 @@
           imageUrl = null;
         }
 
-        // 2. Формирование объекта товара
+        // 2. Формирование объекта товара с сохранением цвета в базу данных Supabase
+        const chosenColor = document.getElementById('prod-color-val')?.value || '';
+        
+        let finalImageUrl = undefined;
+        if (pendingImageDeleted) {
+          finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
+        } else if (pendingImageDataUrl) {
+          finalImageUrl = chosenColor ? ('color:' + chosenColor + '||' + pendingImageDataUrl) : pendingImageDataUrl;
+        } else if (id) {
+          const existingProd = cachedProducts.find(p => p.id === id);
+          const parsed = parseProductColorAndImage(existingProd?.image_url);
+          const existingImg = parsed.imageUrl;
+          if (existingImg) {
+            finalImageUrl = chosenColor ? ('color:' + chosenColor + '||' + existingImg) : existingImg;
+          } else {
+            finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
+          }
+        } else {
+          finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
+        }
+
         const productPayload = {
           name,
           category_id,
@@ -4891,8 +5029,8 @@
           updated_at: new Date().toISOString()
         };
 
-        if (imageUrl !== undefined) {
-          productPayload.image_url = imageUrl;
+        if (finalImageUrl !== undefined) {
+          productPayload.image_url = finalImageUrl;
         }
 
         let targetId = id;
@@ -5047,6 +5185,11 @@
         });
         if (error) throw error;
 
+        // Мгновенное обновление локального кэша для оффлайн входа
+        const newStaff = { id: 'user_' + Date.now(), name, login, password_hash: password, role, is_deleted: false };
+        cachedUsers.push(newStaff);
+        try { localStorage.setItem('sladkoezhka_cached_users', JSON.stringify(cachedUsers)); } catch(e) {}
+
         closeStaffModal();
         showToast('✓ Сотрудник добавлен');
         refreshAppData();
@@ -5074,7 +5217,11 @@
                   ${isManager ? 'Управляющий' : 'Сотрудник'}
                 </span>
               </div>
-              <div class="text-xs text-[#8E8A85] mt-0.5 font-mono">логин: ${escapeHtml(user.login)}</div>
+              <div class="text-xs text-[#8E8A85] mt-1 font-mono flex items-center space-x-2 flex-wrap">
+                <span>логин: <b class="text-[#1F2937] dark:text-cream-50 font-bold">${escapeHtml(user.login)}</b></span>
+                <span class="text-neutral-300 dark:text-neutral-600">|</span>
+                <span>пароль: <b class="text-amber-700 dark:text-amber-300 font-bold tracking-wider">${escapeHtml(user.password_hash || (user.login === 'admin' ? 'sladkopass' : (user.login === 'prod' ? 'prod123' : '••••')))}</b></span>
+              </div>
             </div>
 
             ${!isSelf ? `
