@@ -1456,13 +1456,13 @@
         <input type="hidden" id="prod-id">
         <input type="hidden" id="prod-item-type" value="simple">
 
-        <!-- 1. Загрузка фотографии товара (Client-side сжатие 800px WebP) -->
+        <!-- 1. Загрузка фотографии товара (Client-side сжатие 400px WebP) -->
         <div>
           <label class="block text-xs font-semibold text-[#6B7280] mb-1.5">Фотография товара</label>
-          <input type="file" id="prod-image-file" accept="image/*" onchange="handleImageSelect(event)" class="hidden">
+          <input type="file" id="prod-image-file" accept="image/*" onchange="handleImageSelect(event)" class="sr-only" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; z-index: -1;">
           
           <div class="flex items-center space-x-3">
-            <div id="prod-image-box" onclick="document.getElementById('prod-image-file').click()"
+            <label for="prod-image-file" id="prod-image-box"
                  class="w-20 h-20 rounded-xl border border-dashed border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 flex flex-col items-center justify-center cursor-pointer hover:border-[#2D1E17] dark:hover:border-cream-100 transition overflow-hidden relative group shrink-0 shadow-2xs">
               <div id="prod-image-placeholder" class="flex flex-col items-center justify-center text-center p-1">
                 <svg class="w-6 h-6 text-[#8E8A85] mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -1471,17 +1471,17 @@
                 <span class="text-[9px] text-[#8E8A85] font-semibold leading-tight">+ Фото</span>
               </div>
               <img id="prod-image-preview" src="" alt="Превью" class="hidden w-full h-full object-cover">
-            </div>
+            </label>
 
             <div class="flex-1 space-y-1">
               <div class="text-[11px] text-[#8E8A85]">
-                Автоматическое сжатие до 800px WebP для быстродействия
+                Автоматическое сжатие до 400px для быстродействия
               </div>
               <div class="flex items-center space-x-2 pt-1">
-                <button type="button" onclick="document.getElementById('prod-image-file').click()" 
-                        class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-700 hover:border-[#2D1E17] text-[#1F2937] dark:text-cream-100 transition shadow-2xs">
+                <label for="prod-image-file" 
+                        class="cursor-pointer px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-700 hover:border-[#2D1E17] text-[#1F2937] dark:text-cream-100 transition shadow-2xs inline-block">
                   Выбрать фото
-                </button>
+                </label>
                 <button type="button" id="btn-remove-image" onclick="removeSelectedImage()" 
                         class="hidden px-2 py-1 rounded-md text-[11px] font-semibold text-red-500 hover:underline">
                   Удалить
