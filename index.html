@@ -2287,7 +2287,7 @@
     // УПРАВЛЕНИЕ ТИПАМИ И ТЕХКАРТОЙ В МОДАЛКЕ
     // ==========================================
     function setProductItemType(type) {
-      document.getElementById('prod-item-type').value = type;
+      const pTypeEl = document.getElementById('prod-item-type'); if (pTypeEl) pTypeEl.value = type;
 
       const btnSimple = document.getElementById('type-btn-simple');
       const btnComposite = document.getElementById('type-btn-composite');
@@ -3895,8 +3895,8 @@
     function openCustomRangeModal() {
       const now = new Date();
       const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0);
-      document.getElementById('range-start-date').value = formatDateTimeLocal(customStartDate || start);
-      document.getElementById('range-end-date').value = formatDateTimeLocal(customEndDate || now);
+      const rStart = document.getElementById('range-start-date'); if (rStart) rStart.value = formatDateTimeLocal(customStartDate || start);
+      const rEnd = document.getElementById('range-end-date'); if (rEnd) rEnd.value = formatDateTimeLocal(customEndDate || now);
       openModal('modal-custom-range');
     }
 
@@ -4670,9 +4670,9 @@
     // МОДАЛЬНОЕ ОКНО БЫСТРОГО ИЗМЕНЕНИЯ ОСТАТКА
     // ==========================================
     function openStockModal(prodId, currentStock, prodName) {
-      document.getElementById('modal-stock-prod-id').value = prodId;
-      document.getElementById('modal-stock-prod-name').innerText = prodName || '';
-      document.getElementById('modal-stock-input').value = currentStock;
+      const sProdEl = document.getElementById('modal-stock-prod-id'); if (sProdEl) sProdEl.value = prodId;
+      const sNameEl = document.getElementById('modal-stock-prod-name'); if (sNameEl) sNameEl.innerText = prodName || '';
+      const sInpEl = document.getElementById('modal-stock-input'); if (sInpEl) sInpEl.value = currentStock;
       openModal('modal-stock-edit');
     }
 
@@ -4785,8 +4785,8 @@
     }
 
     function openCategoryEditModal(catId, catName) {
-      document.getElementById('edit-cat-id').value = catId;
-      document.getElementById('edit-cat-name').value = catName;
+      const cIdEl = document.getElementById('edit-cat-id'); if (cIdEl) cIdEl.value = catId;
+      const cNameEl = document.getElementById('edit-cat-name'); if (cNameEl) cNameEl.value = catName;
       
       const cat = cachedCategories.find(c => c.id === catId);
       const currentColor = getCategoryColor(cat);
@@ -5246,9 +5246,9 @@
     }
 
     function openStaffModal() {
-      document.getElementById('staff-name').value = '';
-      document.getElementById('staff-login').value = '';
-      document.getElementById('staff-password').value = '';
+      const sName = document.getElementById('staff-name'); if (sName) sName.value = '';
+      const sLogin = document.getElementById('staff-login'); if (sLogin) sLogin.value = '';
+      const sPass = document.getElementById('staff-password'); if (sPass) sPass.value = '';
       openModal('modal-staff');
     }
 
