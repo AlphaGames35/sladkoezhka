@@ -1671,8 +1671,159 @@
     <span id="toast-text">Сообщение</span>
   </div>
 
+  
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО ОШИБКИ СВЕРХУ С КОПИРОВАНИЕМ -->
+  <div id="top-error-banner" class="hidden fixed top-3 left-3 right-3 sm:left-auto sm:right-4 sm:max-w-md z-[99999] bg-white dark:bg-cacao-900 border-2 border-rose-500 rounded-2xl shadow-2xl p-3.5 space-y-2 animate-bounce-short">
+    <div class="flex items-start justify-between gap-2.5">
+      <div class="flex items-start gap-2.5">
+        <span class="text-xl shrink-0">⚠️</span>
+        <div>
+          <h4 id="top-error-title" class="text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider">Ошибка</h4>
+          <p id="top-error-message" class="text-xs font-medium text-[#1F2937] dark:text-cream-100 line-clamp-2 mt-0.5"></p>
+        </div>
+      </div>
+      <button type="button" onclick="dismissTopError()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1 text-sm font-bold">✕</button>
+    </div>
+    <div class="flex items-center gap-2 pt-1">
+      <button type="button" onclick="copyTopErrorText()" id="btn-top-error-copy" class="flex-1 py-1.5 px-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+        <span id="btn-top-error-copy-text">📋 Скопировать ошибку</span>
+      </button>
+      <button type="button" onclick="openErrorDiagnosticsModal()" class="py-1.5 px-3 rounded-lg bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#1F2937] dark:text-cream-100 font-semibold text-xs transition active:scale-95">
+        Подробнее
+      </button>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА ПОЛНОЙ ДИАГНОСТИКИ ОШИБКИ -->
+  <div id="modal-error-diagnostics" class="hidden modal-sheet-backdrop fixed inset-0 z-[100000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="modal-sheet-dialog bg-white dark:bg-cacao-900 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-rose-200 dark:border-rose-900/60 space-y-4">
+      <div class="flex items-center justify-between border-b border-[#ECE6DE] dark:border-cacao-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛠️</span>
+          <h3 class="font-bold text-sm text-[#1F2937] dark:text-cream-50">Диагностика и текст ошибки</h3>
+        </div>
+        <button type="button" onclick="closeErrorDiagnosticsModal()" class="text-[#8E8A85] hover:text-[#1F2937] dark:hover:text-white p-1 text-base font-bold">✕</button>
+      </div>
+
+      <div class="space-y-2">
+        <div class="text-[11px] text-[#6B7280]">
+          Вы можете скопировать этот текст и отправить разработчику для точного выявления проблемы:
+        </div>
+        <pre id="error-diagnostics-text" class="w-full max-h-60 overflow-y-auto p-3 rounded-xl bg-neutral-900 text-neutral-100 font-mono text-[11px] leading-relaxed select-all whitespace-pre-wrap break-all border border-neutral-700"></pre>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeErrorDiagnosticsModal()" class="px-4 py-2 text-xs font-semibold text-[#6B7280]">
+          Закрыть
+        </button>
+        <button type="button" onclick="copyDiagnosticsModalText()" id="btn-modal-copy-diag" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95">
+          <span id="btn-modal-copy-diag-text">📋 Скопировать весь текст</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== СКРИПТ ПРИЛОЖЕНИЯ ==================== -->
   <script>
+    // ==========================================
+    // СИСТЕМА ДИАГНОСТИКИ И ВСПЛЫВАЮЩИХ ОШИБОК
+    // ==========================================
+    let lastGlobalErrorPayload = null;
+
+    function showGlobalError(title, errOrMessage, details) {
+      const errMsg = typeof errOrMessage === 'string' ? errOrMessage : (errOrMessage && errOrMessage.message ? errOrMessage.message : JSON.stringify(errOrMessage));
+      const errStack = (errOrMessage && errOrMessage.stack) ? errOrMessage.stack : 'No stack trace';
+      const timestamp = new Date().toLocaleString('ru-RU');
+
+      const fullDiagnostics = [
+        '=== СЛАДКОЕЖКА POS: ДИАГНОСТИКА ОШИБКИ ===',
+        'Время: ' + timestamp,
+        'Заголовок: ' + (title || 'Ошибка'),
+        'Текст ошибки: ' + (errMsg || 'Неизвестная ошибка'),
+        'Интернет-соединение: ' + (navigator.onLine ? 'ПОДКЛЮЧЕНО (Онлайн)' : 'ОТКЛЮЧЕНО (Оффлайн)'),
+        'Supabase URL: ' + (SUPABASE_URL || 'Не настроен'),
+        'Платформа: ' + navigator.userAgent,
+        details ? ('Контекст: ' + (typeof details === 'object' ? JSON.stringify(details, null, 2) : String(details))) : '',
+        '\nСтек вызова:\n' + errStack
+      ].filter(Boolean).join('\n');
+
+      lastGlobalErrorPayload = {
+        title: title || 'Ошибка',
+        message: errMsg,
+        fullText: fullDiagnostics
+      };
+
+      const banner = document.getElementById('top-error-banner');
+      const titleEl = document.getElementById('top-error-title');
+      const msgEl = document.getElementById('top-error-message');
+      if (banner && titleEl && msgEl) {
+        titleEl.innerText = title || 'Внимание: Ошибка';
+        msgEl.innerText = errMsg || 'Неизвестная ошибка';
+        banner.classList.remove('hidden');
+      }
+
+      console.error('[Sladkoezhka Error]', title, errOrMessage, details);
+    }
+
+    function dismissTopError() {
+      document.getElementById('top-error-banner')?.classList.add('hidden');
+    }
+
+    async function copyTopErrorText() {
+      if (!lastGlobalErrorPayload) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(lastGlobalErrorPayload.fullText);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastGlobalErrorPayload.fullText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const btnText = document.getElementById('btn-top-error-copy-text');
+        if (btnText) {
+          btnText.innerText = '✓ Скопировано в буфер!';
+          setTimeout(() => { btnText.innerText = '📋 Скопировать ошибку'; }, 3000);
+        }
+        showToast('✓ Текст ошибки скопирован в буфер обмена');
+      } catch (e) {
+        openErrorDiagnosticsModal();
+      }
+    }
+
+    function openErrorDiagnosticsModal() {
+      if (!lastGlobalErrorPayload) return;
+      const pre = document.getElementById('error-diagnostics-text');
+      if (pre) pre.innerText = lastGlobalErrorPayload.fullText;
+      openModal('modal-error-diagnostics');
+    }
+
+    function closeErrorDiagnosticsModal() {
+      closeModal('modal-error-diagnostics');
+    }
+
+    async function copyDiagnosticsModalText() {
+      await copyTopErrorText();
+      const btn = document.getElementById('btn-modal-copy-diag-text');
+      if (btn) {
+        btn.innerText = '✓ Скопировано в буфер!';
+        setTimeout(() => { btn.innerText = '📋 Скопировать весь текст'; }, 3000);
+      }
+    }
+
+    window.addEventListener('error', (event) => {
+      if (event && event.message && !event.message.includes('ResizeObserver')) {
+        showGlobalError('Сбой скрипта (JS Error)', event.message, { filename: event.filename, lineno: event.lineno, colno: event.colno });
+      }
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      const reason = event.reason || {};
+      showGlobalError('Сбой сетевого запроса', reason.message || String(reason), { reason });
+    });
+
     // ==========================================
     // 1. ПАРАМЕТРЫ ПОДКЛЮЧЕНИЯ К SUPABASE
     // ==========================================
@@ -1826,12 +1977,61 @@
     try { cachedIngredients = JSON.parse(localStorage.getItem('sladkoezhka_cached_ingredients') || '[]'); } catch(e) {}
     let cachedSales = [];
     let cachedUsers = [];
+    try { cachedUsers = JSON.parse(localStorage.getItem('sladkoezhka_cached_users') || '[]'); } catch(e) {}
+
+    // ==========================================
+    // ПАЛИТРА И СТИЛИ КАТЕГОРИЙ
+    // ==========================================
+    const PRESET_CATEGORY_COLORS = [
+      { hex: '#D97706', name: 'Янтарный', label: 'Кофе', icon: '☕', bg: 'bg-amber-500/15', text: 'text-amber-800 dark:text-amber-300', border: 'border-amber-500/40' },
+      { hex: '#E11D48', name: 'Малиновый', label: 'Десерты', icon: '🍰', bg: 'bg-rose-500/15', text: 'text-rose-800 dark:text-rose-300', border: 'border-rose-500/40' },
+      { hex: '#059669', name: 'Изумрудный', label: 'Чай', icon: '🍃', bg: 'bg-emerald-500/15', text: 'text-emerald-800 dark:text-emerald-300', border: 'border-emerald-500/40' },
+      { hex: '#0284C7', name: 'Лазурный', label: 'Холодное', icon: '🥤', bg: 'bg-sky-500/15', text: 'text-sky-800 dark:text-sky-300', border: 'border-sky-500/40' },
+      { hex: '#7C3AED', name: 'Фиолетовый', label: 'Особое', icon: '✨', bg: 'bg-purple-500/15', text: 'text-purple-800 dark:text-purple-300', border: 'border-purple-500/40' },
+      { hex: '#EA580C', name: 'Оранжевый', label: 'Выпечка', icon: '🥐', bg: 'bg-orange-500/15', text: 'text-orange-800 dark:text-orange-300', border: 'border-orange-500/40' },
+      { hex: '#0D9488', name: 'Бирюзовый', label: 'Фреши', icon: '🍹', bg: 'bg-teal-500/15', text: 'text-teal-800 dark:text-teal-300', border: 'border-teal-500/40' },
+      { hex: '#4F46E5', name: 'Индиго', label: 'Торты', icon: '🎂', bg: 'bg-indigo-500/15', text: 'text-indigo-800 dark:text-indigo-300', border: 'border-indigo-500/40' }
+    ];
+
+    function getCategoryColor(cat) {
+      if (!cat) return PRESET_CATEGORY_COLORS[0];
+      const styles = JSON.parse(localStorage.getItem('sladkoezhka_category_styles') || '{}');
+      if (styles[cat.id] && styles[cat.id].color) {
+        const customHex = styles[cat.id].color;
+        const found = PRESET_CATEGORY_COLORS.find(c => c.hex.toLowerCase() === customHex.toLowerCase());
+        if (found) return found;
+        return {
+          hex: customHex,
+          name: 'Свой цвет',
+          icon: '🏷️',
+          bg: 'bg-amber-500/15',
+          text: 'text-amber-800 dark:text-amber-300',
+          border: 'border-amber-500/40',
+          customStyle: true
+        };
+      }
+
+      const n = (cat.name || '').toLowerCase();
+      if (n.includes('горяч') || n.includes('кофе') || n.includes('капуч') || n.includes('эспрессо')) return PRESET_CATEGORY_COLORS[0];
+      if (n.includes('десерт') || n.includes('сладк') || n.includes('пирож') || n.includes('макарон')) return PRESET_CATEGORY_COLORS[1];
+      if (n.includes('чай') || n.includes('матча') || n.includes('трав') || n.includes('зелен')) return PRESET_CATEGORY_COLORS[2];
+      if (n.includes('холод') || n.includes('лед') || n.includes('лимонад') || n.includes('айс') || n.includes('кола')) return PRESET_CATEGORY_COLORS[3];
+      if (n.includes('шоколад') || n.includes('конфет') || n.includes('авторск') || n.includes('особ')) return PRESET_CATEGORY_COLORS[4];
+      if (n.includes('выпеч') || n.includes('круассан') || n.includes('сэндвич') || n.includes('тост') || n.includes('булоч')) return PRESET_CATEGORY_COLORS[5];
+      if (n.includes('сок') || n.includes('фреш') || n.includes('смузи') || n.includes('ягод')) return PRESET_CATEGORY_COLORS[6];
+      if (n.includes('торт') || n.includes('чизкейк')) return PRESET_CATEGORY_COLORS[7];
+
+      const charCode = (cat.name && cat.name.length) ? cat.name.charCodeAt(0) : 0;
+      const idx = Math.abs((cat.sort_order || 0) + charCode) % PRESET_CATEGORY_COLORS.length;
+      return PRESET_CATEGORY_COLORS[idx];
+    }
+
 
     // Режим отображения склада управляющего: 'showcase' (витрина готовых блюд) или 'ingredients' (сырье)
     let inventoryViewMode = 'showcase';
 
     // Состояние загрузки изображения товара и редактирования техкарт
-    let pendingImageBlob = null;
+    let pendingImageDataUrl = null; pendingImageBlob = null;
     let pendingImageDeleted = false;
     let editingRecipes = [];
 
@@ -1938,7 +2138,7 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-          const MAX_SIZE = 800;
+          const MAX_SIZE = 400; // Оптимальный четкий размер для мобильных
 
           if (width > height) {
             if (width > MAX_SIZE) {
@@ -1957,14 +2157,13 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          canvas.toBlob(function(blob) {
-            if (blob) {
-              pendingImageBlob = blob;
-              pendingImageDeleted = false;
-              const previewUrl = URL.createObjectURL(blob);
-              showImagePreview(previewUrl);
-            }
-          }, 'image/webp', 0.8);
+          let dataUrl = canvas.toDataURL('image/webp', 0.78);
+          if (!dataUrl || !dataUrl.startsWith('data:image/webp')) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+          }
+          pendingImageDataUrl = dataUrl;
+          pendingImageDeleted = false;
+          showImagePreview(dataUrl);
         };
         img.src = e.target.result;
       };
@@ -2339,39 +2538,64 @@
         const normLogin = (login || '').trim().toLowerCase();
         const normPass = (password || '').trim();
 
+        if (!normLogin || !normPass) {
+          throw new Error('Введите логин и пароль');
+        }
+
         let verifiedUser = null;
 
-        // 1. Дефолтные системные учетные записи (гарантированный оффлайн/онлайн вход)
+        // 1. Дефолтные системные учетные записи: МГНОВЕННЫЙ вход (0 сек ожидания)
         if (normLogin === 'admin' && normPass === 'sladkopass') {
-          verifiedUser = {
+          currentUser = {
             id: '141c59cc-5494-477d-844d-a18209d50d4f',
             name: 'Главный Управляющий',
             login: 'admin',
             role: 'manager'
           };
-        } else if (normLogin === 'prod' && normPass === 'prod123') {
-          verifiedUser = {
+          isManagerInPreview = false;
+          localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+          applyUserSession();
+          return;
+        }
+        
+        if (normLogin === 'prod' && normPass === 'prod123') {
+          currentUser = {
             id: '227c7adf-d2d3-46f3-9157-7dd01ea66840',
             name: 'Сотрудник',
             login: 'prod',
             role: 'employee'
           };
+          isManagerInPreview = false;
+          localStorage.setItem('sladkoezhka_auth_user', JSON.stringify(currentUser));
+          applyUserSession();
+          return;
         }
 
-        // 2. Проверка через базу данных Supabase (для сотрудников, добавленных через систему)
+        // 2. Проверка через базу Supabase с гарантированным таймаутом 7 секунд
         if (!supabaseClient) {
           initSupabase();
         }
+
+        let networkError = null;
+
         if (supabaseClient) {
           try {
-            const { data: uData, error: uErr } = await supabaseClient
+            const queryPromise = supabaseClient
               .from('users')
               .select('*')
               .ilike('login', normLogin)
               .eq('is_deleted', false)
               .maybeSingle();
 
-            if (uData && !uErr) {
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Превышено время ожидания сервера (7 сек). Проверьте интернет на телефоне.')), 7000);
+            });
+
+            const { data: uData, error: uErr } = await Promise.race([queryPromise, timeoutPromise]);
+
+            if (uErr) throw uErr;
+
+            if (uData) {
               const passMatches = (uData.password_hash === normPass) ||
                                   (normLogin === 'admin' && normPass === 'sladkopass') ||
                                   (normLogin === 'prod' && normPass === 'prod123');
@@ -2386,12 +2610,34 @@
               }
             }
           } catch (e) {
-            console.warn('Supabase profile fetch fallback:', e);
+            console.warn('Supabase login check failed or timed out:', e);
+            networkError = e;
+          }
+        }
+
+        // 3. Если сеть медленная или недоступна - проверяем локальный кэш сотрудников
+        if (!verifiedUser) {
+          let cached = [];
+          try { cached = JSON.parse(localStorage.getItem('sladkoezhka_cached_users') || '[]'); } catch(e) {}
+          const localUser = cached.find(u => (u.login || '').toLowerCase() === normLogin && !u.is_deleted);
+          if (localUser && (localUser.password_hash === normPass || (normLogin === 'prod' && normPass === 'prod123'))) {
+            verifiedUser = {
+              id: localUser.id,
+              name: localUser.name || (localUser.role === 'manager' ? 'Управляющий' : 'Сотрудник'),
+              login: localUser.login,
+              role: localUser.role || 'employee'
+            };
+            showToast('✓ Вход выполнен в оффлайн-режиме (по кэшу)', 3500);
           }
         }
 
         if (!verifiedUser) {
-          throw new Error('Неверный логин или пароль');
+          if (networkError) {
+            showGlobalError('Ошибка связи при авторизации', networkError, { login: normLogin, url: SUPABASE_URL });
+            throw new Error(networkError.message || 'Ошибка подключения к серверу');
+          } else {
+            throw new Error('Неверный логин или пароль');
+          }
         }
 
         currentUser = verifiedUser;
@@ -2401,6 +2647,9 @@
       } catch (err) {
         errorEl.innerText = err.message || 'Ошибка входа';
         errorEl.classList.remove('hidden');
+        if (err.message !== 'Неверный логин или пароль') {
+          showGlobalError('Ошибка авторизации', err, { login, url: SUPABASE_URL });
+        }
         const card = document.querySelector('#screen-login > div');
         if (card) {
           card.classList.remove('shake-modal');
@@ -2696,7 +2945,7 @@
             items: s.sale_items || []
           }));
         }
-        if (uRes.data) cachedUsers = uRes.data;
+        if (uRes.data) { cachedUsers = uRes.data; try { localStorage.setItem('sladkoezhka_cached_users', JSON.stringify(uRes.data)); } catch(e) {} }
 
         if (currentUser) {
           if (currentUser.role === 'employee' || isManagerInPreview) {
@@ -3012,7 +3261,7 @@
               <!-- Селектор корзины в карточке -->
               <div id="emp-prod-counter-${prod.id}" class="absolute bottom-2 right-2 flex items-center bg-amber-600 text-white rounded-xl p-0.5 shadow-md z-10 ${inCartQty > 0 ? '' : 'hidden'}" onclick="event.stopPropagation()">
                 ${inCartQty > 0 ? `
-                  <button onclick="decrementCart('${prod.id}')" class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm">-</button>
+                  <button onclick="decrementCart('${prod.id}')" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-black text-base">-</button>
                   <span class="px-2 font-mono text-xs font-bold tabular-nums">${inCartQty}</span>
                   <button onclick="incrementCart('${prod.id}', ${availQty}, event)" ${isMax ? 'disabled class="w-7 h-7 flex items-center justify-center opacity-30 cursor-not-allowed text-sm"' : 'class="w-7 h-7 flex items-center justify-center hover:bg-white/20 active:scale-90 rounded-lg font-bold text-sm"'}>+</button>
                 ` : ''}
@@ -3022,7 +3271,7 @@
             <!-- Нижняя часть: Название с line-clamp-2 и цена с tabular-nums -->
             <div class="p-3 sm:p-3.5 flex flex-col justify-between flex-1 space-y-2">
               <div>
-                <div class="font-bold text-xs sm:text-sm text-neutral-900 dark:text-neutral-50 line-clamp-2 leading-snug min-h-[2.5rem]">
+                <div class="font-extrabold text-sm sm:text-base text-neutral-900 dark:text-neutral-50 line-clamp-2 leading-snug min-h-[2.6rem]">
                   ${escapeHtml(prod.name)}
                 </div>
                 <div class="text-[11px] text-neutral-400 mt-1 font-medium">
@@ -3034,7 +3283,7 @@
 
               <div class="pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between">
                 <div class="flex items-baseline gap-0.5">
-                  <span class="text-sm sm:text-base font-extrabold text-neutral-900 dark:text-white tabular-nums">
+                  <span class="text-base sm:text-lg font-black text-neutral-900 dark:text-white tabular-nums">
                     ${Number(prod.price).toLocaleString('ru-RU')}
                   </span>
                   <span class="text-xs font-bold text-amber-600 dark:text-amber-400">₽</span>
@@ -4155,7 +4404,40 @@
     function openCategoryEditModal(catId, catName) {
       document.getElementById('edit-cat-id').value = catId;
       document.getElementById('edit-cat-name').value = catName;
+      
+      const cat = cachedCategories.find(c => c.id === catId);
+      const currentColor = getCategoryColor(cat);
+      const colorValInput = document.getElementById('edit-cat-color-val');
+      if (colorValInput) colorValInput.value = currentColor.hex;
+
+      const grid = document.getElementById('edit-cat-palette-grid');
+      if (grid) {
+        grid.innerHTML = PRESET_CATEGORY_COLORS.map(c => {
+          const isSelected = c.hex.toLowerCase() === currentColor.hex.toLowerCase();
+          return `
+            <button type="button" onclick="selectEditCategoryColor('${c.hex}')" 
+                    class="p-2 rounded-xl flex items-center space-x-1.5 border transition-all active:scale-95 text-left ${isSelected ? 'ring-2 ring-amber-600 border-amber-600 bg-amber-50 dark:bg-amber-950/40' : 'border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950'}">
+              <span class="w-4 h-4 rounded-full shrink-0 shadow-2xs" style="background-color: ${c.hex};"></span>
+              <span class="text-[10px] font-bold truncate text-[#1F2937] dark:text-cream-100">${c.name}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
       openModal('modal-category-edit');
+    }
+
+    function selectEditCategoryColor(hex) {
+      const colorValInput = document.getElementById('edit-cat-color-val');
+      if (colorValInput) colorValInput.value = hex;
+      
+      const grid = document.getElementById('edit-cat-palette-grid');
+      if (grid) {
+        grid.querySelectorAll('button').forEach(btn => {
+          const isSelected = btn.innerHTML.includes(hex);
+          btn.className = `p-2 rounded-xl flex items-center space-x-1.5 border transition-all active:scale-95 text-left ${isSelected ? 'ring-2 ring-amber-600 border-amber-600 bg-amber-50 dark:bg-amber-950/40' : 'border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950'}`;
+        });
+      }
     }
 
     function closeCategoryEditModal() {
@@ -4164,12 +4446,13 @@
 
     async function saveCategoryRename() {
       if (!supabaseClient) {
-        alert('База данных не подключена. Нажмите иконку ⚙️ вверху для настройки подключения.');
+        showGlobalError('Нет связи с базой', 'База данных не подключена. Нажмите иконку ⚙️ вверху для настройки подключения.');
         openDbConfigModal();
         return;
       }
       const id = document.getElementById('edit-cat-id').value;
       const name = document.getElementById('edit-cat-name').value.trim();
+      const color = document.getElementById('edit-cat-color-val')?.value || '#D97706';
       if (!name) return;
 
       try {
@@ -4179,12 +4462,19 @@
           .eq('id', id);
         if (error) throw error;
 
+        // Сохранение выбранного цвета в локальное хранилище
+        const styles = JSON.parse(localStorage.getItem('sladkoezhka_category_styles') || '{}');
+        styles[id] = { color };
+        localStorage.setItem('sladkoezhka_category_styles', JSON.stringify(styles));
+
+        broadcastChange('category_update', { id, name, color });
+
         closeCategoryEditModal();
-        showToast('✓ Категория переименована');
+        showToast('✓ Категория обновлена');
         await refreshAppData();
         renderCategoryManageList();
       } catch (err) {
-        alert('Ошибка: ' + err.message);
+        showGlobalError('Ошибка обновления категории', err, { id, name });
       }
     }
 
@@ -4233,6 +4523,7 @@
       `).join('');
 
       // Сброс состояния загрузки фото
+      pendingImageDataUrl = null;
       pendingImageBlob = null;
       pendingImageDeleted = false;
 
@@ -4349,28 +4640,9 @@
       try {
         let imageUrl = undefined; // undefined = не изменять существующий
 
-        // 1. Загрузка сжатого фото в Supabase Storage bucket 'product-images'
-        if (pendingImageBlob) {
-          btnSave.innerText = 'Загрузка фото...';
-          const fileExt = 'webp';
-          const fileName = `products/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-          
-          const { data: uploadData, error: uploadErr } = await supabaseClient.storage
-            .from('product-images')
-            .upload(fileName, pendingImageBlob, {
-              contentType: 'image/webp',
-              upsert: true
-            });
-
-          if (uploadErr) {
-            console.error('Ошибка загрузки фото:', uploadErr);
-            showToast('⚠️ Фото не загружено (проверьте bucket в Supabase)', 3500);
-          } else {
-            const { data: urlData } = supabaseClient.storage
-              .from('product-images')
-              .getPublicUrl(fileName);
-            imageUrl = urlData?.publicUrl || null;
-          }
+        // 1. Мгновенное сохранение оптимизированного фото в базу данных (100% надежность без внешних bucket)
+        if (pendingImageDataUrl) {
+          imageUrl = pendingImageDataUrl;
         } else if (pendingImageDeleted) {
           imageUrl = null;
         }
