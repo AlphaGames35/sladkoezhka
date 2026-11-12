@@ -1997,16 +1997,52 @@
     try { cachedCategories = JSON.parse(localStorage.getItem('sladkoezhka_cached_categories') || '[]'); } catch(e) {}
     let cachedProducts = [];
 
-    // Парсер цвета и ссылки изображения из поля image_url
+    // Парсер метаданных (порядок, цвет) и ссылки изображения из поля image_url
     function parseProductColorAndImage(raw) {
-      if (!raw || typeof raw !== 'string') return { color: null, imageUrl: null };
-      if (raw.startsWith('color:')) {
+      if (!raw || typeof raw !== 'string') return { color: null, sortOrder: null, imageUrl: null };
+      if (raw.startsWith('color:') || raw.startsWith('order:')) {
         const parts = raw.split('||');
-        const color = parts[0].replace('color:', '').trim();
-        const imageUrl = parts[1] || null;
-        return { color, imageUrl };
+        const metaPart = parts[0] || '';
+        const imageUrl = parts.slice(1).join('||') || null;
+        let color = null;
+        let sortOrder = null;
+        metaPart.split(';').forEach(token => {
+          const t = token.trim();
+          if (t.startsWith('color:')) {
+            color = t.slice(6).trim() || null;
+          } else if (t.startsWith('order:')) {
+            const num = parseInt(t.slice(6).trim(), 10);
+            if (Number.isFinite(num)) sortOrder = num;
+          }
+        });
+        return { color, sortOrder, imageUrl };
       }
-      return { color: null, imageUrl: raw };
+      return { color: null, sortOrder: null, imageUrl: raw };
+    }
+
+    function buildProductImageField({ color, sortOrder, imageUrl }) {
+      const tokens = [];
+      if (sortOrder !== null && sortOrder !== undefined && Number.isFinite(Number(sortOrder))) {
+        tokens.push('order:' + Math.round(Number(sortOrder)));
+      }
+      if (color) {
+        tokens.push('color:' + String(color).trim());
+      }
+      const cleanImg = imageUrl ? String(imageUrl).trim() : '';
+      if (tokens.length > 0 && cleanImg) {
+        return tokens.join(';') + '||' + cleanImg;
+      }
+      if (tokens.length > 0) {
+        return tokens.join(';');
+      }
+      return cleanImg || null;
+    }
+
+    function sortProductsComparator(a, b) {
+      const aOrder = (a.sort_order !== null && a.sort_order !== undefined && Number.isFinite(Number(a.sort_order))) ? Number(a.sort_order) : Number.MAX_SAFE_INTEGER;
+      const bOrder = (b.sort_order !== null && b.sort_order !== undefined && Number.isFinite(Number(b.sort_order))) ? Number(b.sort_order) : Number.MAX_SAFE_INTEGER;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return String(a.name || '').localeCompare(String(b.name || ''), 'ru');
     }
 
     const PRESET_PRODUCT_COLORS = [
@@ -2032,7 +2068,7 @@
       if (!prod) return '#D97706';
       if (prod.card_color) return prod.card_color;
       const raw = prod.image_url;
-      if (raw && typeof raw === 'string' && raw.startsWith('color:')) {
+      if (raw && typeof raw === 'string' && (raw.startsWith('color:') || raw.startsWith('order:'))) {
         const parsed = parseProductColorAndImage(raw);
         if (parsed.color) return parsed.color;
       }
@@ -3079,8 +3115,12 @@
         return;
       }
 
-      // БЛОКИРОВКА ПЕРЕРИСОВКИ: если пользователь прямо сейчас набирает текст на клавиатуре,
+      // БЛОКИРОВКА ПЕРЕРИСОВКИ: если пользователь прямо сейчас набирает текст на клавиатуре или перетаскивает товар,
       // страница НЕ ОБНОВЛЯЕТСЯ и DOM не пересоздается, чтобы клавиатура не скрывалась!
+      if (typeof isDraggingInventory !== 'undefined' && isDraggingInventory) {
+        pendingDeferredRefresh = true;
+        return;
+      }
       if (!allowWhileTyping && (isUserTypingActive || isInputActive())) {
         console.log('⌨️ Пользователь вводит данные в поле. Фоновое обновление отложено.');
         pendingDeferredRefresh = true;
@@ -3133,11 +3173,12 @@
             return {
               ...p,
               card_color: parsed.color,
+              sort_order: parsed.sortOrder,
               image_url: parsed.imageUrl,
               item_type: p.item_type || 'simple',
               unit: p.unit || 'шт'
             };
-          });
+          }).sort(sortProductsComparator);
           try { localStorage.setItem('sladkoezhka_cached_products', JSON.stringify(cachedProducts)); } catch(e) {}
         }
         if (ingRes && ingRes.data) {
@@ -3423,7 +3464,7 @@
         const isMax = inCartQty >= availQty;
         const isComposite = prod.item_type === 'composite';
         const parsed = parseProductColorAndImage(prod.image_url);
-        const imgUrl = prod.image_url && !prod.image_url.startsWith('color:') ? prod.image_url : parsed.imageUrl;
+        const imgUrl = parsed.imageUrl;
         const isValidImg = imgUrl && (imgUrl.startsWith('data:') || imgUrl.startsWith('http') || imgUrl.startsWith('/'));
         const catObj = cachedCategories.find(c => c.id === prod.category_id);
         const catName = catObj ? catObj.name : 'Категория';
@@ -4496,19 +4537,40 @@
         return;
       }
 
-      listContainer.innerHTML = list.map(prod => {
+      const canReorder = !search && list.length > 1;
+      listContainer.innerHTML = list.map((prod, idx) => {
         const cat = cachedCategories.find(c => c.id === prod.category_id);
         const availStock = getProductAvailableStock(prod);
         const isComposite = prod.item_type === 'composite';
         const recipes = isComposite ? cachedIngredients.filter(r => r.parent_product_id === prod.id) : [];
 
         const isValidImg = prod.image_url && (prod.image_url.startsWith('http') || prod.image_url.startsWith('data:') || prod.image_url.startsWith('/'));
+        const reorderControls = canReorder ? `
+          <div class="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1 shrink-0" onclick="event.stopPropagation()">
+            <div data-drag-handle="${prod.id}"
+                 title="Зажмите и перетащите"
+                 class="drag-handle touch-none select-none cursor-grab active:cursor-grabbing w-7 h-5 sm:w-6 sm:h-7 flex items-center justify-center rounded-md text-[#9CA3AF] hover:text-[#2D1E17] dark:hover:text-white hover:bg-[#F3EDE6] dark:hover:bg-cacao-800 transition">
+              <svg class="w-3.5 h-3.5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+              </svg>
+            </div>
+            <input type="number" min="1" max="${list.length}" value="${idx + 1}"
+                   data-pos-input="${prod.id}"
+                   onfocus="this.select()"
+                   onkeydown="if(event.key==='Enter'){this.blur();}"
+                   onchange="moveProductToPosition('${prod.id}', this.value)"
+                   title="Позиция в списке (введите номер)"
+                   class="w-7 h-6 sm:w-8 sm:h-7 text-center text-[11px] font-black rounded-md border border-[#ECE6DE] dark:border-cacao-700 bg-[#FAF7F2] dark:bg-cacao-950 text-[#2D1E17] dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-caramel-500 tabular-nums">
+          </div>
+        ` : '';
+
         if (inventoryViewMode === 'showcase') {
           return `
-            <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
-              <!-- Название и фото -->
-              <div class="col-span-5 sm:col-span-6 pr-2 flex items-center space-x-3 cursor-pointer" onclick="openProductModal('${prod.id}')">
-                <div class="w-10 h-10 rounded-lg bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 overflow-hidden shrink-0 flex items-center justify-center">
+            <div data-prod-id="${prod.id}" class="inventory-prod-row grid grid-cols-12 px-3 sm:px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+              <!-- Позиция, перетаскивание, название и фото -->
+              <div class="col-span-5 sm:col-span-6 pr-2 flex items-center space-x-2 sm:space-x-3 cursor-pointer" onclick="openProductModal('${prod.id}')">
+                ${reorderControls}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 overflow-hidden shrink-0 flex items-center justify-center">
                   ${isValidImg ? `
                     <img src="${escapeHtml(prod.image_url)}" alt="" class="w-full h-full object-cover">
                   ` : `
@@ -4581,17 +4643,20 @@
           // 'ingredients' (сырье)
           const isLow = prod.stock_qty <= (prod.unit === 'г' ? 500 : prod.unit === 'мл' ? 1000 : 10);
           return `
-            <div class="grid grid-cols-12 px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
-              <!-- Название сырья -->
-              <div class="col-span-5 sm:col-span-6 pr-2 cursor-pointer" onclick="openProductModal('${prod.id}')">
-                <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">
-                  ${escapeHtml(prod.name)}
-                </div>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#8E8A85]">
-                    Сырье
-                  </span>
-                  ${cat ? `<span class="text-[10px] text-[#8E8A85] truncate">• ${escapeHtml(cat.name)}</span>` : ''}
+            <div data-prod-id="${prod.id}" class="inventory-prod-row grid grid-cols-12 px-3 sm:px-4 py-3 items-center hover:bg-[#FAF7F2] dark:hover:bg-cacao-950/40 transition">
+              <!-- Позиция, перетаскивание и название сырья -->
+              <div class="col-span-5 sm:col-span-6 pr-2 flex items-center space-x-2 cursor-pointer" onclick="openProductModal('${prod.id}')">
+                ${reorderControls}
+                <div class="min-w-0">
+                  <div class="font-bold text-xs sm:text-sm text-[#1F2937] dark:text-cream-50 line-clamp-2 leading-snug hover:text-caramel-600 transition">
+                    ${escapeHtml(prod.name)}
+                  </div>
+                  <div class="flex items-center space-x-1.5 mt-0.5">
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#FAF7F2] dark:bg-cacao-950 border border-[#ECE6DE] dark:border-cacao-800 text-[#8E8A85]">
+                      Сырье
+                    </span>
+                    ${cat ? `<span class="text-[10px] text-[#8E8A85] truncate">• ${escapeHtml(cat.name)}</span>` : ''}
+                  </div>
                 </div>
               </div>
 
@@ -4628,6 +4693,221 @@
           `;
         }
       }).join('');
+
+      if (canReorder) {
+        initInventoryDragHandlers();
+      }
+    }
+
+    let isDraggingInventory = false;
+    let inventoryDragInitialized = false;
+
+    function getCurrentDisplayedInventoryList() {
+      let list = cachedProducts.filter(p => !p.is_deleted);
+      if (inventoryViewMode === 'showcase') {
+        list = list.filter(p => p.item_type !== 'ingredient');
+      } else {
+        list = list.filter(p => p.item_type === 'ingredient');
+      }
+      if (currentManagerCategory !== 'all') {
+        list = list.filter(p => p.category_id === currentManagerCategory);
+      }
+      return list;
+    }
+
+    async function moveProductToPosition(prodId, rawPos) {
+      const list = getCurrentDisplayedInventoryList();
+      const oldIdx = list.findIndex(p => p.id === prodId);
+      if (oldIdx === -1) return;
+
+      let targetPos = parseInt(rawPos, 10);
+      if (!Number.isFinite(targetPos)) {
+        renderManagerInventory();
+        return;
+      }
+      targetPos = Math.max(1, Math.min(list.length, targetPos));
+      const newIdx = targetPos - 1;
+
+      if (newIdx === oldIdx) {
+        renderManagerInventory();
+        return;
+      }
+
+      const reordered = [...list];
+      const [moved] = reordered.splice(oldIdx, 1);
+      reordered.splice(newIdx, 0, moved);
+      await applyNewProductOrder(reordered.map(p => p.id));
+    }
+
+    async function applyNewProductOrder(orderedIds) {
+      if (!orderedIds || orderedIds.length === 0) return;
+
+      const updates = [];
+      orderedIds.forEach((id, index) => {
+        const newOrder = index + 1;
+        const prod = cachedProducts.find(p => p.id === id);
+        if (!prod) return;
+        if (prod.sort_order !== newOrder) {
+          prod.sort_order = newOrder;
+          updates.push({
+            id: prod.id,
+            image_url: buildProductImageField({
+              color: prod.card_color || null,
+              sortOrder: newOrder,
+              imageUrl: prod.image_url || null
+            })
+          });
+        }
+      });
+
+      cachedProducts.sort(sortProductsComparator);
+      try { localStorage.setItem('sladkoezhka_cached_products', JSON.stringify(cachedProducts)); } catch(e) {}
+      renderManagerInventory();
+      if (typeof renderEmployeeProducts === 'function') renderEmployeeProducts();
+
+      if (updates.length === 0 || !supabaseClient) return;
+
+      try {
+        const results = await Promise.all(
+          updates.map(u => supabaseClient
+            .from('products')
+            .update({ image_url: u.image_url, updated_at: new Date().toISOString() })
+            .eq('id', u.id)
+          )
+        );
+        const failed = results.find(r => r.error);
+        if (failed && failed.error) throw failed.error;
+        showToast('Порядок товаров сохранен');
+      } catch (err) {
+        console.error('Ошибка сохранения порядка товаров:', err);
+        showToast('Не удалось сохранить порядок в облаке', 'error');
+      }
+    }
+
+    function initInventoryDragHandlers() {
+      if (inventoryDragInitialized) return;
+      const listEl = document.getElementById('inventory-products-list');
+      if (!listEl) return;
+      inventoryDragInitialized = true;
+
+      let activeRow = null;
+      let startOrderIds = [];
+      let pressTimer = null;
+      let startX = 0;
+      let startY = 0;
+      let suppressNextClick = false;
+
+      function updateLivePositionNumbers() {
+        const rows = Array.from(listEl.querySelectorAll('.inventory-prod-row'));
+        rows.forEach((r, idx) => {
+          const inp = r.querySelector('input[data-pos-input]');
+          if (inp && document.activeElement !== inp) {
+            inp.value = String(idx + 1);
+          }
+        });
+      }
+
+      function startDraggingRow(row) {
+        if (!row || isDraggingInventory) return;
+        isDraggingInventory = true;
+        activeRow = row;
+        startOrderIds = Array.from(listEl.querySelectorAll('.inventory-prod-row')).map(r => r.dataset.prodId);
+        activeRow.classList.add('ring-2', 'ring-amber-500', 'bg-amber-50', 'dark:bg-amber-950/60', 'shadow-lg', 'relative', 'z-20');
+        if (navigator.vibrate) {
+          try { navigator.vibrate(25); } catch(e) {}
+        }
+      }
+
+      function moveDraggedRow(clientY) {
+        if (!isDraggingInventory || !activeRow) return;
+        const rows = Array.from(listEl.querySelectorAll('.inventory-prod-row')).filter(r => r !== activeRow);
+        for (const r of rows) {
+          const rect = r.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          if (clientY < mid) {
+            if (activeRow.nextElementSibling !== r) {
+              listEl.insertBefore(activeRow, r);
+              updateLivePositionNumbers();
+            }
+            return;
+          }
+        }
+        const last = rows[rows.length - 1];
+        if (last && activeRow.previousElementSibling !== last) {
+          listEl.appendChild(activeRow);
+          updateLivePositionNumbers();
+        }
+      }
+
+      async function stopDraggingRow() {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        if (!isDraggingInventory || !activeRow) return;
+        const row = activeRow;
+        activeRow = null;
+        isDraggingInventory = false;
+        row.classList.remove('ring-2', 'ring-amber-500', 'bg-amber-50', 'dark:bg-amber-950/60', 'shadow-lg', 'relative', 'z-20');
+
+        const finalOrderIds = Array.from(listEl.querySelectorAll('.inventory-prod-row')).map(r => r.dataset.prodId);
+        const changed = finalOrderIds.some((id, i) => id !== startOrderIds[i]);
+        if (changed) {
+          suppressNextClick = true;
+          setTimeout(() => { suppressNextClick = false; }, 120);
+          await applyNewProductOrder(finalOrderIds);
+        }
+        if (pendingDeferredRefresh) {
+          pendingDeferredRefresh = false;
+          refreshAppData(false);
+        }
+      }
+
+      listEl.addEventListener('click', (e) => {
+        if (suppressNextClick) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }, true);
+
+      listEl.addEventListener('pointerdown', (e) => {
+        const handle = e.target.closest('.drag-handle');
+        const row = e.target.closest('.inventory-prod-row');
+        if (!row) return;
+
+        if (handle) {
+          e.preventDefault();
+          startDraggingRow(row);
+          if (handle.setPointerCapture && e.pointerId !== undefined) {
+            try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+          }
+          return;
+        }
+
+        // Долгое удержание (380мс) на самой строке товара (не на кнопках и не на поле ввода)
+        if (e.target.closest('button, input, select, textarea, label')) return;
+        startX = e.clientX;
+        startY = e.clientY;
+        pressTimer = setTimeout(() => {
+          pressTimer = null;
+          suppressNextClick = true;
+          startDraggingRow(row);
+        }, 380);
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (pressTimer && (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8)) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+        if (isDraggingInventory && activeRow) {
+          e.preventDefault();
+          moveDraggedRow(e.clientY);
+        }
+      }, { passive: false });
+
+      window.addEventListener('pointerup', stopDraggingRow);
+      window.addEventListener('pointercancel', stopDraggingRow);
     }
 
     function renderManagerCategoriesBar() {
@@ -4989,7 +5269,7 @@
         }
 
         // Цвет позиции из базы данных или кэша
-        const existingColor = prod.card_color || (prod.image_url && prod.image_url.startsWith('color:') ? parseProductColorAndImage(prod.image_url).color : '');
+        const existingColor = prod.card_color || parseProductColorAndImage(prod.image_url).color || '';
         renderProductColorPalette(existingColor || '');
 
         // Загрузка ингредиентов техкарты
@@ -5091,26 +5371,32 @@
           imageUrl = null;
         }
 
-        // 2. Формирование объекта товара с сохранением цвета в базу данных Supabase
+        // 2. Формирование объекта товара с сохранением цвета и порядка в базу данных Supabase
         const chosenColor = document.getElementById('prod-color-val')?.value || '';
-        
-        let finalImageUrl = undefined;
-        if (pendingImageDeleted) {
-          finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
-        } else if (pendingImageDataUrl) {
-          finalImageUrl = chosenColor ? ('color:' + chosenColor + '||' + pendingImageDataUrl) : pendingImageDataUrl;
-        } else if (id) {
-          const existingProd = cachedProducts.find(p => p.id === id);
-          const parsed = parseProductColorAndImage(existingProd?.image_url);
-          const existingImg = parsed.imageUrl;
-          if (existingImg) {
-            finalImageUrl = chosenColor ? ('color:' + chosenColor + '||' + existingImg) : existingImg;
-          } else {
-            finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
-          }
+        const existingProd = id ? cachedProducts.find(p => p.id === id) : null;
+        const parsedExisting = parseProductColorAndImage(existingProd?.image_url);
+        const existingImg = parsedExisting.imageUrl;
+
+        let targetSortOrder = null;
+        if (existingProd) {
+          targetSortOrder = (existingProd.sort_order !== null && existingProd.sort_order !== undefined)
+            ? existingProd.sort_order
+            : parsedExisting.sortOrder;
         } else {
-          finalImageUrl = chosenColor ? ('color:' + chosenColor) : null;
+          const sameCatProds = cachedProducts.filter(p => !p.is_deleted && p.category_id === category_id && (item_type === 'ingredient' ? p.item_type === 'ingredient' : p.item_type !== 'ingredient'));
+          const maxOrder = sameCatProds.reduce((m, p) => (Number.isFinite(Number(p.sort_order)) ? Math.max(m, Number(p.sort_order)) : m), sameCatProds.length);
+          targetSortOrder = maxOrder + 1;
         }
+
+        const imgToKeep = pendingImageDeleted
+          ? null
+          : (pendingImageDataUrl || existingImg || null);
+
+        const finalImageUrl = buildProductImageField({
+          color: chosenColor || null,
+          sortOrder: targetSortOrder,
+          imageUrl: imgToKeep
+        });
 
         const productPayload = {
           name,
